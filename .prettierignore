@@ -1,0 +1,13 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+.angular
+coverage
+
+# Misc
+*.log
+.DS_Store
+Thumbs.db
+
