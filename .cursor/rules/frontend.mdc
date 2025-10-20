@@ -1,0 +1,164 @@
+---
+globs: '**/*.ts, **/*.html, **/*.scss, **/*.css'
+alwaysApply: false
+---
+
+## Frontend
+
+### General Guidelines
+
+- Use standalone components by default (Angular 19 standard)
+- Leverage TypeScript 5 strict mode for type safety
+- Use Angular's inject() function for dependency injection
+- Follow Single Responsibility Principle: one component/service per file
+- Organize code by feature in the project structure
+
+### Modern Angular 19 Syntax
+
+#### New Control Flow
+
+- Use @if instead of \*ngIf for conditional rendering
+- Use @for with track expression instead of \*ngFor for lists
+- Use @switch instead of \*ngSwitch for multiple conditions
+- Use @empty block for empty state handling in @for loops
+- Use @defer for lazy loading heavy components with @placeholder, @loading, @error blocks
+
+#### Signal-Based APIs
+
+- Use input() and input.required() for component inputs
+- Use output() for component outputs
+- Use model() for two-way binding
+- Use viewChild() and contentChild() instead of @ViewChild/@ContentChild decorators
+- Use computed() for derived state from signals
+- Use effect() for side effects based on signal changes
+
+#### Modern Dependency Injection
+
+- Use inject() function in components, services, guards, and interceptors
+- Use inject() at field level instead of constructor injection
+- Use providedIn: 'root' for application-wide services
+
+### Component Best Practices
+
+- Use OnPush change detection strategy for performance
+- Keep templates simple; move logic to component classes or services
+- Use signals for reactive state management
+- Use async pipe for observables in templates
+- Use takeUntilDestroyed() operator for automatic observable cleanup
+- Initialize in ngOnInit, clean up in ngOnDestroy
+- Break down large components into smaller, reusable ones
+
+### TypeScript Best Practices
+
+- Define explicit types for function parameters and return values
+- Use interfaces for data models in the `models` directory
+- Avoid using `any` type; use `unknown` when type is truly unknown
+- Use readonly modifiers for immutable properties
+- Implement type guards for runtime type checking
+- Use type unions and intersections for complex scenarios
+
+### State Management
+
+- Use signals as primary state management approach
+- Use computed() for derived state
+- Use effect() for side effects based on signal changes
+- Keep component state local when possible
+- Share state through services only when necessary
+- Use toSignal() to convert observables to signals
+
+### RxJS and Observables
+
+- Use takeUntilDestroyed() for automatic cleanup (no manual unsubscribe needed)
+- Prefer async pipe in templates to avoid manual subscriptions
+- Avoid nested subscriptions; use operators (switchMap, mergeMap, concatMap)
+- Use appropriate operators for data transformation
+- Never subscribe in constructors; use ngOnInit or effects
+
+### Angular Material
+
+#### Component Usage
+
+- Use Material components for consistent UI design
+- Import only needed Material modules to reduce bundle size
+- Follow Material Design guidelines for spacing, typography, and color
+- Use Material's theming system for color schemes
+
+#### Styling with SCSS
+
+- Use Material's mixins and functions for theming
+- Use :host selector for component root styling
+- Implement responsive designs using CSS Grid and Flexbox
+- Use Material's BreakpointObserver service for responsive behavior
+- Define primary, accent, and warn color palettes
+- Use mat-elevation-z\* classes for depth
+
+### Supabase Integration
+
+- Create Supabase client as singleton service with providedIn: 'root'
+- Store Supabase configuration in environment files
+- Use Supabase authentication for user management
+- Type Supabase database responses with TypeScript interfaces
+- Use Supabase Storage for file uploads (MusicXML files)
+- Implement Row Level Security (RLS) policies for data access control
+- Handle Supabase errors consistently with proper error messages
+- Leverage Supabase Realtime for live data updates when needed
+
+### Routing
+
+- Use lazy loading with loadComponent() for standalone components
+- Use functional route guards with inject() for authentication
+- Use route resolvers for pre-fetching data
+- Define clear and RESTful route structures
+- Avoid hardcoding routes; use route constants
+
+### Forms
+
+- Use Reactive Forms for complex form scenarios
+- Use FormBuilder with inject() for cleaner service injection
+- Implement custom validators for business logic
+- Use Material form field components for consistent styling
+- Use typed forms for better type safety
+- Handle form submission and error states with clear messages
+
+### HTTP and API Communication
+
+- Centralize API calls in dedicated services
+- Use HttpClient with inject() function
+- Use interceptors for authentication headers and global error handling
+- Type HTTP responses with interfaces
+- Use environment files for API endpoint configuration
+- Convert HTTP observables to signals with toSignal() when appropriate
+- Implement proper error handling with retry logic when needed
+
+### Accessibility
+
+- Use ARIA landmarks (main, navigation, search) to identify page regions
+- Set aria-expanded and aria-controls for expandable content
+- Use aria-live regions for dynamic content updates
+- Apply aria-label for elements without visible text labels
+- Avoid redundant ARIA that duplicates native HTML semantics
+- Test keyboard navigation through all interactive elements
+- Ensure WCAG AA color contrast ratios
+- Test with screen readers for proper announcements
+
+### Performance Optimization
+
+- Use track expression in @for loops for efficient rendering
+- Use OnPush change detection with signals
+- Implement virtual scrolling for large lists (CDK ScrollingModule)
+- Use @defer blocks for deferred loading of heavy components
+- Lazy load routes with loadComponent()
+- Optimize bundle size with tree-shakeable imports
+- Use pure pipes for data transformation
+- Avoid function calls in templates
+
+### Anti-Patterns to Avoid
+
+- Don't use deprecated *ngIf, *ngFor, \*ngSwitch; use @if, @for, @switch
+- Don't nest subscriptions; use RxJS operators
+- Don't store subscriptions; use takeUntilDestroyed() or async pipe
+- Don't use complex logic or subscriptions in constructors
+- Don't ignore TypeScript strict mode or abuse 'any' type
+- Don't use NgModules for new code; use standalone components
+- Don't skip error handling in HTTP requests and observables
+- Don't mutate signal values directly; create new references for objects/arrays

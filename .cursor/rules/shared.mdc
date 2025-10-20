@@ -1,0 +1,58 @@
+---
+alwaysApply: true
+---
+
+# AI Rules for MuShee
+
+**MuShee** is a web-based sheet music library management application built with Angular 19 and TypeScript 5, enabling musicians to upload, organize, and render MusicXML files into readable sheet music using OpenSheetMusicDisplay. The application leverages Supabase for authentication, database storage, and file management, providing users with secure personal libraries and access to a pre-loaded collection of public domain compositions. An AI-powered recommendation engine integrated through OpenRouter.ai analyzes users' music collections to suggest similar pieces, enhancing music discovery. The system includes user feedback mechanisms for both rendering quality and AI suggestion relevance, enabling continuous improvement of the platform.
+
+## Tech Stack
+
+### Frontend
+
+- Angular 19
+- TypeScript 5
+- Angular Material
+- OpenSheetMusicDisplay
+
+### Backend
+
+- Supabase
+
+### AI
+
+- OpenRouter.ai
+
+### CI/CD and Hosting
+
+- GitHub Actions
+- DigitalOcean
+
+## Project Structure
+
+When introducing changes to the project, always follow the directory structure below:
+
+- `./src` - source code
+- `./src/app` - Angular application components, services, and routes
+- `./src/app/components` - Angular components
+- `./src/app/services` - Angular services
+- `./src/app/models` - TypeScript models and interfaces
+- `./src/app/guards` - Route guards
+- `./src/app/interceptors` - HTTP interceptors
+- `./src/assets` - static internal assets
+- `./public` - public assets (favicon, etc.)
+
+When modifying the directory structure, always update this section.
+
+## Coding practices
+
+### Guidelines for clean code
+
+- Prioritize error handling and edge cases
+- Handle errors and edge cases at the beginning of functions.
+- Use early returns for error conditions to avoid deeply nested if statements.
+- Place the happy path last in the function for improved readability.
+- Avoid unnecessary else statements; use if-return pattern instead.
+- Use guard clauses to handle preconditions and invalid states early.
+- Implement proper error logging and user-friendly error messages.
+- Consider using custom error types or error factories for consistent error handling.
