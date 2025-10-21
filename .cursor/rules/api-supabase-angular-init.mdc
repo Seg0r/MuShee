@@ -1,0 +1,124 @@
+---
+alwaysApply: false
+---
+
+# Supabase Angular Initialization
+
+This document provides a reproducible guide to create the necessary file structure for integrating Supabase with your Angular project.
+
+## Prerequisites
+
+- Your project should use Angular 19, TypeScript 5, and Angular Material.
+- Install the `@supabase/supabase-js` and `dotenv` packages.
+- Ensure that `/supabase/config.toml` exists
+- Ensure that a file `/src/db/database.types.ts` exists and contains the correct type definitions for your database.
+
+IMPORTANT: Check prerequisites before performing actions below. If they're not met, stop and ask a user for the fix.
+
+## File Structure and Setup
+
+### 1. Environment Variables Setup
+
+Create the following files in the project root:
+
+Create the file `/.env.example` with the following content (this should be committed to version control):
+
+```env
+SUPABASE_URL=your-supabase-url
+SUPABASE_KEY=your-supabase-anon-key
+```
+
+Create the file `/.env` with the following content (this should NOT be committed - add it to .gitignore):
+
+```env
+SUPABASE_URL=your-actual-supabase-url
+SUPABASE_KEY=your-actual-supabase-anon-key
+```
+
+Replace the placeholder values with your actual Supabase project URL and anonymous key.
+
+### 2. Supabase Client Service
+
+Create the file `/src/app/services/supabase.service.ts` with the following content:
+
+```ts
+import { Injectable } from '@angular/core';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { config } from 'dotenv';
+import type { Database } from '../../db/database.types';
+
+// Load environment variables
+config();
+
+@Injectable({
+  providedIn: 'root',
+})
+export class SupabaseService {
+  private supabase: SupabaseClient<Database>;
+
+  constructor() {
+    const supabaseUrl = process.env['SUPABASE_URL'];
+    const supabaseAnonKey = process.env['SUPABASE_KEY'];
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error('Missing Supabase environment variables. Please check your .env file.');
+    }
+
+    this.supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+  }
+
+  get client(): SupabaseClient<Database> {
+    return this.supabase;
+  }
+}
+```
+
+This service loads environment variables using dotenv and initializes the Supabase client, providing it through Angular's dependency injection system.
+
+### 3. TypeScript Environment Definitions
+
+Create the file `/src/types/env.d.ts` with the following content:
+
+```ts
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      SUPABASE_URL: string;
+      SUPABASE_KEY: string;
+    }
+  }
+}
+```
+
+This provides TypeScript declarations for the environment variables.
+
+### 4. Update App Configuration
+
+Update `/src/app/app.config.ts` to include the Supabase service provider:
+
+```ts
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+
+import { routes } from './app.routes';
+import { SupabaseService } from './services/supabase.service';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes),
+    SupabaseService,
+  ],
+};
+```
+
+This ensures the Supabase service is available throughout your Angular application via dependency injection.
+
+### 5. Update .gitignore
+
+Make sure your `.gitignore` file includes `.env` to prevent committing sensitive environment variables:
+
+```gitignore
+# Environment variables
+.env
+```

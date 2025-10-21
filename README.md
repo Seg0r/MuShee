@@ -1,59 +1,199 @@
-# Mushee
+# MuShee 🎵
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.18.
+A web-based sheet music library management application that helps musicians organize, access, and discover sheet music through AI-powered recommendations.
 
-## Development server
+## Table of Contents
 
-To start a local development server, run:
+- [Project Description](#project-description)
+- [Tech Stack](#tech-stack)
+- [Getting Started Locally](#getting-started-locally)
+- [Available Scripts](#available-scripts)
+- [Project Scope](#project-scope)
+- [Project Status](#project-status)
+- [License](#license)
 
-```bash
-ng serve
-```
+## Project Description
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+MuShee is a comprehensive web application designed to solve the common problem musicians face when managing disorganized collections of sheet music. Instead of scattered PDF files, physical books, and bookmarks, MuShee provides a centralized, accessible digital library where musicians can upload, organize, and render their MusicXML files into readable sheet music.
 
-## Code scaffolding
+### Key Features
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- **User Account Management**: Secure registration and login with email/password authentication
+- **Song Library Management**: Upload MusicXML files, view library as organized tiles, delete unwanted songs
+- **Pre-loaded Content Library**: Access to public domain compositions that can be added to personal collections
+- **Sheet Music Rendering**: Clean, readable sheet music display using OpenSheetMusicDisplay
+- **AI-Powered Recommendations**: Discover similar music through intelligent suggestions via OpenRouter.ai
+- **User Feedback System**: Rate rendering quality and AI suggestion relevance to improve the platform
+- **New User Onboarding**: Guided introduction for first-time users
 
-```bash
-ng generate component component-name
-```
+### Target Users
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Musicians who want to centralize their sheet music collection and discover new pieces to play through intelligent recommendations.
 
-```bash
-ng generate --help
-```
+## Tech Stack
 
-## Building
+### Frontend
 
-To build the project run:
+- **Angular 19** - Full-featured SPA framework providing routing, forms, HTTP client, and application structure
+- **TypeScript 5** - Static code typing and enhanced IDE support
+- **Angular Material** - UI component library for consistent, modern interface design
+- **OpenSheetMusicDisplay** - Open-source JavaScript library for parsing and rendering MusicXML files
 
-```bash
-ng build
-```
+### Backend
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+- **Supabase** - Comprehensive backend solution providing:
+  - PostgreSQL database
+  - Built-in user authentication
+  - File storage and management
+  - SDKs for seamless integration
 
-## Running unit tests
+### AI
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+- **OpenRouter.ai** - Access to multiple AI models (OpenAI, Anthropic, Google, etc.) for music recommendations with cost controls
 
-```bash
-ng test
-```
+### CI/CD and Hosting
 
-## Running end-to-end tests
+- **GitHub Actions** - Automated CI/CD pipelines
+- **DigitalOcean** - Application hosting via Docker containers
 
-For end-to-end (e2e) testing, run:
+## Getting Started Locally
 
-```bash
-ng e2e
-```
+### Prerequisites
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+- Node.js (version 18 or higher)
+- npm or yarn package manager
+- Git
 
-## Additional Resources
+### Installation
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/your-username/mushee.git
+   cd mushee
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+
+   Create a `.env` file in the root directory and configure the following:
+
+   ```env
+   # Supabase Configuration
+   SUPABASE_URL=your_supabase_project_url
+   SUPABASE_ANON_KEY=your_supabase_anon_key
+
+   # OpenRouter.ai Configuration
+   OPENROUTER_API_KEY=your_openrouter_api_key
+   ```
+
+4. **Start the development server**
+
+   ```bash
+   npm start
+   ```
+
+5. **Open your browser**
+
+   Navigate to `http://localhost:4200` to access the application.
+
+### Database Setup
+
+1. Create a new project on [Supabase](https://supabase.com)
+2. Set up authentication tables and storage buckets
+3. Configure Row Level Security (RLS) policies for user data isolation
+4. Run database migrations if any are provided in the project
+
+## Available Scripts
+
+| Command                | Description                                              |
+| ---------------------- | -------------------------------------------------------- |
+| `npm start`            | Starts the development server at `http://localhost:4200` |
+| `npm run build`        | Builds the application for production                    |
+| `npm run watch`        | Builds the application in watch mode for development     |
+| `npm test`             | Runs unit tests with Karma and Jasmine                   |
+| `npm run lint`         | Runs ESLint to check code quality                        |
+| `npm run lint:fix`     | Automatically fixes ESLint issues                        |
+| `npm run format`       | Formats code using Prettier                              |
+| `npm run format:check` | Checks if code is properly formatted                     |
+| `npm run prepare`      | Sets up Husky git hooks                                  |
+
+## Project Scope
+
+### MVP Features (Current Release)
+
+**✅ User Account Management**
+
+- Email/password registration and login
+- Secure session management
+
+**✅ Song Library Management**
+
+- MusicXML file upload and storage
+- Library display as composer-title tiles
+- Song deletion with confirmation
+
+**✅ Pre-loaded Content Library**
+
+- Public domain compositions available for browsing
+- One-click addition to personal library
+
+**✅ Sheet Music Rendering**
+
+- OpenSheetMusicDisplay integration
+- Clean, readable sheet music visualization
+
+**✅ AI-Powered Song Suggestions**
+
+- "Find Similar Music" functionality
+- OpenRouter.ai integration for recommendations
+- Modal display of suggestions
+
+**✅ User Feedback System**
+
+- Thumbs up/down rating for rendering quality
+- Thumbs up/down rating for AI suggestion relevance
+
+**✅ New User Onboarding**
+
+- 3-step introductory modal for new users
+- Guidance on uploading, browsing, and AI features
+
+### Out of Scope for MVP
+
+- Support for formats other than MusicXML (PDF, MIDI, etc.)
+- Sheet music editing or annotation capabilities
+- Advanced filtering by genre, difficulty, or key
+- Social features (sharing, collaboration)
+- Native mobile applications
+- Social login options (Google, Facebook, etc.)
+
+## Project Status
+
+🚧 **MVP Development** - This project is currently in active development for the Minimum Viable Product release.
+
+### Success Metrics (Target)
+
+- **Sheet Music Rendering Quality**: 95% thumbs up ratings
+- **AI Suggestion Relevance**: 75% thumbs up ratings
+
+### Roadmap
+
+- [ ] Complete MVP development
+- [ ] User testing and feedback collection
+- [ ] Performance optimization
+- [ ] Mobile responsiveness improvements
+- [ ] Additional MusicXML features
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+**MuShee** - Making sheet music management musical again! 🎼

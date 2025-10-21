@@ -22,6 +22,8 @@
     "@angular/platform-browser": "^19.2.0",
     "@angular/platform-browser-dynamic": "^19.2.0",
     "@angular/router": "^19.2.0",
+    "@supabase/supabase-js": "^2.76.1",
+    "dotenv": "^17.2.3",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
@@ -31,6 +33,7 @@
     "@angular/cli": "^19.2.18",
     "@angular/compiler-cli": "^19.2.0",
     "@types/jasmine": "~5.1.0",
+    "@types/node": "^24.9.1",
     "angular-eslint": "20.4.0",
     "eslint": "^9.37.0",
     "eslint-config-prettier": "^10.1.8",
@@ -44,6 +47,7 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "lint-staged": "^16.2.4",
     "prettier": "^3.6.2",
+    "supabase": "^2.51.0",
     "typescript": "~5.7.2",
     "typescript-eslint": "8.46.0"
   },

@@ -12,14 +12,13 @@ alwaysApply: false
 - Use Angular's inject() function for dependency injection
 - Follow Single Responsibility Principle: one component/service per file
 - Organize code by feature in the project structure
+- Leverage Angular CLI for schematics and code generation
 
 ### Modern Angular 19 Syntax
 
 #### New Control Flow
 
-- Use @if instead of \*ngIf for conditional rendering
-- Use @for with track expression instead of \*ngFor for lists
-- Use @switch instead of \*ngSwitch for multiple conditions
+- Implement control flow with @if, @for, and @switch instead of *ngIf, *ngFor, etc.
 - Use @empty block for empty state handling in @for loops
 - Use @defer for lazy loading heavy components with @placeholder, @loading, @error blocks
 
@@ -56,6 +55,7 @@ alwaysApply: false
 - Use readonly modifiers for immutable properties
 - Implement type guards for runtime type checking
 - Use type unions and intersections for complex scenarios
+- Use TypeScript decorators with explicit visibility modifiers (public, private)
 
 ### State Management
 
@@ -91,17 +91,6 @@ alwaysApply: false
 - Use Material's BreakpointObserver service for responsive behavior
 - Define primary, accent, and warn color palettes
 - Use mat-elevation-z\* classes for depth
-
-### Supabase Integration
-
-- Create Supabase client as singleton service with providedIn: 'root'
-- Store Supabase configuration in environment files
-- Use Supabase authentication for user management
-- Type Supabase database responses with TypeScript interfaces
-- Use Supabase Storage for file uploads (MusicXML files)
-- Implement Row Level Security (RLS) policies for data access control
-- Handle Supabase errors consistently with proper error messages
-- Leverage Supabase Realtime for live data updates when needed
 
 ### Routing
 
