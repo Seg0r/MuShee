@@ -37,6 +37,5 @@ alter table public.rendering_feedback enable row level security;
 create policy "users can insert their own feedback"
   on public.rendering_feedback
   for insert
-  to authenticated
   with check (auth.uid() = user_id);
 

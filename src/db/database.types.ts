@@ -27,6 +27,7 @@ export interface Database {
           input_songs: Json;
           rating_score: number;
           suggestions: Json;
+          updated_at: string;
           user_id: string;
         };
         Insert: {
@@ -35,6 +36,7 @@ export interface Database {
           input_songs: Json;
           rating_score?: number;
           suggestions: Json;
+          updated_at?: string;
           user_id: string;
         };
         Update: {
@@ -43,6 +45,7 @@ export interface Database {
           input_songs?: Json;
           rating_score?: number;
           suggestions?: Json;
+          updated_at?: string;
           user_id?: string;
         };
         Relationships: [];

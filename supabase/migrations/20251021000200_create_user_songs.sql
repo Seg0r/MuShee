@@ -30,21 +30,21 @@ alter table public.user_songs enable row level security;
 create policy "users can manage their own library"
   on public.user_songs
   for all
-  to authenticated
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
+  using (auth.uid() = user_id);
 
 -- ============================================================================
 -- update songs table policies to include library access
 -- ============================================================================
--- now that the user_songs table exists, we can drop the basic authenticated policy
--- and replace it with one that checks the user's library
+-- now that the user_songs table exists, we can drop the anonymous policy
+-- and replace it with the policy from db-plan.md that checks the user's library
 
--- policy: authenticated users can select public songs and songs in their library
-create policy "authenticated users can select public and personal songs"
+-- drop the anonymous policy from songs table
+drop policy "anonymous users can select public songs" on public.songs;
+
+-- policy: users can view public songs and songs in their library
+create policy "users can view public songs and songs in their library"
   on public.songs
   for select
-  to authenticated
   using (
     uploader_id is null or
     exists (

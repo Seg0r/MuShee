@@ -25,7 +25,5 @@ alter table public.profiles enable row level security;
 create policy "users can manage their own profile"
   on public.profiles
   for all
-  to authenticated
-  using (auth.uid() = id)
-  with check (auth.uid() = id);
+  using (auth.uid() = id);
 

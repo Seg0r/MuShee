@@ -42,6 +42,5 @@ create policy "anonymous users can select public songs"
 create policy "authenticated users can insert songs"
   on public.songs
   for insert
-  to authenticated
   with check (auth.role() = 'authenticated');
 
