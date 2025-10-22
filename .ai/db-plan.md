@@ -61,6 +61,7 @@ This table logs user feedback on the relevance of song suggestions provided by t
 | `rating_score` | `integer`     | `NOT NULL`, `DEFAULT 0`                       | Sum of all user ratings for this suggestion set (1 for each thumbs up, -1 for each thumbs down). Used for quick analytics calculations.                                           |
 | `input_songs`  | `json`        | `NOT NULL`                                    | A JSON object or array containing the list of songs sent to the AI to generate the suggestion set.                                                                                |
 | `created_at`   | `timestamptz` | `NOT NULL`, `DEFAULT now()`                   | Timestamp of when the feedback was submitted.                                                                                                                                     |
+| `updated_at`   | `timestamptz` | `NOT NULL`, `DEFAULT now()`                   | Timestamp of the last feedback update.                                                                                                                                            |
 
 ## 2. Relationships
 

@@ -811,16 +811,13 @@ Submit user ratings for multiple AI-generated song suggestions in a single batch
 
 1. Calculate MD5 hash of uploaded file content
 2. Query `songs` table for existing record with same `file_hash`
-3. If exists:
-   - Check if already in user's library via `user_songs`
-   - If yes, return 409 Conflict
-   - If no, add to user's library, return 200 OK with `is_duplicate: true`
+3. If exists add to user's library, return 200 OK
 4. If not exists:
    - Parse MusicXML for metadata
    - Upload to Supabase Storage
    - Create song record
    - Add to user's library
-   - Return 201 Created with `is_duplicate: false`
+   - Return 201 Created
 
 #### Onboarding Status Tracking
 
@@ -911,7 +908,6 @@ All endpoints follow consistent error response format:
 - `FORBIDDEN`: Insufficient permissions
 - `NOT_FOUND`: Resource doesn't exist
 - `INVALID_REQUEST`: Validation failure
-- `CONFLICT`: Resource conflict (e.g., duplicate)
 - `SERVICE_UNAVAILABLE`: External service failure
 - `INTERNAL_ERROR`: Unexpected server error
 
