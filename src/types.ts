@@ -255,13 +255,8 @@ export interface UpdateAiSuggestionFeedbackCommand {
  */
 export type UpdateAiSuggestionFeedbackResponseDto = Pick<
   AiSuggestionFeedbackRow,
-  'id' | 'rating_score'
-> & {
-  /**
-   * Timestamp supplied by application logic because the table maintains only created_at.
-   */
-  updated_at: string;
-};
+  'id' | 'rating_score' | 'updated_at'
+>;
 
 // =============================================================================
 // Rendering Feedback
