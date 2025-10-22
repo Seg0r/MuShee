@@ -7,23 +7,21 @@
 create table public.ai_suggestion_feedback (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  rating smallint not null check (rating in (1, -1)),
-  suggestion_title varchar(200) not null,
-  suggestion_composer varchar(200) not null,
+  suggestions jsonb not null,
+  rating_score integer not null default 0,
   input_songs json not null,
   created_at timestamptz not null default now()
 );
 
 -- add comment to table
-comment on table public.ai_suggestion_feedback is 'logs user feedback on the relevance of song suggestions provided by the ai';
+comment on table public.ai_suggestion_feedback is 'logs user feedback on the relevance of song suggestions provided by the ai. each row captures the full suggestion set returned by the ai so that users can rate individual entries within the set. the rating_score provides a quick aggregate for analytics while preserving individual ratings in the suggestions json';
 
 -- add comments to columns
 comment on column public.ai_suggestion_feedback.id is 'unique identifier for the feedback entry';
 comment on column public.ai_suggestion_feedback.user_id is 'the user providing the feedback';
-comment on column public.ai_suggestion_feedback.rating is 'the rating (1 for thumbs up, -1 for thumbs down)';
-comment on column public.ai_suggestion_feedback.suggestion_title is 'the title of the suggested song being rated';
-comment on column public.ai_suggestion_feedback.suggestion_composer is 'the composer of the suggested song being rated';
-comment on column public.ai_suggestion_feedback.input_songs is 'a json object or array containing the list of songs sent to the ai to generate the suggestion';
+comment on column public.ai_suggestion_feedback.suggestions is 'array of suggestion objects returned by the ai. each object includes title, composer, and an optional user_rating (1 for upvote, -1 for downvote, null when unrated)';
+comment on column public.ai_suggestion_feedback.rating_score is 'sum of all user ratings for this suggestion set (1 for each thumbs up, -1 for each thumbs down). used for quick analytics calculations';
+comment on column public.ai_suggestion_feedback.input_songs is 'a json object or array containing the list of songs sent to the ai to generate the suggestion set';
 comment on column public.ai_suggestion_feedback.created_at is 'timestamp of when the feedback was submitted';
 
 -- create index on user_id for analytics queries
@@ -34,7 +32,7 @@ alter table public.ai_suggestion_feedback enable row level security;
 
 -- policy: authenticated users can insert their own feedback
 -- note: users cannot view, update, or delete feedback entries to maintain data integrity for analytics
-create policy "authenticated users can insert their own feedback"
+create policy "users can insert their own feedback"
   on public.ai_suggestion_feedback
   for insert
   to authenticated

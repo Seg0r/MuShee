@@ -51,17 +51,16 @@ This table logs user feedback on the quality of sheet music rendering for a spec
 
 ### `public.ai_suggestion_feedback`
 
-This table logs user feedback on the relevance of song suggestions provided by the AI.
+This table logs user feedback on the relevance of song suggestions provided by the AI. Each row captures the full suggestion set returned by the AI so that users can rate individual entries within the set. The `rating_score` provides a quick aggregate for analytics while preserving individual ratings in the `suggestions` JSON.
 
-| Column                | Data Type      | Constraints                                   | Description                                                                                    |
-| :-------------------- | :------------- | :-------------------------------------------- | :--------------------------------------------------------------------------------------------- |
-| `id`                  | `uuid`         | `PRIMARY KEY`, `DEFAULT gen_random_uuid()`    | Unique identifier for the feedback entry.                                                      |
-| `user_id`             | `uuid`         | `REFERENCES auth.users(id) ON DELETE CASCADE` | The user providing the feedback.                                                               |
-| `rating`              | `smallint`     | `NOT NULL`, `CHECK (rating IN (1, -1))`       | The rating (1 for thumbs up, -1 for thumbs down).                                              |
-| `suggestion_title`    | `varchar(200)` | `NOT NULL`                                    | The title of the suggested song being rated.                                                   |
-| `suggestion_composer` | `varchar(200)` | `NOT NULL`                                    | The composer of the suggested song being rated.                                                |
-| `input_songs`         | `json`         | `NOT NULL`                                    | A JSON object or array containing the list of songs sent to the AI to generate the suggestion. |
-| `created_at`          | `timestamptz`  | `NOT NULL`, `DEFAULT now()`                   | Timestamp of when the feedback was submitted.                                                  |
+| Column         | Data Type     | Constraints                                   | Description                                                                                                                                                                       |
+| :------------- | :------------ | :-------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`           | `uuid`        | `PRIMARY KEY`, `DEFAULT gen_random_uuid()`    | Unique identifier for the feedback entry.                                                                                                                                         |
+| `user_id`      | `uuid`        | `REFERENCES auth.users(id) ON DELETE CASCADE` | The user providing the feedback.                                                                                                                                                  |
+| `suggestions`  | `jsonb`       | `NOT NULL`                                    | Array of suggestion objects returned by the AI. Each object includes `title`, `composer`, and an optional `user_rating` (`1` for upvote, `-1` for downvote, `null` when unrated). |
+| `rating_score` | `integer`     | `NOT NULL`, `DEFAULT 0`                       | Sum of all user ratings for this suggestion set (1 for each thumbs up, -1 for each thumbs down). Used for quick analytics calculations.                                           |
+| `input_songs`  | `json`        | `NOT NULL`                                    | A JSON object or array containing the list of songs sent to the AI to generate the suggestion set.                                                                                |
+| `created_at`   | `timestamptz` | `NOT NULL`, `DEFAULT now()`                   | Timestamp of when the feedback was submitted.                                                                                                                                     |
 
 ## 2. Relationships
 
@@ -157,3 +156,5 @@ RLS will be enabled on all tables to ensure data privacy and security.
 - **File Storage**: MusicXML files will be stored in Supabase Storage. The filename in storage will be the `file_hash` from the `songs` table, ensuring deterministic file paths and preventing duplicate file uploads.
 - **Data Truncation**: `composer` and `title` fields are `varchar(200)`. The application logic must handle truncating any values longer than this limit before insertion.
 - **Historical Ratings**: The `rendering_feedback` table intentionally lacks a unique constraint on `(user_id, song_id)`. The `created_at` column allows for a historical log of user feedback, enabling analysis of rendering quality improvements over time.
+- **JSON vs JSONB**: The `input_songs` column is specifically of json data type instead of jsonb to retain original structure sent to AI.
+- **AI Suggestion Analytics**: The `rating_score` column in `ai_suggestion_feedback` provides a sum of all ratings (1 for thumbs up, -1 for thumbs down) for quick calculation of the 75% thumbs-up success metric. Individual ratings are preserved in the `suggestions` JSON for detailed analysis of which specific suggestions perform well.

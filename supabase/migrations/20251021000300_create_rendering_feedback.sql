@@ -32,9 +32,9 @@ create index rendering_feedback_song_id_idx on public.rendering_feedback(song_id
 -- enable row level security
 alter table public.rendering_feedback enable row level security;
 
--- policy: authenticated users can insert their own feedback
+-- policy: users can insert their own feedback
 -- note: users cannot view, update, or delete feedback entries to maintain data integrity for analytics
-create policy "authenticated users can insert their own feedback"
+create policy "users can insert their own feedback"
   on public.rendering_feedback
   for insert
   to authenticated

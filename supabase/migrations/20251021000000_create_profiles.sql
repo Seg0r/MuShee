@@ -21,33 +21,11 @@ comment on column public.profiles.has_completed_onboarding is 'flag to track if 
 -- enable row level security
 alter table public.profiles enable row level security;
 
--- policy: authenticated users can select their own profile
-create policy "authenticated users can select their own profile"
+-- policy: users can manage their own profile
+create policy "users can manage their own profile"
   on public.profiles
-  for select
-  to authenticated
-  using (auth.uid() = id);
-
--- policy: authenticated users can insert their own profile
-create policy "authenticated users can insert their own profile"
-  on public.profiles
-  for insert
-  to authenticated
-  with check (auth.uid() = id);
-
--- policy: authenticated users can update their own profile
-create policy "authenticated users can update their own profile"
-  on public.profiles
-  for update
+  for all
   to authenticated
   using (auth.uid() = id)
   with check (auth.uid() = id);
-
--- policy: authenticated users can delete their own profile
--- note: this policy exists for completeness, but cascade deletion from auth.users will typically handle profile deletion
-create policy "authenticated users can delete their own profile"
-  on public.profiles
-  for delete
-  to authenticated
-  using (auth.uid() = id);
 

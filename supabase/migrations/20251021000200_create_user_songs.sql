@@ -26,35 +26,13 @@ create index user_songs_song_id_idx on public.user_songs(song_id);
 -- enable row level security
 alter table public.user_songs enable row level security;
 
--- policy: authenticated users can select their own library entries
-create policy "authenticated users can select their own library"
+-- policy: users can manage their own library
+create policy "users can manage their own library"
   on public.user_songs
-  for select
-  to authenticated
-  using (auth.uid() = user_id);
-
--- policy: authenticated users can insert songs to their own library
-create policy "authenticated users can insert to their own library"
-  on public.user_songs
-  for insert
-  to authenticated
-  with check (auth.uid() = user_id);
-
--- policy: authenticated users can update their own library entries
--- note: only the created_at timestamp could be updated, though this is unlikely in practice
-create policy "authenticated users can update their own library"
-  on public.user_songs
-  for update
+  for all
   to authenticated
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
-
--- policy: authenticated users can delete songs from their own library
-create policy "authenticated users can delete from their own library"
-  on public.user_songs
-  for delete
-  to authenticated
-  using (auth.uid() = user_id);
 
 -- ============================================================================
 -- update songs table policies to include library access

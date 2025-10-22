@@ -39,10 +39,9 @@ create policy "anonymous users can select public songs"
   using (uploader_id is null);
 
 -- policy: authenticated users can insert new songs
--- note: the with check clause ensures the uploader_id is set to the current user
 create policy "authenticated users can insert songs"
   on public.songs
   for insert
   to authenticated
-  with check (auth.uid() = uploader_id);
+  with check (auth.role() = 'authenticated');
 

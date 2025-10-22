@@ -27,4 +27,3 @@ alter table public.rendering_feedback disable row level security;
 -- disable row level security on public.ai_suggestion_feedback
 -- ============================================================================
 alter table public.ai_suggestion_feedback disable row level security;
-

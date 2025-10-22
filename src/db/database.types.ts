@@ -25,27 +25,24 @@ export interface Database {
           created_at: string;
           id: string;
           input_songs: Json;
-          rating: number;
-          suggestion_composer: string;
-          suggestion_title: string;
+          rating_score: number;
+          suggestions: Json;
           user_id: string;
         };
         Insert: {
           created_at?: string;
           id?: string;
           input_songs: Json;
-          rating: number;
-          suggestion_composer: string;
-          suggestion_title: string;
+          rating_score?: number;
+          suggestions: Json;
           user_id: string;
         };
         Update: {
           created_at?: string;
           id?: string;
           input_songs?: Json;
-          rating?: number;
-          suggestion_composer?: string;
-          suggestion_title?: string;
+          rating_score?: number;
+          suggestions?: Json;
           user_id?: string;
         };
         Relationships: [];
