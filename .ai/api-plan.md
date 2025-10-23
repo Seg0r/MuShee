@@ -1,19 +1,20 @@
-# REST API Plan - MuShee
+# API Integration Plan - MuShee
 
 ## 1. Overview
 
-This document defines the REST API architecture for MuShee, a web-based sheet music library management application. The API leverages Supabase as a Backend-as-a-Service, providing PostgreSQL database access, authentication, and file storage. The frontend Angular application will interact with these endpoints to deliver the core functionality defined in the PRD.
+This document defines the API integration architecture for MuShee, a web-based sheet music library management application. The application uses a hybrid approach: most operations use Supabase SDK directly from the Angular frontend, while external API calls (AI suggestions) use Supabase Edge Functions for secure server-side execution.
 
 ### Technology Stack
 
-- **Backend**: Supabase (PostgreSQL + Row Level Security + Storage)
+- **Backend**: Supabase (PostgreSQL + Row Level Security + Storage + Edge Functions)
 - **Authentication**: Supabase Auth (handled client-side via Supabase SDK)
-- **AI Integration**: OpenRouter.ai
+- **AI Integration**: OpenRouter.ai (via Supabase Edge Functions)
 - **File Storage**: Supabase Storage
 
 ### API Design Principles
 
-- RESTful resource-based URLs
+- Direct Supabase SDK calls for database and authentication operations
+- Supabase Edge Functions for external API integrations requiring private keys
 - JSON request/response payloads
 - JWT-based authentication via Supabase Auth
 - Row Level Security (RLS) enforcement at the database level
@@ -23,14 +24,14 @@ This document defines the REST API architecture for MuShee, a web-based sheet mu
 
 ## 2. Resources
 
-| Resource                   | Database Table(s)               | Description                                     |
-| -------------------------- | ------------------------------- | ----------------------------------------------- |
-| **Profiles**               | `public.profiles`               | User profile data extending Supabase auth.users |
-| **Songs**                  | `public.songs`                  | Master catalog of unique music pieces           |
-| **User Library**           | `public.user_songs`             | User's personal song collection                 |
-| **Rendering Feedback**     | `public.rendering_feedback`     | User ratings on sheet music rendering quality   |
-| **AI Suggestion Feedback** | `public.ai_suggestion_feedback` | User ratings on AI-powered suggestions          |
-| **AI Suggestions**         | N/A (External API)              | AI-generated music recommendations              |
+| Resource                   | Database Table(s)               | Integration Method     | Description                                          |
+| -------------------------- | ------------------------------- | ---------------------- | ---------------------------------------------------- |
+| **Profiles**               | `public.profiles`               | Direct Supabase SDK    | User profile data extending Supabase auth.users      |
+| **Songs**                  | `public.songs`                  | Direct Supabase SDK    | Master catalog of unique music pieces                |
+| **User Library**           | `public.user_songs`             | Direct Supabase SDK    | User's personal song collection                      |
+| **Rendering Feedback**     | `public.rendering_feedback`     | Direct Supabase SDK    | User ratings on sheet music rendering quality        |
+| **AI Suggestion Feedback** | `public.ai_suggestion_feedback` | Direct Supabase SDK    | User ratings on AI-powered suggestions               |
+| **AI Suggestions**         | N/A (External API)              | Supabase Edge Function | AI-generated music recommendations via OpenRouter.ai |
 
 ---
 
@@ -47,10 +48,10 @@ Authentication is handled entirely through **Supabase Auth** using the client-si
 
 ### Implementation Details
 
-- All API requests to protected endpoints require a valid JWT token in the `Authorization` header
-- Format: `Authorization: Bearer <JWT_TOKEN>`
-- Supabase SDK automatically manages token refresh and session persistence
-- Row Level Security (RLS) policies use `auth.uid()` to enforce data access control at the database level
+- Authentication is handled entirely through Supabase Auth SDK in the Angular application
+- Supabase SDK automatically manages JWT tokens, refresh, and session persistence
+- Direct database operations use RLS policies with `auth.uid()` for automatic authorization
+- Edge Functions receive authenticated context through Supabase client calls
 
 ---
 
@@ -506,11 +507,10 @@ No response body
 
 #### Get AI Song Suggestions
 
-Generate AI-powered song suggestions based on the user's current library.
+Generate AI-powered song suggestions based on the user's current library via Supabase Edge Function.
 
-- **HTTP Method**: `POST`
-- **URL Path**: `/api/ai/suggestions`
-- **Authentication**: Required
+- **Integration Method**: Supabase Edge Function (`ai-suggestions`)
+- **Authentication**: Required (handled by Edge Function)
 - **Timeout**: 3 seconds (per PRD requirements)
 
 **Request Payload**:
@@ -968,26 +968,39 @@ Allowed headers: `Authorization`, `Content-Type`
 ### Supabase Integration
 
 - Use Supabase client SDK (JavaScript/TypeScript) for database operations
-- Leverage Supabase Auth for JWT validation
+- Leverage Supabase Auth for JWT validation and session management
 - Use Supabase Storage SDK for file operations
 - RLS policies handle authorization automatically
+- Use Supabase Edge Functions for server-side operations requiring private keys
 
-### API Framework
+### Direct Client Operations
 
-- Can be implemented as Supabase Edge Functions (Deno-based)
-- Or as a separate Node.js/Express API layer
-- Recommendation: Supabase Edge Functions for simpler deployment and tighter integration
+Most application features use direct Supabase SDK calls from Angular:
+
+- **Profile Management**: `supabase.from('profiles')` queries
+- **Song Upload**: Direct database inserts and file uploads to Supabase Storage
+- **Library Management**: `user_songs` table operations with RLS
+- **Feedback Submission**: Direct inserts to feedback tables
+
+### Server-Side Operations (Edge Functions)
+
+External API integrations requiring private keys use Supabase Edge Functions:
+
+- **AI Suggestions**: `ai-suggestions` Edge Function calls OpenRouter.ai securely
+- Private API keys stored in Supabase secrets (not client-side)
+- Functions run on Supabase infrastructure with proper security isolation
 
 ### AI Integration
 
-- OpenRouter.ai integration via HTTP client
-- Implement timeout (3 seconds) and retry logic
+- OpenRouter.ai integration via Supabase Edge Functions (server-side)
+- Implement timeout (3 seconds) and retry logic in Edge Function
 - Error handling for rate limits and service outages
+- API keys stored securely in Supabase Edge Function secrets
 - Consider prompt engineering for optimal suggestion quality
 
 ### File Processing
 
-- Use xml2js or similar library for MusicXML parsing
+- Use OSMD or similar library for MusicXML parsing
 - Use crypto library for MD5 hash generation
 - Stream large file uploads to avoid memory issues
 - Validate XML structure before processing

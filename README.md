@@ -42,10 +42,11 @@ Musicians who want to centralize their sheet music collection and discover new p
 ### Backend
 
 - **Supabase** - Comprehensive backend solution providing:
-  - PostgreSQL database
-  - Built-in user authentication
-  - File storage and management
-  - SDKs for seamless integration
+  - PostgreSQL database with Row Level Security (RLS)
+  - Built-in user authentication and session management
+  - File storage and management for MusicXML files
+  - Client-side SDK for direct database and auth operations
+  - Edge Functions for server-side operations (external API calls)
 
 ### AI
 
@@ -87,10 +88,9 @@ Musicians who want to centralize their sheet music collection and discover new p
    # Supabase Configuration
    SUPABASE_URL=your_supabase_project_url
    SUPABASE_ANON_KEY=your_supabase_anon_key
-
-   # OpenRouter.ai Configuration
-   OPENROUTER_API_KEY=your_openrouter_api_key
    ```
+
+   **Note**: The OpenRouter.ai API key is stored securely in Supabase Edge Functions, not in client-side environment variables.
 
 4. **Start the development server**
 
