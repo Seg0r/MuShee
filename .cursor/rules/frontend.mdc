@@ -1,5 +1,5 @@
 ---
-globs: '**/*.ts, **/*.html, **/*.scss, **/*.css'
+globs: src/**/*.ts, src/**/*.html, src/**/*.scss, src/**/*.css
 alwaysApply: false
 ---
 

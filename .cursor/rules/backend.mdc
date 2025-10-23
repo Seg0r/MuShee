@@ -1,6 +1,6 @@
 ---
 description:
-globs: src/db/*.ts,src/**/*.ts
+globs: src/db/*.ts,src/app/**/*.ts
 alwaysApply: false
 ---
 
@@ -8,6 +8,8 @@ alwaysApply: false
 
 - Use Supabase for backend services, including authentication and database interactions.
 - Follow Supabase guidelines for security and performance.
-- Use Zod schemas to validate data exchanged with the backend.
-- Use supabase from context.locals in Astro routes instead of importing supabaseClient directly
-- Use SupabaseClient type from `src/db/supabase.client.ts`, not from `@supabase/supabase-js`
+- Use the `Database` type from `src/db/database.types.ts` for type-safe database interactions.
+- Use Zod schemas to validate data exchanged with the backend for runtime type safety.
+- Inject SupabaseService via Angular's dependency injection instead of importing the client directly
+- Access the Supabase client through `SupabaseService.client` property
+- Type the Supabase client as `SupabaseClient<Database>` combining `SupabaseClient` from `@supabase/supabase-js` with `Database` from `src/db/database.types.ts`

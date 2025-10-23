@@ -452,7 +452,6 @@ Implement a structured try-catch pattern that handles different error types appr
      - `validateMusicXML(fileBuffer: ArrayBuffer): boolean`
    - Error handling for malformed XML
    - Timeout implementation for large files
-   - Unit tests for various MusicXML formats
 
 2. **Create File Utility Service**
    - File: `src/app/services/file-utils.service.ts`
@@ -461,7 +460,6 @@ Implement a structured try-catch pattern that handles different error types appr
      - `validateFileExtension(filename: string): boolean`
      - `validateFileSize(size: number): boolean`
      - `truncateString(str: string, maxLength: number): string`
-   - Unit tests for edge cases
 
 3. **Extend Supabase Service**
    - File: `src/app/services/supabase.service.ts`
