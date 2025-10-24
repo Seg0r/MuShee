@@ -334,6 +334,6 @@ Implement comprehensive error handling with proper error classification:
    - Ensure consistent error response format
 
 8. **Add Logging**
-   - Implement audit logging for profile updates
+   - Log basic flow to console
    - Add error logging with full context
    - Configure appropriate log levels

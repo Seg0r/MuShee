@@ -372,6 +372,5 @@ Implement comprehensive error handling with proper error classification:
    - Ensure consistent error response format
 
 8. **Add Logging**
-   - Implement security logging for access control
-   - Add audit logging for library additions
+   - Log basic flow to console
    - Configure appropriate log levels

@@ -297,6 +297,5 @@ Implement structured error handling for library removal operations:
    - Ensure consistent error response format
 
 8. **Add Logging**
-   - Implement security logging for access attempts
-   - Add audit logging for library removals
+   - Log basic flow to console
    - Configure appropriate log levels

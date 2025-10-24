@@ -349,5 +349,5 @@ Implement structured error handling for library operations:
 
 8. **Add Logging**
    - Implement parameter validation logging
-   - Add query performance logging
+   - Log basic flow to console
    - Configure appropriate log levels

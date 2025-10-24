@@ -412,6 +412,5 @@ Implement comprehensive error handling for feedback updates:
    - Ensure consistent error response format
 
 8. **Add Logging**
-   - Implement feedback update logging
-   - Add validation and ownership checking logs
+   - Log basic flow to console
    - Configure appropriate log levels

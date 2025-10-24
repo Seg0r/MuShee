@@ -429,6 +429,5 @@ Implement comprehensive error handling for AI service integration:
    - Ensure consistent error response format
 
 9. **Add Logging**
-   - Implement AI service performance logging
-   - Add timeout and error tracking
+   - Log basic flow to console
    - Configure appropriate log levels

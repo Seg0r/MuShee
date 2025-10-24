@@ -277,6 +277,5 @@ Implement structured error handling that maps database and authentication errors
    - Ensure all errors return `ErrorResponseDto` format
 
 8. **Add Logging**
-   - Implement error logging for failed requests
-   - Add audit logging for successful profile access
+   - Log basic flow to console
    - Configure appropriate log levels

@@ -326,6 +326,5 @@ Implement structured error handling for different failure scenarios:
    - Ensure consistent error response format
 
 8. **Add Logging**
-   - Implement security logging for access control
-   - Add audit logging for song access
+   - Log basic flow to console
    - Configure appropriate log levels
