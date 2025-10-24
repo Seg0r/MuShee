@@ -71,3 +71,19 @@ export class ConflictError extends AppError {
     }
   }
 }
+
+/**
+ * Error thrown when a requested resource is not found.
+ * Maps to HTTP 404 Not Found responses.
+ */
+export class NotFoundError extends AppError {
+  readonly code: ErrorCode = 'PROFILE_NOT_FOUND';
+  readonly statusCode = 404;
+
+  constructor(message: string, code?: ErrorCode) {
+    super(message);
+    if (code) {
+      Object.assign(this, { code });
+    }
+  }
+}

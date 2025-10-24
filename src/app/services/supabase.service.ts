@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { config } from 'dotenv';
-import type { Database, Tables, TablesInsert } from '../../db/database.types';
+import type { Database, Tables, TablesInsert, TablesUpdate } from '../../db/database.types';
+import type { ProfileDto, UpdateProfileCommand } from '../../types';
 
 // Type aliases for better readability
 type SongRow = Tables<'songs'>;
 type UserSongRow = Tables<'user_songs'>;
 type SongInsert = TablesInsert<'songs'>;
 type UserSongInsert = TablesInsert<'user_songs'>;
+type ProfileInsert = TablesInsert<'profiles'>;
 
 /**
  * DTO for creating a new song record.
@@ -262,5 +264,107 @@ export class SupabaseService {
       song: song as SongRow,
       userHasSong,
     };
+  }
+
+  // ============================================================================
+  // Profile Management Methods
+  // ============================================================================
+
+  /**
+   * Retrieves a user's profile by their user ID.
+   * Returns null if the profile doesn't exist.
+   *
+   * @param userId - The user's unique identifier
+   * @returns The user's profile data or null if not found
+   * @throws Error if database query fails
+   */
+  async getUserProfile(userId: string): Promise<ProfileDto | null> {
+    console.log('Getting profile for user:', userId);
+
+    const { data, error } = await this.supabase
+      .from('profiles')
+      .select('id, updated_at, has_completed_onboarding')
+      .eq('id', userId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Failed to get profile for user:', userId, error);
+      throw new Error(`Failed to retrieve user profile: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  /**
+   * Creates a new profile for a user with default values.
+   * Used when a user doesn't have a profile yet.
+   *
+   * @param userId - The user's unique identifier
+   * @returns The created profile data
+   * @throws Error if profile creation fails
+   */
+  async createUserProfile(userId: string): Promise<ProfileDto> {
+    console.log('Creating profile for user:', userId);
+
+    const profileData: ProfileInsert = {
+      id: userId,
+      has_completed_onboarding: false,
+    };
+
+    const { data: profile, error } = await this.supabase
+      .from('profiles')
+      .insert(profileData)
+      .select('id, updated_at, has_completed_onboarding')
+      .single();
+
+    if (error) {
+      console.error('Failed to create profile for user:', userId, error);
+      throw new Error(`Failed to create user profile: ${error.message}`);
+    }
+
+    console.log('Profile created for user:', userId);
+    return profile;
+  }
+
+  /**
+   * Updates a user's profile with the provided changes.
+   * Performs atomic update of profile record and returns updated data.
+   *
+   * @param userId - The user's unique identifier
+   * @param updates - The profile updates to apply
+   * @returns The updated profile data
+   * @throws Error if profile update fails or profile doesn't exist
+   */
+  async updateUserProfile(userId: string, updates: UpdateProfileCommand): Promise<ProfileDto> {
+    console.log('Updating profile for user:', userId, updates);
+
+    // First check if profile exists
+    const existingProfile = await this.getUserProfile(userId);
+    if (!existingProfile) {
+      console.warn('Profile not found for user:', userId);
+      throw new Error('Profile not found');
+    }
+
+    // Prepare update data with type safety
+    const updateData: TablesUpdate<'profiles'> = {
+      ...updates,
+      updated_at: new Date().toISOString(), // Ensure updated_at is set
+    };
+
+    // Perform the update
+    const { data: updatedProfile, error } = await this.supabase
+      .from('profiles')
+      .update(updateData)
+      .eq('id', userId)
+      .select('id, updated_at, has_completed_onboarding')
+      .single();
+
+    if (error) {
+      console.error('Failed to update profile for user:', userId, error);
+      throw new Error(`Failed to update user profile: ${error.message}`);
+    }
+
+    console.log('Profile updated for user:', userId);
+    return updatedProfile;
   }
 }
