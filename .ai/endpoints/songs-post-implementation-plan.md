@@ -268,11 +268,11 @@ Return Response DTO
    - Store hash for deduplication check
 
 5. **MusicXML Parsing**
-   - Parse XML string using DOMParser or xml2js
-   - Extract `<work-title>` element → title
-   - Extract `<creator type="composer">` → composer
+   - Use OpenSheetMusicDisplay (OSMD) library to load and parse MusicXML
+   - Extract title from `osmd.Sheet.Title` or `osmd.Sheet.MusicParts[0].Title`
+   - Extract composer from `osmd.Sheet.Composer` or score metadata
    - Truncate both fields to 200 characters max
-   - Handle missing or malformed elements gracefully
+   - Handle missing or malformed elements gracefully through OSMD's built-in error handling
 
 6. **Duplicate Detection**
    - Single query with LEFT JOIN:
@@ -337,13 +337,14 @@ Return Response DTO
    - Return 413 Payload Too Large for violations
 
 3. **XML Security**
-   - **XXE (XML External Entity) Prevention**:
-     - Disable external entity resolution in XML parser
-     - Use secure parser configuration (e.g., `{ noent: false, nonet: true }`)
+   - **OSMD Security Layer**:
+     - Leverage OpenSheetMusicDisplay's built-in XML parsing security
+     - OSMD handles XXE (XML External Entity) prevention internally
+     - OSMD provides protection against Billion Laughs attacks through controlled parsing
+   - **Additional Validation**:
+     - Pre-validate files for suspicious patterns before passing to OSMD
      - Reject files containing `<!DOCTYPE>` or `<!ENTITY>` declarations
-   - **Billion Laughs Attack Prevention**:
-     - Set maximum entity expansion limits
-     - Timeout parsing after reasonable duration (5 seconds)
+     - Timeout parsing after reasonable duration (5 seconds) as additional safeguard
 
 4. **Data Sanitization**
    - Truncate composer and title to 200 characters
@@ -366,21 +367,21 @@ Return Response DTO
 
 ### Error Scenarios
 
-| Scenario                  | HTTP Code | Error Code              | Handling Strategy                       |
-| ------------------------- | --------- | ----------------------- | --------------------------------------- |
-| Missing file in request   | 400       | INVALID_REQUEST         | Validate FormData contains 'file' field |
-| Invalid file extension    | 400       | INVALID_FILE_FORMAT     | Check extension against whitelist       |
-| File too large (>10MB)    | 413       | FILE_TOO_LARGE          | Check Content-Length or file size       |
-| Malformed XML             | 400       | INVALID_MUSICXML        | Catch parser exceptions                 |
-| Missing metadata elements | 400       | INVALID_MUSICXML        | Validate required XML elements exist    |
-| XML parsing timeout       | 400       | INVALID_MUSICXML        | Set parser timeout, handle gracefully   |
-| XXE attack attempt        | 400       | INVALID_MUSICXML        | Reject files with suspicious patterns   |
-| No authentication token   | 401       | UNAUTHORIZED            | Check Authorization header              |
-| Invalid/expired token     | 401       | UNAUTHORIZED            | Validate with Supabase Auth             |
-| Song already in library   | 409       | SONG_ALREADY_IN_LIBRARY | Check user_songs before insert          |
-| Storage upload failure    | 500       | INTERNAL_ERROR          | Log error, rollback transaction         |
-| Database insert failure   | 500       | INTERNAL_ERROR          | Log error, delete uploaded file         |
-| Hash collision (unlikely) | 500       | INTERNAL_ERROR          | Log critical error for investigation    |
+| Scenario                  | HTTP Code | Error Code              | Handling Strategy                        |
+| ------------------------- | --------- | ----------------------- | ---------------------------------------- |
+| Missing file in request   | 400       | INVALID_REQUEST         | Validate FormData contains 'file' field  |
+| Invalid file extension    | 400       | INVALID_FILE_FORMAT     | Check extension against whitelist        |
+| File too large (>10MB)    | 413       | FILE_TOO_LARGE          | Check Content-Length or file size        |
+| Malformed XML             | 400       | INVALID_MUSICXML        | Catch OSMD parsing exceptions            |
+| Missing metadata elements | 400       | INVALID_MUSICXML        | Validate required XML elements exist     |
+| XML parsing timeout       | 400       | INVALID_MUSICXML        | Set OSMD load timeout, handle gracefully |
+| XXE attack attempt        | 400       | INVALID_MUSICXML        | Reject files with suspicious patterns    |
+| No authentication token   | 401       | UNAUTHORIZED            | Check Authorization header               |
+| Invalid/expired token     | 401       | UNAUTHORIZED            | Validate with Supabase Auth              |
+| Song already in library   | 409       | SONG_ALREADY_IN_LIBRARY | Check user_songs before insert           |
+| Storage upload failure    | 500       | INTERNAL_ERROR          | Log error, rollback transaction          |
+| Database insert failure   | 500       | INTERNAL_ERROR          | Log error, delete uploaded file          |
+| Hash collision (unlikely) | 500       | INTERNAL_ERROR          | Log critical error for investigation     |
 
 ### Error Handling Pattern
 
@@ -437,7 +438,7 @@ Implement a structured try-catch pattern that handles different error types appr
    - Ensure proper COMMIT on success and ROLLBACK on errors
 
 5. **Timeout Configuration**
-   - Set reasonable timeouts for XML parsing (5 seconds)
+   - Set reasonable timeouts for OSMD score loading (5 seconds)
    - Set upload timeout to 30 seconds
    - Fail fast on timeout to free resources
 
@@ -447,12 +448,13 @@ Implement a structured try-catch pattern that handles different error types appr
 
 1. **Create MusicXML Parser Service**
    - File: `src/app/services/musicxml-parser.service.ts`
-   - Implement secure XML parsing with XXE protection
+   - Leverage OpenSheetMusicDisplay (OSMD) library for parsing and metadata extraction
    - Methods:
      - `parseMusicXML(fileBuffer: ArrayBuffer): Promise<MusicXMLMetadata>`
      - `validateMusicXML(fileBuffer: ArrayBuffer): boolean`
-   - Error handling for malformed XML
-   - Timeout implementation for large files
+   - Error handling for malformed XML through OSMD's built-in validation
+   - Timeout implementation for large files and complex scores
+   - Extract metadata using OSMD's parsed score object
 
 2. **Create File Utility Service**
    - File: `src/app/services/file-utils.service.ts`
@@ -504,7 +506,7 @@ Implement a structured try-catch pattern that handles different error types appr
    - **Calculate Hash**: Use the file utilities service to compute the MD5 hash of the entire file content
    - **Check for Duplicate**: Execute the single LEFT JOIN query against the database to check if the song exists and whether it's already in the user's library (as described in Data Flow section)
    - **Branch Logic**: Based on query results, delegate to duplicate handler or continue with new song creation
-   - **Parse Metadata**: Extract composer and title from MusicXML content using the parser service, handling missing elements gracefully
+   - **Parse Metadata**: Extract composer and title from MusicXML content using OSMD's parsed score object, handling missing elements gracefully
    - **Upload to Storage**: Store the file in Supabase Storage bucket using the hash as the filename with `.musicxml` extension
    - **Create Database Records**: Insert into both `songs` and `user_songs` tables within a transaction to ensure data consistency
    - **Build Response**: Construct the `UploadSongResponseDto` with all required fields and return 201 Created status
