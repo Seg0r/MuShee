@@ -11,6 +11,7 @@ Backend - Supabase as a comprehensive backend solution:
 - Provides SDKs in multiple languages that will serve as Backend-as-a-Service
 - Is an open source solution that can be hosted locally or on your own server
 - Has built-in user authentication
+- Supabase Edge Functions for server-side operations requiring private keys
 
 AI - Communication with models via the OpenRouter.ai service:
 

@@ -13,3 +13,4 @@ alwaysApply: false
 - Inject SupabaseService via Angular's dependency injection instead of importing the client directly
 - Access the Supabase client through `SupabaseService.client` property
 - Type the Supabase client as `SupabaseClient<Database>` combining `SupabaseClient` from `@supabase/supabase-js` with `Database` from `src/db/database.types.ts`
+- For services that contains elements that cannot be exposed to client use Supabase Edge Functions
