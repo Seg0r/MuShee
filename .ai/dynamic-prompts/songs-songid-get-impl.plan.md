@@ -329,9 +329,3 @@ Implement structured error handling for different failure scenarios:
    - Implement security logging for access control
    - Add audit logging for song access
    - Configure appropriate log levels
-
-9. **Add Unit Tests**
-   - Test successful song retrieval with access
-   - Test access control scenarios (403 responses)
-   - Test song not found handling
-   - Test signed URL generation

@@ -300,9 +300,3 @@ Implement structured error handling for library removal operations:
    - Implement security logging for access attempts
    - Add audit logging for library removals
    - Configure appropriate log levels
-
-9. **Add Unit Tests**
-   - Test successful song removal
-   - Test validation error scenarios
-   - Test library membership checks (404 responses)
-   - Test authentication and error handling
