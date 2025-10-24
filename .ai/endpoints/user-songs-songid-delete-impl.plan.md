@@ -154,15 +154,16 @@ Validate Song ID Format
 
 ### Detailed Step-by-Step Flow
 
-1. **Request Reception**
-   - API route receives DELETE request to `/api/user-songs/:songId`
-   - Extract songId from URL path parameter
+1. **Request Initiation**
+   - Angular component/service initiates remove from library
+   - Calls `UserLibraryService.removeSongFromLibrary(songId)`
+   - Service validates songId parameter
 
 2. **Authentication Check**
-   - Extract JWT token from `Authorization: Bearer <token>` header
-   - Validate token with Supabase Auth service
-   - Extract user ID from authenticated token context
-   - Return 401 if authentication fails
+   - Use `supabase.auth.getUser()` to get authenticated user
+   - Supabase SDK automatically handles JWT token validation
+   - Extract user ID from auth context
+   - Handle authentication errors if user is not authenticated
 
 3. **Parameter Validation**
    - Validate `songId` is present and valid UUID format
@@ -272,21 +273,21 @@ Implement structured error handling for library removal operations:
    - Implement UUID format validation utility
    - Add to path parameter validation
 
-### Phase 2: API Route Implementation
+### Phase 2: Direct Supabase SDK Implementation
 
-4. **Create API Route Handler**
-   - File: `src/app/api/user-songs/[songId]/route.ts` (or appropriate Angular routing structure)
-   - Implement DELETE handler with authentication
-   - Add path parameter extraction and validation
+4. **Implement Remove from Library in Angular Component/Service**
+   - Use Supabase client directly from Angular service
+   - Call `supabase.auth.getUser()` to get authenticated user
+   - Delete using `supabase.from('user_songs').delete()`
 
 5. **Implement Library Check Logic**
-   - Query user_songs table to verify association exists
-   - Return 404 if song is not in user's library
+   - Query user_songs table via Supabase SDK to verify association
+   - Handle case where song is not in user's library
    - Prevent deletion of non-existent associations
 
 6. **Implement Deletion Logic**
-   - Execute DELETE query with proper WHERE conditions
-   - Ensure only user's own library entries can be deleted
+   - Execute DELETE with proper WHERE conditions via Supabase SDK
+   - RLS policies ensure only user's own entries can be deleted
    - Handle database constraints and errors
 
 ### Phase 3: Error Handling & Testing

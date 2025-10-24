@@ -144,15 +144,16 @@ Return ProfileDto
 
 ### Detailed Step-by-Step Flow
 
-1. **Request Reception**
-   - API route receives GET request to `/api/profiles/me`
+1. **Request Initiation**
+   - Angular component/service initiates profile retrieval
+   - Calls `ProfileService.getCurrentUserProfile()`
    - No request body or query parameters expected
 
 2. **Authentication Check**
-   - Extract JWT token from `Authorization: Bearer <token>` header
-   - Validate token with Supabase Auth service
-   - Extract user ID from authenticated token context
-   - Return 401 if token is missing, invalid, or expired
+   - Use `supabase.auth.getUser()` to get authenticated user
+   - Supabase SDK automatically handles JWT token validation
+   - Extract user ID from auth context
+   - Handle authentication errors if user is not authenticated
 
 3. **Database Query**
    - Query `profiles` table using authenticated user ID
@@ -252,20 +253,20 @@ Implement structured error handling that maps database and authentication errors
    - File: `src/app/models/errors.ts`
    - Add `NotFoundError` class for 404 responses
 
-### Phase 2: API Route Implementation
+### Phase 2: Direct Supabase SDK Implementation
 
-4. **Create API Route Handler**
-   - File: `src/app/api/profiles/me/route.ts` (or appropriate Angular routing structure)
-   - Implement GET handler with authentication middleware
-   - Wire up profile service for data retrieval
+4. **Implement Profile Retrieval in Angular Component/Service**
+   - Use Supabase client directly from Angular service
+   - Call `supabase.auth.getUser()` to get authenticated user
+   - Query database using `supabase.from('profiles')` with authenticated user ID
 
-5. **Implement Authentication Middleware**
-   - Validate JWT token using Supabase Auth
-   - Extract user ID from authenticated context
+5. **Implement Authentication Check**
+   - Use Supabase Auth SDK to validate session
+   - Extract user ID from auth context via `supabase.auth.getUser()`
    - Handle authentication errors gracefully
 
 6. **Implement Profile Retrieval Logic**
-   - Query database for user profile using authenticated user ID
+   - Query database for user profile using `ProfileService.getCurrentUserProfile()`
    - Handle profile not found scenarios
    - Implement automatic profile creation if enabled
 

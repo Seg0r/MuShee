@@ -238,16 +238,16 @@ Return UpdateAiSuggestionFeedbackResponseDto
 
 ### Detailed Step-by-Step Flow
 
-1. **Request Reception**
-   - API route receives PATCH request to `/api/feedback/ai-suggestions/:feedbackId`
-   - Extract feedbackId from URL path parameter
-   - Parse JSON request body for suggestions array
+1. **Request Initiation**
+   - Angular component/service initiates feedback update
+   - Calls `FeedbackService.updateAiSuggestionFeedback(command)`
+   - Service validates feedbackId and suggestions array parameters
 
 2. **Authentication Check**
-   - Extract JWT token from `Authorization: Bearer <token>` header
-   - Validate token with Supabase Auth service
-   - Extract user ID from authenticated token context
-   - Return 401 if authentication fails
+   - Use `supabase.auth.getUser()` to get authenticated user
+   - Supabase SDK automatically handles JWT token validation
+   - Extract user ID from auth context
+   - Handle authentication errors if user is not authenticated
 
 3. **Request Validation**
    - Validate request body is valid JSON
@@ -387,20 +387,20 @@ Implement comprehensive error handling for feedback updates:
    - Add rating value validation (-1, 1, null)
    - Create comprehensive feedback update validation
 
-### Phase 2: API Route Implementation
+### Phase 2: Direct Supabase SDK Implementation
 
-4. **Create API Route Handler**
-   - File: `src/app/api/feedback/ai-suggestions/[feedbackId]/route.ts` (or appropriate Angular routing structure)
-   - Implement PATCH handler with authentication
-   - Add path parameter and request body validation
+4. **Implement Feedback Update in Angular Component/Service**
+   - Use Supabase client directly from Angular service
+   - Call `supabase.auth.getUser()` to get authenticated user
+   - Update using `supabase.from('ai_suggestion_feedback').update()`
 
 5. **Implement Ownership Verification**
-   - Query feedback record and verify user ownership
-   - Return 403 for unauthorized access attempts
-   - Return 404 for non-existent records
+   - Query feedback record via Supabase SDK and verify ownership
+   - RLS policies enforce users can only update their own records
+   - Handle non-existent records appropriately
 
 6. **Implement Suggestion Validation**
-   - Compare provided ratings with stored suggestions
+   - Compare provided ratings with stored suggestions in Angular
    - Validate exact match of titles, composers, and order
    - Ensure all suggestions are accounted for
 

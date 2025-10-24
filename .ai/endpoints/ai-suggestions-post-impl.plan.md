@@ -254,15 +254,17 @@ Return GenerateAiSuggestionsResponseDto
 
 ### Detailed Step-by-Step Flow
 
-1. **Request Reception**
-   - API route receives POST request to `/api/ai/suggestions`
-   - Parse optional JSON request body for song references
+1. **Request Initiation**
+   - Angular component/service initiates AI suggestions request
+   - Calls `AiService.generateSuggestions(songs)`
+   - Service invokes Supabase Edge Function `ai-suggestions`
+   - Edge Function receives and parses request payload
 
-2. **Authentication Check**
-   - Extract JWT token from `Authorization: Bearer <token>` header
-   - Validate token with Supabase Auth service
-   - Extract user ID from authenticated token context
-   - Return 401 if authentication fails
+2. **Authentication Check (in Edge Function)**
+   - Supabase Edge Function receives authenticated context automatically
+   - Extract user ID from `context.user` or `supabase.auth.getUser()`
+   - Edge Function has access to authenticated Supabase client
+   - Handle authentication errors if user is not authenticated
 
 3. **Song Collection Logic**
    - **If request body provided**: Use songs from request payload
@@ -383,11 +385,11 @@ Implement comprehensive error handling for AI service integration:
 
 ### Phase 1: Infrastructure Setup
 
-1. **Create AI Service**
+1. **Create AI Service for Edge Function Invocation**
    - File: `src/app/services/ai.service.ts`
    - Methods:
      - `generateSuggestions(songs: SongReferenceDto[]): Promise<AiSuggestionItemDto[]>`
-     - Handle OpenRouter.ai API integration with timeout
+     - Invoke Supabase Edge Function via `supabase.functions.invoke('ai-suggestions')`
    - Implement timeout logic and error handling
 
 2. **Extend Supabase Service**
@@ -404,20 +406,21 @@ Implement comprehensive error handling for AI service integration:
    - Implement timeout wrapper for external API calls
    - Add proper cleanup for timed-out requests
 
-### Phase 2: API Route Implementation
+### Phase 2: Supabase Edge Function Implementation
 
-5. **Create API Route Handler**
-   - File: `src/app/api/ai/suggestions/route.ts`
-   - Implement POST handler with authentication
-   - Add request body parsing and validation
+5. **Create Supabase Edge Function**
+   - File: `supabase/functions/ai-suggestions/index.ts`
+   - Implement Edge Function handler with Supabase Auth context
+   - Parse request body and validate
 
 6. **Implement Song Collection Logic**
-   - Handle optional request body vs database retrieval
+   - Handle optional request body vs database retrieval via Edge Function
+   - Query user's library using Supabase client in Edge Function
    - Validate song count and format requirements
-   - Ensure proper fallback to user's library
 
 7. **Implement AI Service Integration**
-   - Call AI service with timeout protection
+   - Call OpenRouter.ai API from Edge Function with timeout
+   - Store OpenRouter.ai API key in Edge Function secrets
    - Handle various response scenarios appropriately
    - Implement retry logic for transient failures
 

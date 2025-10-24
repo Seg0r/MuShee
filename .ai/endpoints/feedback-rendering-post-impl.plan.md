@@ -205,15 +205,16 @@ Return SubmitRenderingFeedbackResponseDto
 
 ### Detailed Step-by-Step Flow
 
-1. **Request Reception**
-   - API route receives POST request to `/api/feedback/rendering`
-   - Parse JSON request body for song_id and rating
+1. **Request Initiation**
+   - Angular component/service initiates feedback submission
+   - Calls `FeedbackService.submitRenderingFeedback(command)`
+   - Service validates song_id and rating parameters
 
 2. **Authentication Check**
-   - Extract JWT token from `Authorization: Bearer <token>` header
-   - Validate token with Supabase Auth service
-   - Extract user ID from authenticated token context
-   - Return 401 if authentication fails
+   - Use `supabase.auth.getUser()` to get authenticated user
+   - Supabase SDK automatically handles JWT token validation
+   - Extract user ID from auth context
+   - Handle authentication errors if user is not authenticated
 
 3. **Request Validation**
    - Validate request body is valid JSON
@@ -333,22 +334,22 @@ Implement structured error handling for feedback operations:
    - Add UUID format validation for song_id
    - Create comprehensive request validation
 
-### Phase 2: API Route Implementation
+### Phase 2: Direct Supabase SDK Implementation
 
-4. **Create API Route Handler**
-   - File: `src/app/api/feedback/rendering/route.ts` (or appropriate Angular routing structure)
-   - Implement POST handler with authentication
-   - Add request body parsing and validation
+4. **Implement Feedback Submission in Angular Component/Service**
+   - Use Supabase client directly from Angular service
+   - Call `supabase.auth.getUser()` to get authenticated user
+   - Insert using `supabase.from('rendering_feedback').insert()`
 
 5. **Implement Request Validation**
-   - Validate JSON request body structure
+   - Validate request payload structure in Angular
    - Check required fields and data types
    - Validate rating constraints and song_id format
 
 6. **Implement Access Control Logic**
-   - Check song existence and user accessibility
-   - Prevent feedback on inaccessible songs
-   - Return appropriate error responses
+   - Check song existence via Supabase SDK query
+   - Prevent feedback on inaccessible songs (enforced by RLS)
+   - Handle errors appropriately
 
 ### Phase 3: Error Handling & Testing
 

@@ -210,15 +210,16 @@ Return AddUserSongResponseDto
 
 ### Detailed Step-by-Step Flow
 
-1. **Request Reception**
-   - API route receives POST request to `/api/user-songs`
-   - Parse JSON request body for song_id
+1. **Request Initiation**
+   - Angular component/service initiates add to library
+   - Calls `UserLibraryService.addSongToLibrary(songId)`
+   - Service validates song_id parameter
 
 2. **Authentication Check**
-   - Extract JWT token from `Authorization: Bearer <token>` header
-   - Validate token with Supabase Auth service
-   - Extract user ID from authenticated token context
-   - Return 401 if authentication fails
+   - Use `supabase.auth.getUser()` to get authenticated user
+   - Supabase SDK automatically handles JWT token validation
+   - Extract user ID from auth context
+   - Handle authentication errors if user is not authenticated
 
 3. **Request Validation**
    - Validate request body is valid JSON
@@ -347,21 +348,21 @@ Implement comprehensive error handling with proper error classification:
    - Implement UUID format validation utility
    - Add to request validation pipeline
 
-### Phase 2: API Route Implementation
+### Phase 2: Direct Supabase SDK Implementation
 
-4. **Create API Route Handler**
-   - File: `src/app/api/user-songs/route.ts` (or appropriate Angular routing structure)
-   - Implement POST handler with authentication
-   - Add request body parsing and validation
+4. **Implement Add to Library in Angular Component/Service**
+   - Use Supabase client directly from Angular service
+   - Call `supabase.auth.getUser()` to get authenticated user
+   - Insert using `supabase.from('user_songs').insert()`
 
 5. **Implement Request Validation**
-   - Validate JSON request body structure
+   - Validate request payload structure in Angular
    - Check song_id presence and UUID format
-   - Return appropriate 400 errors for invalid requests
+   - Handle validation errors appropriately
 
 6. **Implement Access Control Logic**
-   - Check song existence and user accessibility
-   - Prevent adding inaccessible songs
+   - Check song existence via Supabase SDK query
+   - Prevent adding inaccessible songs (enforced by RLS)
    - Handle different song types (public vs private)
 
 ### Phase 3: Error Handling & Testing

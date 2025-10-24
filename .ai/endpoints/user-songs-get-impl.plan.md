@@ -191,15 +191,16 @@ Return UserLibraryListResponseDto
 
 ### Detailed Step-by-Step Flow
 
-1. **Request Reception**
-   - API route receives GET request to `/api/user-songs`
-   - Extract query parameters from URL
+1. **Request Initiation**
+   - Angular component/service initiates user library retrieval
+   - Calls `UserLibraryService.getUserLibrary(queryParams)`
+   - Service validates and prepares query parameters
 
 2. **Authentication Check**
-   - Extract JWT token from `Authorization: Bearer <token>` header
-   - Validate token with Supabase Auth service
-   - Extract user ID from authenticated token context
-   - Return 401 if authentication fails
+   - Use `supabase.auth.getUser()` to get authenticated user
+   - Supabase SDK automatically handles JWT token validation
+   - Extract user ID from auth context
+   - Handle authentication errors if user is not authenticated
 
 3. **Parameter Validation**
    - Validate `page`: Must be positive integer ≥ 1
@@ -323,20 +324,20 @@ Implement structured error handling for library operations:
    - Add sort field validation for library-specific fields
    - Implement pagination parameter validation
 
-### Phase 2: API Route Implementation
+### Phase 2: Direct Supabase SDK Implementation
 
-4. **Create API Route Handler**
-   - File: `src/app/api/user-songs/route.ts` (or appropriate Angular routing structure)
-   - Implement GET handler with authentication
-   - Add query parameter extraction and validation
+4. **Implement User Library Retrieval in Angular Component/Service**
+   - Use Supabase client directly from Angular service
+   - Call `supabase.auth.getUser()` to get authenticated user
+   - Query using `supabase.from('user_songs')` with proper JOIN
 
 5. **Implement Query Logic**
-   - Build JOIN query between user_songs and songs tables
-   - Apply user filtering and sorting
+   - Build JOIN query using Supabase SDK between user_songs and songs
+   - Apply user filtering and sorting via RLS and query params
    - Implement pagination with proper count queries
 
 6. **Handle Data Transformation**
-   - Transform database JOIN results to DTO format
+   - Transform database JOIN results to DTO format in service
    - Ensure proper field mapping and data types
    - Handle null values and missing data gracefully
 

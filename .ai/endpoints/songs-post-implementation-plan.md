@@ -208,11 +208,11 @@ Tables<'songs'>; // For querying existing songs
 ### High-Level Flow
 
 ```
-User Upload → Angular Component → POST /api/songs
+User Upload → Angular Component → SongService.uploadSong()
     ↓
-Authentication Middleware (verify JWT)
+Supabase Auth Verification (automatic via SDK)
     ↓
-File Upload Handler (multipart parsing)
+File Processing (parse form data)
     ↓
 Validation Layer (file extension, size, format)
     ↓
@@ -246,13 +246,14 @@ Return Response DTO
 
 ### Detailed Step-by-Step Flow
 
-1. **Request Reception**
-   - Angular HTTP client sends multipart/form-data
-   - API route receives request with file field
+1. **Request Initiation**
+   - Angular component handles file upload form
+   - Component calls `SongService.uploadSong(file)`
+   - Service prepares file for processing
 
 2. **Authentication**
-   - Extract JWT from Authorization header
-   - Verify token with Supabase Auth
+   - Use `supabase.auth.getUser()` to get authenticated user
+   - Supabase SDK automatically handles JWT token validation
    - Extract user ID from auth context
 
 3. **File Extraction & Initial Validation**
@@ -332,7 +333,7 @@ Return Response DTO
 
 2. **File Size Limits**
    - Enforce 10MB maximum file size
-   - Configure at both API gateway and application level
+   - Configure at frontend and service level
    - Return 413 Payload Too Large for violations
 
 3. **XML Security**
@@ -480,20 +481,20 @@ Implement a structured try-catch pattern that handles different error types appr
      - `ConflictError` (extends Error)
    - Each with `toDTO()` method returning `ErrorResponseDto`
 
-### Phase 2: API Route Implementation
+### Phase 2: Direct Supabase SDK Implementation
 
-5. **Create API Route Handler**
-   - File: `src/app/api/songs/route.ts` (or appropriate Angular routing structure)
-   - Set up multipart/form-data parsing
-   - Implement authentication check using Supabase Auth
-   - Wire up middleware for file size validation
+5. **Implement Song Upload in Angular Component/Service**
+   - Use Supabase client directly from Angular service
+   - Handle multipart/form-data in Angular component
+   - Call `supabase.auth.getUser()` to get authenticated user
+   - Implement file size validation in frontend
 
 6. **Implement Request Validation**
-   - Validate presence of file in request
+   - Validate presence of file in Angular component
    - Validate file extension (.xml, .musicxml)
    - Validate file size (≤ 10MB)
    - Validate MIME type
-   - Return appropriate 400 errors with error codes
+   - Handle validation errors appropriately
 
 7. **Implement Core Upload Logic**
 

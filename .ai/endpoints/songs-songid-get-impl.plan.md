@@ -175,16 +175,16 @@ Return SongAccessDto
 
 ### Detailed Step-by-Step Flow
 
-1. **Request Reception**
-   - API route receives GET request to `/api/songs/:songId`
-   - Extract songId from URL path parameter
-   - Validate UUID format of songId
+1. **Request Initiation**
+   - Angular component/service initiates song retrieval
+   - Calls `SongService.getSongDetails(songId)`
+   - Service validates UUID format of songId
 
 2. **Authentication Check**
-   - Extract JWT token from `Authorization: Bearer <token>` header
-   - Validate token with Supabase Auth service
-   - Extract user ID from authenticated token context
-   - Return 401 if authentication fails
+   - Use `supabase.auth.getUser()` to get authenticated user
+   - Supabase SDK automatically handles JWT token validation
+   - Extract user ID from auth context
+   - Handle authentication errors if user is not authenticated
 
 3. **Song Access Verification**
    - Perform complex query to check song existence and user access
@@ -301,20 +301,20 @@ Implement structured error handling for different failure scenarios:
    - Add utility function for UUID format validation
    - Include in request validation pipeline
 
-### Phase 2: API Route Implementation
+### Phase 2: Direct Supabase SDK Implementation
 
-4. **Create API Route Handler**
-   - File: `src/app/api/songs/[songId]/route.ts` (or appropriate Angular routing structure)
-   - Implement GET handler with authentication
-   - Add path parameter extraction and validation
+4. **Implement Song Retrieval in Angular Component/Service**
+   - Use Supabase client directly from Angular service
+   - Call `supabase.auth.getUser()` to get authenticated user
+   - Query using `supabase.from('songs')` with access control
 
 5. **Implement Access Control Logic**
-   - Query database with proper access control checks
+   - Query database with proper RLS policies via Supabase SDK
    - Handle different access scenarios (public vs private songs)
-   - Return appropriate error responses
+   - Handle errors appropriately
 
 6. **Implement Signed URL Generation**
-   - Generate secure signed URLs for file access
+   - Generate signed URLs using `supabase.storage.from().createSignedUrl()`
    - Configure appropriate expiration and access controls
    - Handle storage service errors gracefully
 

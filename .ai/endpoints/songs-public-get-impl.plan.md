@@ -189,15 +189,16 @@ Return PublicSongsListResponseDto
 
 ### Detailed Step-by-Step Flow
 
-1. **Request Reception**
-   - API route receives GET request to `/api/songs/public`
-   - Extract query parameters from URL
+1. **Request Initiation**
+   - Angular component/service initiates public songs retrieval
+   - Calls `SongService.getPublicSongs(queryParams)`
+   - Service validates and prepares query parameters
 
 2. **Authentication Check**
-   - Extract JWT token from `Authorization: Bearer <token>` header
-   - Validate token with Supabase Auth service
+   - Use `supabase.auth.getUser()` to get authenticated user
+   - Supabase SDK automatically handles JWT token validation
    - Extract user ID (required for RLS but not used in query)
-   - Return 401 if authentication fails
+   - Handle authentication errors if user is not authenticated
 
 3. **Parameter Validation**
    - Validate `page`: Must be positive integer ≥ 1
@@ -322,20 +323,20 @@ Implement comprehensive validation and error handling:
    - Add sort field validation against allowed fields
    - Implement search query sanitization
 
-### Phase 2: API Route Implementation
+### Phase 2: Direct Supabase SDK Implementation
 
-4. **Create API Route Handler**
-   - File: `src/app/api/songs/public/route.ts` (or appropriate Angular routing structure)
-   - Implement GET handler with authentication
-   - Add query parameter extraction and validation
+4. **Implement Public Songs Retrieval in Angular Component/Service**
+   - Use Supabase client directly from Angular service
+   - Call `supabase.auth.getUser()` to get authenticated user
+   - Query using `supabase.from('songs')` with appropriate filters
 
 5. **Implement Parameter Validation**
-   - Validate all query parameters against constraints
-   - Return detailed error messages for invalid parameters
-   - Handle type conversion and default values
+   - Validate all query parameters in Angular
+   - Handle validation errors appropriately
+   - Apply type conversion and default values
 
 6. **Implement Query Logic**
-   - Build database query with proper filtering and sorting
+   - Build database query with filtering and sorting via Supabase SDK
    - Execute paginated query with count for metadata
    - Handle search functionality across title and composer
 

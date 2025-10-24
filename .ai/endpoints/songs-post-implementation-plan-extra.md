@@ -7,10 +7,10 @@
    - Document security measures in code comments
 
 10. **Add Rate Limiting**
-    - Implement per-user upload rate limiting
-    - Consider using middleware or API gateway features
+    - Implement per-user upload rate limiting in Angular service
+    - Consider using Supabase Edge Functions or frontend throttling
     - Configure appropriate limits (e.g., 10 uploads per minute)
-    - Return 429 Too Many Requests when exceeded
+    - Handle rate limit errors appropriately
 
 11. **Configure Storage Security**
     - Set up Supabase Storage bucket with proper policies
@@ -58,16 +58,16 @@
 
 ### Phase 6: Documentation & Deployment
 
-19. **API Documentation**
-    - Update OpenAPI/Swagger specification
-    - Add usage examples with curl commands
+19. **Service Documentation**
+    - Document service methods and interfaces
+    - Add usage examples with Angular code
     - Document error codes and scenarios
     - Add frontend integration examples
 
 20. **Code Documentation**
     - Add JSDoc comments to all services and methods
     - Document security considerations inline
-    - Add README for API route structure
+    - Add README for service architecture and Supabase SDK usage
     - Document environment variables and configuration
 
 21. **Deployment Preparation**

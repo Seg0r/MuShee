@@ -176,15 +176,16 @@ Return Updated ProfileDto
 
 ### Detailed Step-by-Step Flow
 
-1. **Request Reception**
-   - API route receives PATCH request to `/api/profiles/me`
-   - Parse JSON request body for update fields
+1. **Request Initiation**
+   - Angular component/service initiates profile update
+   - Calls `ProfileService.updateCurrentUserProfile(updates)`
+   - Prepare update payload with profile fields
 
 2. **Authentication Check**
-   - Extract JWT token from `Authorization: Bearer <token>` header
-   - Validate token with Supabase Auth service
-   - Extract user ID from authenticated token context
-   - Return 401 if authentication fails
+   - Use `supabase.auth.getUser()` to get authenticated user
+   - Supabase SDK automatically handles JWT token validation
+   - Extract user ID from auth context
+   - Handle authentication errors if user is not authenticated
 
 3. **Request Validation**
    - Validate request body is valid JSON
@@ -309,21 +310,21 @@ Implement comprehensive error handling with proper error classification:
    - Add field type checking for profile updates
    - Create validation error handling
 
-### Phase 2: API Route Implementation
+### Phase 2: Direct Supabase SDK Implementation
 
-4. **Create API Route Handler**
-   - File: `src/app/api/profiles/me/route.ts` (or appropriate Angular routing structure)
-   - Implement PATCH handler with authentication
-   - Add request body parsing and validation
+4. **Implement Profile Update in Angular Component/Service**
+   - Use Supabase client directly from Angular service
+   - Call `supabase.auth.getUser()` to get authenticated user
+   - Update using `supabase.from('profiles').update()` with user ID
 
 5. **Implement Request Validation**
-   - Validate JSON request body structure
+   - Validate update payload structure in Angular
    - Check field types and allowed values
-   - Return appropriate 400 errors for invalid requests
+   - Handle validation errors appropriately
 
 6. **Implement Profile Update Logic**
-   - Check profile existence before update
-   - Perform atomic profile update operation
+   - Check profile existence before update via `ProfileService`
+   - Perform atomic profile update operation using Supabase SDK
    - Retrieve and return updated profile data
 
 ### Phase 3: Error Handling & Testing
