@@ -1,7 +1,12 @@
 import { Injectable } from '@angular/core';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import type { Database } from '../../db/database.types';
-import type { ProfileDto, UpdateProfileCommand, PublicSongListItemDto } from '../../types';
+import type {
+  ProfileDto,
+  UpdateProfileCommand,
+  PublicSongListItemDto,
+  SongDetailsDto,
+} from '../../types';
 import type { Tables } from '../../db/database.types';
 
 /**
@@ -14,6 +19,30 @@ export interface PublicSongsQueryParams {
   sort?: 'title' | 'composer' | 'created_at';
   order?: 'asc' | 'desc';
   search?: string;
+}
+
+/**
+ * Query parameters for retrieving user's personal library.
+ * Supports pagination and sorting by library association or song metadata.
+ */
+export interface LibraryQueryParams {
+  page?: number;
+  limit?: number;
+  sort?: 'title' | 'composer' | 'created_at' | 'added_at';
+  order?: 'asc' | 'desc';
+}
+
+/**
+ * Result of JOIN query between user_songs and songs tables.
+ */
+interface UserSongWithSongData {
+  user_id: string;
+  song_id: string;
+  created_at: string;
+  songs: {
+    title: string | null;
+    composer: string | null;
+  };
 }
 
 /**
@@ -321,6 +350,256 @@ export class SupabaseService {
       return data.signedUrl;
     } catch (error) {
       console.error('Unexpected error in generateMusicXMLSignedUrl:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Checks if a song is accessible by a user for adding to their library.
+   * Song is accessible if it exists and is either public domain (uploader_id IS NULL)
+   * or the user already has it in their library.
+   *
+   * @param songId - UUID of the song to check
+   * @param userId - UUID of the authenticated user
+   * @returns Promise resolving to true if song exists and is accessible, false otherwise
+   */
+  async checkSongAccessible(songId: string, userId: string): Promise<boolean> {
+    try {
+      console.log('Checking song accessibility:', { songId, userId });
+
+      const songWithAccess = await this.getSongWithAccessCheck(songId, userId);
+
+      const isAccessible = songWithAccess !== null;
+      console.log('Song accessibility check result:', { songId, userId, isAccessible });
+
+      return isAccessible;
+    } catch (error) {
+      console.error('Unexpected error in checkSongAccessible:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Adds a song to a user's personal library by creating a user_songs association.
+   * Assumes the song exists and user has access (should be checked before calling).
+   *
+   * @param userId - UUID of the authenticated user
+   * @param songId - UUID of the song to add to library
+   * @returns Promise resolving to the created user-song association record
+   */
+  async addSongToUserLibrary(userId: string, songId: string): Promise<Tables<'user_songs'>> {
+    try {
+      console.log('Adding song to user library:', { userId, songId });
+
+      const { data, error } = await this.client
+        .from('user_songs')
+        .insert({
+          user_id: userId,
+          song_id: songId,
+        })
+        .select('user_id, song_id, created_at')
+        .single();
+
+      if (error) {
+        console.error('Database error adding song to library:', { userId, songId }, error);
+        throw error;
+      }
+
+      console.log('Song added to user library successfully:', { userId, songId });
+      return data;
+    } catch (error) {
+      console.error('Unexpected error in addSongToUserLibrary:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Checks if a song is already in a user's library to prevent duplicates.
+   *
+   * @param songId - UUID of the song to check
+   * @param userId - UUID of the authenticated user
+   * @returns Promise resolving to true if song is already in library, false otherwise
+   */
+  async isSongInUserLibrary(songId: string, userId: string): Promise<boolean> {
+    try {
+      console.log('Checking if song is already in user library:', { songId, userId });
+
+      const { error } = await this.client
+        .from('user_songs')
+        .select('user_id')
+        .eq('song_id', songId)
+        .eq('user_id', userId)
+        .single();
+
+      if (error) {
+        // If not found, song is not in library
+        if (error.code === 'PGRST116') {
+          console.log('Song not found in user library:', { songId, userId });
+          return false;
+        }
+        // Other database errors should be thrown
+        console.error('Database error checking song in library:', { songId, userId }, error);
+        throw error;
+      }
+
+      // Song found in library
+      console.log('Song already exists in user library:', { songId, userId });
+      return true;
+    } catch (error) {
+      console.error('Unexpected error in isSongInUserLibrary:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieves song details (title and composer) by song ID.
+   * Used for enriching responses with song metadata.
+   *
+   * @param songId - UUID of the song to retrieve details for
+   * @returns Promise resolving to song details or null if song doesn't exist
+   */
+  async getSongDetails(songId: string): Promise<{ title: string; composer: string } | null> {
+    try {
+      console.log('Retrieving song details for:', songId);
+
+      const { data, error } = await this.client
+        .from('songs')
+        .select('title, composer')
+        .eq('id', songId)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          console.log('Song not found for details:', songId);
+          return null;
+        }
+        console.error('Database error retrieving song details:', { songId }, error);
+        throw error;
+      }
+
+      console.log('Song details retrieved successfully for:', songId);
+      return {
+        title: data.title || '',
+        composer: data.composer || '',
+      };
+    } catch (error) {
+      console.error('Unexpected error in getSongDetails:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieves a user's personal song library with song metadata.
+   * Performs a JOIN query between user_songs and songs tables with sorting and pagination.
+   *
+   * @param userId - UUID of the authenticated user
+   * @param params - Query parameters for sorting and pagination
+   * @returns Promise resolving to object containing library data array and total count
+   */
+  async getUserLibrary(
+    userId: string,
+    params: LibraryQueryParams
+  ): Promise<{ data: (Tables<'user_songs'> & { song_details: SongDetailsDto })[]; total: number }> {
+    try {
+      console.log('Querying user library with params:', { userId, params });
+
+      // Build the JOIN query between user_songs and songs
+      let query = this.client
+        .from('user_songs')
+        .select(
+          `
+          user_id,
+          song_id,
+          created_at,
+          songs!inner (
+            title,
+            composer
+          )
+        `,
+          { count: 'exact' }
+        )
+        .eq('user_id', userId);
+
+      // Apply sorting
+      const sortField = params.sort || 'created_at';
+      const sortOrder = params.order === 'desc' ? false : true; // Supabase uses boolean for ascending
+
+      // Handle sorting by song metadata fields vs user_songs fields
+      if (sortField === 'title' || sortField === 'composer') {
+        query = query.order(`songs.${sortField}`, { ascending: sortOrder });
+      } else if (sortField === 'added_at') {
+        // Map 'added_at' to the created_at field in user_songs
+        query = query.order('created_at', { ascending: sortOrder });
+      } else {
+        // Default to created_at for any other sort field
+        query = query.order('created_at', { ascending: sortOrder });
+      }
+
+      // Apply pagination
+      const page = Math.max(1, params.page || 1);
+      const limit = Math.min(100, Math.max(1, params.limit || 50));
+      const offset = (page - 1) * limit;
+      query = query.range(offset, offset + limit - 1);
+
+      const { data, error, count } = await query;
+
+      if (error) {
+        console.error('Database error retrieving user library:', { userId, params }, error);
+        throw error;
+      }
+
+      // Transform the data to match expected format
+      const transformedData = ((data as UserSongWithSongData[]) || []).map(item => ({
+        user_id: item.user_id,
+        song_id: item.song_id,
+        created_at: item.created_at,
+        song_details: {
+          title: item.songs?.title || '',
+          composer: item.songs?.composer || '',
+        },
+      }));
+
+      console.log(
+        `Retrieved ${transformedData.length} library items (total: ${count}) for user:`,
+        userId
+      );
+      return {
+        data: transformedData,
+        total: count || 0,
+      };
+    } catch (error) {
+      console.error('Unexpected error in getUserLibrary:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Removes a song from a user's personal library by deleting the user_songs association.
+   * Assumes the song exists in the user's library (should be checked before calling).
+   * This operation is atomic and only affects the specific user-song association.
+   *
+   * @param userId - UUID of the authenticated user
+   * @param songId - UUID of the song to remove from library
+   * @throws Error if the database operation fails
+   */
+  async removeSongFromUserLibrary(userId: string, songId: string): Promise<void> {
+    try {
+      console.log('Removing song from user library:', { userId, songId });
+
+      const { error } = await this.client
+        .from('user_songs')
+        .delete()
+        .eq('user_id', userId)
+        .eq('song_id', songId);
+
+      if (error) {
+        console.error('Database error removing song from library:', { userId, songId }, error);
+        throw error;
+      }
+
+      console.log('Song removed from user library successfully:', { userId, songId });
+    } catch (error) {
+      console.error('Unexpected error in removeSongFromUserLibrary:', error);
       throw error;
     }
   }
