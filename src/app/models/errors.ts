@@ -87,3 +87,16 @@ export class NotFoundError extends AppError {
     }
   }
 }
+
+/**
+ * Error thrown when access to a resource is forbidden.
+ * Maps to HTTP 403 Forbidden responses.
+ */
+export class ForbiddenError extends AppError {
+  readonly code: ErrorCode = 'FORBIDDEN';
+  readonly statusCode = 403;
+
+  constructor(message = 'Access forbidden') {
+    super(message);
+  }
+}
