@@ -1,11 +1,15 @@
 import { Injectable } from '@angular/core';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
-import type { Database } from '../../db/database.types';
+import type { Database, Json } from '../../db/database.types';
 import type {
   ProfileDto,
   UpdateProfileCommand,
   PublicSongListItemDto,
   SongDetailsDto,
+  SongReferenceDto,
+  AiSuggestionItemDto,
+  SubmitRenderingFeedbackCommand,
+  AiSuggestionFeedbackSuggestionDto,
 } from '../../types';
 import type { Tables } from '../../db/database.types';
 
@@ -43,6 +47,25 @@ interface UserSongWithSongData {
     title: string | null;
     composer: string | null;
   };
+}
+
+/**
+ * Data transfer object for creating a new song record.
+ */
+interface CreateSongDto {
+  title: string;
+  composer: string;
+  file_hash: string;
+  uploader_id: string;
+}
+
+/**
+ * Data transfer object for creating AI suggestion feedback records.
+ */
+interface CreateAiFeedbackDto {
+  user_id: string;
+  input_songs: SongReferenceDto[];
+  suggestions: AiSuggestionItemDto[];
 }
 
 /**
@@ -600,6 +623,461 @@ export class SupabaseService {
       console.log('Song removed from user library successfully:', { userId, songId });
     } catch (error) {
       console.error('Unexpected error in removeSongFromUserLibrary:', error);
+      throw error;
+    }
+  }
+
+  // =============================================================================
+  // MusicXML Upload Support Methods
+  // =============================================================================
+
+  /**
+   * Uploads a MusicXML file to Supabase Storage using the file hash as filename.
+   * Files are stored in the 'musicxml-files' bucket with .musicxml extension.
+   *
+   * @param hash - MD5 hash of the file content (used as filename)
+   * @param fileBuffer - The file content as ArrayBuffer
+   * @throws Error if upload fails
+   */
+  async uploadMusicXMLFile(hash: string, fileBuffer: ArrayBuffer): Promise<void> {
+    try {
+      console.log('Uploading MusicXML file to storage:', hash);
+
+      const fileName = `${hash}.musicxml`;
+      const file = new File([fileBuffer], fileName, { type: 'application/xml' });
+
+      const { error } = await this.client.storage.from('musicxml-files').upload(fileName, file, {
+        contentType: 'application/xml',
+        upsert: false, // Don't overwrite existing files
+      });
+
+      if (error) {
+        console.error('Storage upload error:', { hash }, error);
+        throw error;
+      }
+
+      console.log('MusicXML file uploaded successfully:', hash);
+    } catch (error) {
+      console.error('Unexpected error in uploadMusicXMLFile:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Checks if a MusicXML file exists in Supabase Storage.
+   * Used to verify file existence before database operations.
+   *
+   * @param hash - MD5 hash of the file content (used as filename)
+   * @returns Promise resolving to true if file exists, false otherwise
+   */
+  async checkMusicXMLFileExists(hash: string): Promise<boolean> {
+    try {
+      console.log('Checking if MusicXML file exists in storage:', hash);
+
+      const fileName = `${hash}.musicxml`;
+
+      const { data, error } = await this.client.storage.from('musicxml-files').list('', {
+        limit: 1,
+        search: fileName,
+      });
+
+      if (error) {
+        console.error('Storage check error:', { hash }, error);
+        // If we can't check, assume file doesn't exist for safety
+        return false;
+      }
+
+      const exists = data && data.length > 0 && data[0].name === fileName;
+      console.log('MusicXML file existence check:', { hash, exists });
+
+      return exists;
+    } catch (error) {
+      console.error('Unexpected error in checkMusicXMLFileExists:', error);
+      // If we can't check, assume file doesn't exist for safety
+      return false;
+    }
+  }
+
+  /**
+   * Finds a song by its file hash to check for duplicates.
+   * Returns null if no song with the given hash exists.
+   *
+   * @param hash - MD5 hash of the file content
+   * @returns Promise resolving to song data or null
+   */
+  async findSongByHash(hash: string): Promise<Tables<'songs'> | null> {
+    try {
+      console.log('Finding song by hash:', hash);
+
+      const { data, error } = await this.client
+        .from('songs')
+        .select('id, title, composer, file_hash, uploader_id, created_at')
+        .eq('file_hash', hash)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No song found with this hash
+          console.log('No song found with hash:', hash);
+          return null;
+        }
+        console.error('Database error finding song by hash:', { hash }, error);
+        throw error;
+      }
+
+      console.log('Song found by hash:', { hash, songId: data.id });
+      return data;
+    } catch (error) {
+      console.error('Unexpected error in findSongByHash:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Creates a new song record in the database.
+   * Used when uploading a new (non-duplicate) MusicXML file.
+   *
+   * @param data - Song creation data
+   * @returns Promise resolving to the created song record
+   */
+  async createSong(data: CreateSongDto): Promise<Tables<'songs'>> {
+    try {
+      console.log('Creating new song record:', {
+        title: data.title,
+        composer: data.composer,
+        hash: data.file_hash,
+      });
+
+      const { data: song, error } = await this.client
+        .from('songs')
+        .insert({
+          title: data.title,
+          composer: data.composer,
+          file_hash: data.file_hash,
+          uploader_id: data.uploader_id,
+        })
+        .select('id, title, composer, file_hash, uploader_id, created_at')
+        .single();
+
+      if (error) {
+        console.error('Database error creating song:', error);
+        throw error;
+      }
+
+      console.log('Song created successfully:', { songId: song.id, hash: data.file_hash });
+      return song;
+    } catch (error) {
+      console.error('Unexpected error in createSong:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Checks if a song exists in a user's library using a single optimized query.
+   * Returns detailed information about the song and library association status.
+   *
+   * @param hash - MD5 hash of the file content
+   * @param userId - UUID of the user to check
+   * @returns Promise resolving to object with song data and library status
+   */
+  async checkSongByHashWithLibraryStatus(
+    hash: string,
+    userId: string
+  ): Promise<{
+    song: Tables<'songs'> | null;
+    isInLibrary: boolean;
+  }> {
+    try {
+      console.log('Checking song by hash with library status:', { hash, userId });
+
+      // Single query with LEFT JOIN to check both song existence and library status
+      const { data, error } = await this.client
+        .from('songs')
+        .select(
+          `
+          id,
+          title,
+          composer,
+          file_hash,
+          uploader_id,
+          created_at,
+          user_songs!left(
+            user_id
+          )
+        `
+        )
+        .eq('file_hash', hash)
+        .eq('user_songs.user_id', userId)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No song found with this hash for this user
+          console.log('No song found with hash for user:', { hash, userId });
+          return { song: null, isInLibrary: false };
+        }
+        console.error(
+          'Database error in checkSongByHashWithLibraryStatus:',
+          { hash, userId },
+          error
+        );
+        throw error;
+      }
+
+      // Extract song data (without the joined user_songs)
+      const { user_songs, ...songData } = data as Record<string, unknown>;
+      const song = songData as Tables<'songs'>;
+
+      // Check if user_songs join returned data (indicates song is in library)
+      const isInLibrary = user_songs && Array.isArray(user_songs) && user_songs.length > 0;
+
+      console.log('Song check result:', {
+        hash,
+        userId,
+        songId: song.id,
+        isInLibrary,
+      });
+
+      return { song, isInLibrary: Boolean(isInLibrary) };
+    } catch (error) {
+      console.error('Unexpected error in checkSongByHashWithLibraryStatus:', error);
+      throw error;
+    }
+  }
+
+  // =============================================================================
+  // AI Suggestion Feedback Methods
+  // =============================================================================
+
+  /**
+   * Creates a new AI suggestion feedback record for tracking user ratings.
+   * Stores input songs, AI suggestions, and initializes rating score.
+   *
+   * @param data - Feedback creation data including user, input songs, and suggestions
+   * @returns Promise resolving to the created feedback record
+   */
+  async createAiSuggestionFeedback(
+    data: CreateAiFeedbackDto
+  ): Promise<Tables<'ai_suggestion_feedback'>> {
+    try {
+      console.log('Creating AI suggestion feedback record for user:', data.user_id);
+
+      const { data: feedback, error } = await this.client
+        .from('ai_suggestion_feedback')
+        .insert({
+          user_id: data.user_id,
+          input_songs: data.input_songs as unknown as Json,
+          suggestions: data.suggestions as unknown as Json,
+          rating_score: 0, // Initialize with 0, will be updated when user provides ratings
+        })
+        .select('id, user_id, input_songs, suggestions, rating_score, created_at, updated_at')
+        .single();
+
+      if (error) {
+        console.error(
+          'Database error creating AI suggestion feedback:',
+          { userId: data.user_id },
+          error
+        );
+        throw error;
+      }
+
+      console.log('AI suggestion feedback record created successfully:', {
+        feedbackId: feedback.id,
+        userId: data.user_id,
+        suggestionCount: data.suggestions.length,
+      });
+
+      return feedback;
+    } catch (error) {
+      console.error('Unexpected error in createAiSuggestionFeedback:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Updates an existing AI suggestion feedback record with user ratings.
+   * Validates that suggestions match the original structure and calculates rating score.
+   *
+   * @param feedbackId - UUID of the feedback record to update
+   * @param userId - UUID of the user updating the feedback (for ownership verification)
+   * @param ratings - Array of user ratings matching the original suggestions
+   * @returns Promise resolving to the updated feedback record
+   */
+  async updateAiSuggestionFeedback(
+    feedbackId: string,
+    userId: string,
+    ratings: AiSuggestionFeedbackSuggestionDto[]
+  ): Promise<Tables<'ai_suggestion_feedback'>> {
+    try {
+      console.log('Updating AI suggestion feedback:', {
+        feedbackId,
+        userId,
+        ratingCount: ratings.length,
+      });
+
+      // Step 1: Retrieve the existing feedback record
+      const { data: existingFeedback, error: fetchError } = await this.client
+        .from('ai_suggestion_feedback')
+        .select('id, user_id, suggestions')
+        .eq('id', feedbackId)
+        .single();
+
+      if (fetchError) {
+        if (fetchError.code === 'PGRST116') {
+          console.error('AI suggestion feedback record not found:', feedbackId);
+          throw new Error('Feedback record not found');
+        }
+        console.error('Database error retrieving feedback record:', { feedbackId }, fetchError);
+        throw fetchError;
+      }
+
+      // Step 2: Verify ownership (RLS will also enforce this)
+      if (existingFeedback.user_id !== userId) {
+        console.error('Access denied: User does not own feedback record:', {
+          feedbackId,
+          userId,
+          ownerId: existingFeedback.user_id,
+        });
+        throw new Error('Access denied: You can only update your own feedback');
+      }
+
+      // Step 3: Validate suggestions match original structure
+      const originalSuggestions = existingFeedback.suggestions as unknown as AiSuggestionItemDto[];
+      if (!this.validateSuggestionStructure(ratings, originalSuggestions)) {
+        console.error('Suggestion structure validation failed:', {
+          feedbackId,
+          providedCount: ratings.length,
+          originalCount: originalSuggestions.length,
+        });
+        throw new Error('Invalid suggestions format: does not match original suggestions');
+      }
+
+      // Step 4: Calculate rating score (sum of non-null ratings)
+      const ratingScore = ratings.reduce((sum, rating) => sum + (rating.user_rating || 0), 0);
+
+      // Step 5: Update the feedback record
+      const { data: updatedFeedback, error: updateError } = await this.client
+        .from('ai_suggestion_feedback')
+        .update({
+          suggestions: ratings as unknown as Json,
+          rating_score: ratingScore,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', feedbackId)
+        .select('id, user_id, input_songs, suggestions, rating_score, created_at, updated_at')
+        .single();
+
+      if (updateError) {
+        console.error(
+          'Database error updating AI suggestion feedback:',
+          { feedbackId, userId },
+          updateError
+        );
+        throw updateError;
+      }
+
+      console.log('AI suggestion feedback updated successfully:', {
+        feedbackId,
+        userId,
+        ratingScore,
+        ratedCount: ratings.filter(r => r.user_rating !== null).length,
+      });
+
+      return updatedFeedback;
+    } catch (error) {
+      console.error('Unexpected error in updateAiSuggestionFeedback:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Validates that provided ratings match the structure of original suggestions.
+   * Checks that titles, composers, and order match exactly.
+   *
+   * @param ratings - User-provided ratings to validate
+   * @param originalSuggestions - Original AI-generated suggestions
+   * @returns True if structure matches, false otherwise
+   */
+  private validateSuggestionStructure(
+    ratings: AiSuggestionFeedbackSuggestionDto[],
+    originalSuggestions: AiSuggestionItemDto[]
+  ): boolean {
+    // Check array lengths match
+    if (ratings.length !== originalSuggestions.length) {
+      return false;
+    }
+
+    // Check each suggestion matches title/composer in order
+    for (let i = 0; i < ratings.length; i++) {
+      const rating = ratings[i];
+      const original = originalSuggestions[i];
+
+      if (
+        rating.title !== original.song_details.title ||
+        rating.composer !== original.song_details.composer
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  // =============================================================================
+  // Rendering Feedback Methods
+  // =============================================================================
+
+  /**
+   * Submits rendering quality feedback by creating a new feedback record.
+   * Stores user's thumbs up/down rating for a specific song's rendering quality.
+   *
+   * @param data - Feedback submission data including song_id, rating, and user context
+   * @returns Promise resolving to the created feedback record
+   */
+  async submitRenderingFeedback(
+    data: SubmitRenderingFeedbackCommand & { user_id: string }
+  ): Promise<Tables<'rendering_feedback'>> {
+    try {
+      console.log('Submitting rendering feedback:', {
+        songId: data.song_id,
+        rating: data.rating,
+        userId: data.user_id,
+      });
+
+      const { data: feedback, error } = await this.client
+        .from('rendering_feedback')
+        .insert({
+          user_id: data.user_id,
+          song_id: data.song_id,
+          rating: data.rating,
+        })
+        .select('id, user_id, song_id, rating, created_at')
+        .single();
+
+      if (error) {
+        console.error(
+          'Database error submitting rendering feedback:',
+          {
+            songId: data.song_id,
+            rating: data.rating,
+            userId: data.user_id,
+          },
+          error
+        );
+        throw error;
+      }
+
+      console.log('Rendering feedback submitted successfully:', {
+        feedbackId: feedback.id,
+        songId: data.song_id,
+        rating: data.rating,
+        userId: data.user_id,
+      });
+
+      return feedback;
+    } catch (error) {
+      console.error('Unexpected error in submitRenderingFeedback:', error);
       throw error;
     }
   }
