@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import type { Database } from '../../db/database.types';
-import type { ProfileDto } from '../../types';
+import type { ProfileDto, UpdateProfileCommand } from '../../types';
 
 /**
  * Service for managing Supabase client and database operations.
@@ -89,6 +89,45 @@ export class SupabaseService {
       return data as ProfileDto;
     } catch (error) {
       console.error('Unexpected error in createUserProfile:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Updates an existing user profile with the provided changes.
+   * Performs atomic update and returns the updated profile data.
+   *
+   * @param userId - The UUID of the user whose profile to update
+   * @param updates - The profile fields to update
+   * @returns Promise resolving to the updated ProfileDto
+   * @throws Error if profile doesn't exist or update fails
+   */
+  async updateUserProfile(userId: string, updates: UpdateProfileCommand): Promise<ProfileDto> {
+    try {
+      console.log('Updating profile for user:', userId, 'with updates:', updates);
+
+      const { data, error } = await this.client
+        .from('profiles')
+        .update(updates)
+        .eq('id', userId)
+        .select('id, updated_at, has_completed_onboarding')
+        .single();
+
+      if (error) {
+        // Handle specific error cases
+        if (error.code === 'PGRST116') {
+          console.error('Profile not found for update, user:', userId);
+          throw new Error('Profile not found');
+        }
+
+        console.error('Database error updating profile for user:', userId, error);
+        throw error;
+      }
+
+      console.log('Profile updated successfully for user:', userId);
+      return data as ProfileDto;
+    } catch (error) {
+      console.error('Unexpected error in updateUserProfile:', error);
       throw error;
     }
   }
