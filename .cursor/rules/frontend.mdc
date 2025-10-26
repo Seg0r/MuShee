@@ -79,7 +79,7 @@ alwaysApply: false
 #### Component Usage
 
 - Use Material components for consistent UI design
-- Import only needed Material modules to reduce bundle size
+- Import only needed Material components/directive to reduce bundle size
 - Follow Material Design guidelines for spacing, typography, and color
 - Use Material's theming system for color schemes
 
