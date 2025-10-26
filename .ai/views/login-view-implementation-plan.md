@@ -1,33 +1,30 @@
-# View Implementation Plan: Login View
+# Login View Implementation Plan
 
 ## 1. Overview
 
-The Login View provides authentication functionality for returning users. It presents a form-based interface where users can authenticate using their email address and password credentials. Upon successful authentication, users are redirected to their library page. The view includes comprehensive validation, error handling, and accessibility features to ensure a smooth user experience.
+The Login View is a public-facing authentication page that allows returning users to access their MuShee accounts using email and password credentials. This view serves as the primary entry point for authentication in the application, leveraging Supabase Auth SDK for secure credential validation. The view emphasizes clear UX with real-time field validation, explicit error messages, and smooth navigation to the registration page for new users. Upon successful authentication, users are automatically redirected to their personal song library.
 
 ## 2. View Routing
 
-- **Path**: `/login`
-- **Access**: Public route (unauthenticated users only)
-- **Guard**: `PublicOnlyGuard` - Redirects already authenticated users to `/library`
-- **Lazy Loading**: Can be lazy-loaded as part of authentication feature module
+- **Route Path**: `/login`
+- **Access Level**: Public (unauthenticated users only)
+- **Route Guard**: PublicOnlyGuard - redirects authenticated users to `/library`
+- **Lazy Loading**: Can be lazy-loaded as part of the authentication feature module
+- **Default Route**: Root route `/` should redirect to `/login` if user is not authenticated
 
 ## 3. Component Structure
 
 ```
-LoginComponent
-└── LoginFormComponent (or inline form)
-    ├── MatFormField (Email)
-    │   ├── MatLabel
-    │   ├── Input[type="email"]
-    │   └── MatError
-    ├── MatFormField (Password)
-    │   ├── MatLabel
-    │   ├── Input[type="password"]
-    │   └── MatError
-    ├── MatButton (Login)
-    ├── ErrorMessageDisplay (conditional)
-    ├── LoadingSpinner (conditional)
-    └── RouterLink (to Registration)
+LoginComponent (container/smart component)
+├── AppComponent Router Outlet
+├── Shell Layout (optional - depends on routing strategy for public routes)
+└── AuthFormComponent (presentational component)
+    ├── Email Field (MatFormField + matInput)
+    ├── Password Field (MatFormField + matInput)
+    ├── Error Message Display (error.message)
+    ├── Submit Button (matButton)
+    ├── Loading Spinner Overlay (MatProgressSpinner)
+    └── Create Account Link (MatAnchor navigating to /register)
 ```
 
 ## 4. Component Details
@@ -35,738 +32,937 @@ LoginComponent
 ### LoginComponent
 
 **Component Description:**
-The main container component for the login view. Manages the authentication flow, form submission, error handling, and navigation. It serves as the orchestrator between the UI form and the authentication service.
+The main container component for the login view. This smart component manages the authentication flow, handles form submissions, and orchestrates navigation. It checks if the user is already authenticated and redirects accordingly. The component is responsible for calling the authentication service and managing the overall login state.
 
 **Main Elements:**
 
-- Material Card container (`mat-card`) wrapping the entire login form
-- Application logo/branding at the top
-- `LoginFormComponent` or inline reactive form
-- Loading overlay with spinner (conditional, displayed during authentication)
-- Global error message display area (conditional, displayed on authentication failure)
-- Navigation link to registration view
+- Responsive container (centered, responsive padding)
+- Heading: "Welcome back to MuShee"
+- Subheading: "Sign in to your account"
+- AuthFormComponent instance
+- Optional: App header/toolbar (if not using shell layout for public routes)
 
-**Handled Events:**
+**Handled Interactions:**
 
-- `formSubmit`: Triggered when user submits login form (via button click or Enter key)
-- `navigateToRegister`: Triggered when user clicks "Create Account" link
-- `retryLogin`: Triggered when user attempts to login again after an error
+- Form submission (email + password)
+- Navigation to registration page
+- Error dismissal
+- Keyboard shortcuts (Enter to submit)
 
 **Handled Validation:**
 
-- Email format validation (standard email pattern)
-- Password presence validation (required field)
-- Form-level validation (all fields must be valid before submission)
-- Server-side validation feedback (invalid credentials from Supabase)
+- Pre-login: Check if user already authenticated, redirect to `/library`
+- Post-login: Check Supabase Auth response for errors
+- Route guard validation: Ensure unauthenticated access only
+
+**Validation Details:**
+
+- Verify no active session exists (redirect if authenticated)
+- Verify API response contains valid session after login
+- Handle all possible authentication error codes from Supabase
+- Validate that user is redirected only after profile is verified as created/exists
 
 **Types:**
 
-- `LoginFormViewModel` (custom ViewModel for form state)
-- `ErrorResponseDto` (from types.ts)
-- `FormGroup`, `FormControl` (Angular reactive forms types)
+- AuthError (custom error type extending ErrorResponseDto)
+- ProfileDto (for post-login profile verification)
 
 **Props:**
-None (top-level route component)
 
-### LoginFormComponent (Optional - can be inline)
+- None (component initialized by routing)
+
+### AuthFormComponent
 
 **Component Description:**
-Encapsulates the login form UI with email and password fields. Can be implemented inline in LoginComponent or as a separate component for reusability. Uses Angular Material form fields with reactive forms for validation and state management.
+A presentational (dumb) component that displays the authentication form with email and password fields. This component handles all form-level interactions including field validation, form submission events, and user input feedback. It manages local form state using Angular Reactive Forms and emits login events to the parent component.
 
 **Main Elements:**
 
-- `mat-card-header`: Contains title "Login to MuShee"
-- `mat-card-content`: Contains form fields
-  - Email `mat-form-field` with:
-    - `mat-label`: "Email"
-    - `input` with `type="email"`, `formControlName="email"`, `autocomplete="email"`
-    - `mat-error` for validation messages
-  - Password `mat-form-field` with:
-    - `mat-label`: "Password"
-    - `input` with `type="password"`, `formControlName="password"`, `autocomplete="current-password"`
-    - `mat-error` for validation messages
-- `mat-card-actions`: Contains action buttons
-  - Primary button: "Log In" with `matButton="filled"`, `type="submit"`
-  - Link button: "Create Account" with `matButton`, routing to `/register`
+- Email input field (matInput with email validation)
+- Password input field (matInput with type="password")
+- Error message display container (conditionally shown)
+- Submit button (matButton filled variant)
+- Loading spinner overlay (MatProgressSpinner, shown during submission)
+- "Create Account" link (matAnchor to /register)
+- Optional: Show/hide password toggle (accessibility enhancement)
 
-**Handled Events:**
+**Handled Interactions:**
 
-- `ngSubmit`: Form submission handler
-- `blur`: Field-level validation trigger on blur
-- `input`: Real-time validation (optional for email format)
+- Email field blur: Validate email format
+- Password field blur: Validate password not empty
+- Form submit: Validate entire form and emit login event
+- Enter key press: Submit form if valid
+- Create Account link click: Navigate to register
+- Loading state: Disable form inputs during submission
 
 **Handled Validation:**
 
-- **Email field**:
-  - Required: "Email is required"
-  - Email format: "Please enter a valid email address"
-  - Validation triggered on blur and form submit
-- **Password field**:
-  - Required: "Password is required"
-  - Validation triggered on blur and form submit
+- Email format validation: RFC 5322 compliant pattern
+- Email required: Must not be empty
+- Password required: Must not be empty
+- Password minimum length: At least 8 characters (security requirement)
+- Form-level: Both fields must be valid before submit enabled
+- Cross-field: Cannot submit with empty or invalid email+password
+- Real-time feedback: Validation errors shown on blur (except submit errors)
+
+**Validation Details:**
+
+1. **Email Field Validation:**
+   - Pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ (basic email format)
+   - Message if invalid: "Please enter a valid email address"
+   - Message if empty: "Email is required"
+   - Triggers on: blur, submit attempt
+
+2. **Password Field Validation:**
+   - MinLength: 8 characters
+   - Message if too short: "Password must be at least 8 characters"
+   - Message if empty: "Password is required"
+   - Triggers on: blur (for length check), submit attempt
+
+3. **Form-Level Validation:**
+   - Submit button disabled if form.invalid
+   - Submit button disabled if form.pending
+   - Submit button disabled during loading state
 
 **Types:**
 
-- `FormGroup` from `@angular/forms`
-- `FormControl` from `@angular/forms`
-- `Validators` from `@angular/forms`
+- FormData: { email: string; password: string }
+- FormState: { isLoading: boolean; error: AuthError | null; isSubmitted: boolean }
+- AuthFormOutput: { email: string; password: string } (emitted on submit)
 
 **Props:**
 
-- `@Input() loading: boolean` - Indicates if authentication is in progress
-- `@Input() errorMessage: string | null` - Authentication error message from parent
-- `@Output() submitLogin: EventEmitter<LoginFormViewModel>` - Emits form data on submission
+- `@Input() isLoading: boolean` - Whether authentication request is in progress
+- `@Input() error: AuthError | null` - Error message to display
+- `@Output() loginSubmit = new EventEmitter<FormData>()` - Emits form data on submit
 
 ## 5. Types
 
-### LoginFormViewModel (New Type)
-
-Custom interface representing the login form data model:
+### FormData (ViewModel)
 
 ```typescript
-export interface LoginFormViewModel {
+export interface LoginFormData {
   email: string;
   password: string;
 }
 ```
 
-**Field Breakdown:**
+**Description:** Represents the login form input data structure. Contains the email address and password entered by the user. This interface is used for form control and when emitting the submit event to the parent component.
 
-- `email` (string): User's email address, validated for proper email format
-- `password` (string): User's password, must be non-empty
-
-### LoginState (New Type)
-
-Custom interface for managing component state:
+### AuthError (ViewModel)
 
 ```typescript
-export interface LoginState {
-  loading: boolean;
-  error: string | null;
+export interface AuthError {
+  code: string; // Error code from Supabase or custom code
+  message: string; // User-friendly error message
+  field?: 'email' | 'password' | 'general'; // Which field the error relates to (optional)
+  timestamp: Date; // When the error occurred
 }
 ```
 
-**Field Breakdown:**
+**Description:** Represents authentication errors with additional metadata beyond the API error response. Includes field targeting for form-specific errors and timestamp for error tracking. Extends the ErrorResponseDto structure with presentation-layer information.
 
-- `loading` (boolean): Indicates if authentication request is in progress
-- `error` (string | null): Stores user-friendly error message, null when no error
+### FormState (ViewModel)
 
-### Existing Types Used
+```typescript
+export interface FormState {
+  isLoading: boolean; // True while API call is in progress
+  error: AuthError | null; // Current error message, null if no error
+  isSubmitted: boolean; // True if form submit has been attempted
+  isDirty: boolean; // True if any field has been modified
+}
+```
 
-From `types.ts`:
+**Description:** Represents the current state of the login form. Used to manage UI state including loading indicators, error displays, and validation feedback. Allows component to respond to user interactions and API responses.
 
-- `ErrorResponseDto`: Used for handling error responses from authentication
-- `ErrorCode`: Specifically 'UNAUTHORIZED' for invalid credentials
+### SessionCheckResult (ViewModel)
+
+```typescript
+export interface SessionCheckResult {
+  isAuthenticated: boolean;
+  user: AuthUser | null;
+  profile: ProfileDto | null;
+}
+```
+
+**Description:** Result of checking if user has an existing authenticated session. Used to determine if immediate redirect is needed on component initialization.
 
 ## 6. State Management
 
-### State Approach
+**State Architecture:**
+The Login View uses Angular 19 signals for state management with Reactive Forms for form-specific state. No global state management store is required, as login is a transient operation that doesn't require cross-component state sharing.
 
-The Login View uses Angular 19 signals for reactive state management without external state libraries.
-
-### State Signals
-
-```typescript
-// Component-level signals
-private readonly loadingSignal = signal<boolean>(false);
-private readonly errorSignal = signal<string | null>(null);
-
-// Computed signals (if needed)
-readonly isSubmitDisabled = computed(() =>
-  this.loadingSignal() || !this.loginForm.valid
-);
-```
-
-### State Updates
-
-- **loadingSignal**: Set to `true` when authentication begins, `false` when complete
-- **errorSignal**: Set to error message on authentication failure, `null` on success or retry
-
-### Form State
-
-Managed through Angular Reactive Forms:
+**Signals (Angular 19):**
 
 ```typescript
-private readonly fb = inject(FormBuilder);
+export class LoginComponent {
+  // Form and authentication state
+  formLoading = signal<boolean>(false);
+  authError = signal<AuthError | null>(null);
+  isSessionChecking = signal<boolean>(true);
 
-readonly loginForm = this.fb.group({
-  email: ['', [Validators.required, Validators.email]],
-  password: ['', [Validators.required]]
-});
+  // Derived state
+  isSubmitDisabled = computed(() => this.formLoading() || this.authForm.invalid);
+}
 ```
 
-### State Flow
+**Reactive Forms:**
 
-1. Initial state: `loading = false`, `error = null`, form empty
-2. User fills form: Form validity updates reactively
-3. User submits: `loading = true`, `error = null`
-4. Authentication success: `loading = false`, navigate to `/library`
-5. Authentication failure: `loading = false`, `error = "Invalid email or password"`
-6. User retries: `error = null`, form remains populated
+```typescript
+export class AuthFormComponent implements OnInit {
+  formGroup = new FormGroup({
+    email: new FormControl('', {
+      validators: [Validators.required, Validators.email],
+      updateOn: 'blur',
+    }),
+    password: new FormControl('', {
+      validators: [Validators.required, Validators.minLength(8)],
+      updateOn: 'blur',
+    }),
+  });
+}
+```
+
+**Custom Hook (not required for this view):**
+No custom hook is needed for the Login View. State management is straightforward with Reactive Forms handling form state and signals managing async operations.
+
+**State Lifecycle:**
+
+1. **Initialization:**
+   - `isSessionChecking = true`
+   - Check if user already authenticated
+   - If authenticated: redirect to `/library` (no render)
+   - If no session: `isSessionChecking = false`
+
+2. **Form Interaction:**
+   - User enters email: Form control value updated
+   - User leaves email field: Validation runs, error state updated if invalid
+   - User enters password: Form control value updated
+   - User leaves password field: Validation runs, error state updated if invalid
+
+3. **Form Submission:**
+   - User clicks submit or presses Enter
+   - Form validates (if invalid: show inline errors, return)
+   - `formLoading = true`, `authError = null`
+   - API call initiated
+
+4. **API Response - Success:**
+   - Session created in Supabase Auth
+   - `formLoading = false`
+   - Redirect to `/library`
+
+5. **API Response - Error:**
+   - `formLoading = false`
+   - Map error code to user-friendly message
+   - `authError = { code, message, field: 'general', timestamp }`
+   - Display error in UI, allow retry
 
 ## 7. API Integration
 
-### Authentication Service
+**Authentication Service Call:**
 
-The Login View integrates with Supabase Auth through a custom `AuthService` wrapper.
+The Login View uses `SupabaseService` to interact with Supabase Auth. The actual authentication is performed via Supabase Auth SDK's `signInWithPassword()` method.
 
-### Service Injection
+**Request Execution:**
 
 ```typescript
-private readonly authService = inject(AuthService);
-private readonly router = inject(Router);
+// In LoginComponent
+private authService = inject(SupabaseService);
+
+async performLogin(email: string, password: string): Promise<void> {
+  try {
+    const { data, error } = await this.authService.client.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) throw error;
+
+    // Upon success, Supabase automatically creates session
+    // Redirect to library
+  } catch (error) {
+    // Handle authentication error
+  }
+}
 ```
 
-### Login Method Call
-
-**Method**: `AuthService.login(email: string, password: string)`
-
-**Request Type**: `LoginFormViewModel` (custom)
+**Request Type:**
 
 ```typescript
-{
+interface SignInWithPasswordParams {
   email: string;
   password: string;
 }
 ```
 
-**Response Type**: `void` (success) or throws `AuthenticationError`
-
-The Supabase Auth SDK handles session management internally, storing JWT tokens securely.
-
-### Implementation Pattern
+**Response Type (Success):**
 
 ```typescript
-async onSubmitLogin(): Promise<void> {
-  if (this.loginForm.invalid) {
-    this.loginForm.markAllAsTouched();
-    return;
+interface AuthResponse {
+  data: {
+    user: AuthUser;
+    session: Session;
+  };
+  error: null;
+}
+
+interface AuthUser {
+  id: string;
+  email: string;
+  // ... other fields
+}
+
+interface Session {
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+  expires_at: number;
+  token_type: string;
+  user: AuthUser;
+}
+```
+
+**Response Type (Error):**
+
+```typescript
+interface AuthErrorResponse {
+  data: null;
+  error: {
+    message: string; // e.g., "Invalid login credentials"
+    status: number;
+  };
+}
+```
+
+**Error Code Mapping (Supabase → User-Friendly):**
+
+| Supabase Error            | HTTP Status | User Message                                   |
+| ------------------------- | ----------- | ---------------------------------------------- |
+| Invalid login credentials | 400         | "Invalid email or password"                    |
+| Email not confirmed       | 400         | "Please verify your email before logging in"   |
+| User not found            | 400         | "No account found with this email"             |
+| Account disabled          | 400         | "This account has been disabled"               |
+| Network error             | N/A         | "Network error. Please check your connection." |
+| Generic error             | 500         | "Something went wrong. Please try again."      |
+
+**Session Check (Pre-Login):**
+
+```typescript
+async checkExistingSession(): Promise<SessionCheckResult> {
+  const { data: { user }, error } = await this.authService.client.auth.getUser();
+
+  if (user) {
+    // User has existing session, redirect to library
+    return { isAuthenticated: true, user, profile: null };
   }
 
-  this.loadingSignal.set(true);
-  this.errorSignal.set(null);
+  return { isAuthenticated: false, user: null, profile: null };
+}
+```
 
+**Post-Login Profile Verification:**
+
+```typescript
+// After successful login, optionally verify profile exists
+private profileService = inject(ProfileService);
+
+async verifyProfileExists(): Promise<void> {
   try {
-    const { email, password } = this.loginForm.value;
-    await this.authService.login(email!, password!);
-
-    // Navigate to library on success
-    await this.router.navigate(['/library']);
+    await this.profileService.getCurrentUserProfile();
   } catch (error) {
-    this.loadingSignal.set(false);
-
-    if (error instanceof AuthenticationError) {
-      this.errorSignal.set('Invalid email or password');
-    } else {
-      this.errorSignal.set('An unexpected error occurred. Please try again.');
-    }
+    // Profile will be auto-created if auto-creation is enabled
   }
 }
 ```
 
-### AuthService Expected Interface
+**Session Token Management:**
 
-```typescript
-@Injectable({ providedIn: 'root' })
-export class AuthService {
-  async login(email: string, password: string): Promise<void> {
-    const { error } = await this.supabaseService.client.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      throw new AuthenticationError('Authentication failed');
-    }
-  }
-}
-```
+- Handled automatically by Supabase SDK
+- Tokens stored in browser (localStorage or secure cookie depending on Supabase config)
+- Automatic refresh handled by SDK before expiration
+- No manual token management needed in LoginComponent
 
 ## 8. User Interactions
 
-### Interaction 1: Initial Page Load
+**Interaction 1: Page Load / Component Initialize**
 
-**User Action**: User navigates to `/login`
+- **User Action:** Opens `/login` URL
+- **Precondition:** User is not authenticated (or route guard allows access)
+- **Component Response:**
+  - Display loading state while checking session
+  - If session exists: redirect to `/library` (no form render)
+  - If no session: display login form
+- **Expected Outcome:** Login form visible or redirected
 
-**System Response**:
+**Interaction 2: Focus Email Field**
 
-1. Check if user is already authenticated via `PublicOnlyGuard`
-2. If authenticated, redirect to `/library`
-3. If not authenticated, render login form
-4. Auto-focus on email input field
+- **User Action:** Clicks on email input field
+- **Precondition:** Form is displayed
+- **Component Response:**
+  - Auto-focus email field on page load (ngOnInit)
+  - Clear previous error state if exists
+- **Expected Outcome:** Email field receives focus, cursor visible
 
-### Interaction 2: Email Field Input
+**Interaction 3: Enter Email Address**
 
-**User Action**: User types in email field
+- **User Action:** Types email address in email field
+- **Precondition:** Email field is focused
+- **Component Response:**
+  - Update FormControl value
+  - Store value in memory (no backend call)
+- **Expected Outcome:** Email appears in input field
 
-**System Response**:
+**Interaction 4: Leave Email Field (Blur)**
 
-1. Update form control value reactively
-2. On blur, validate email format
-3. Display inline error message if invalid: "Please enter a valid email address"
-4. Clear error message when valid input provided
+- **User Action:** Tabs out or clicks away from email field
+- **Precondition:** Email field contains text (or is empty)
+- **Component Response:**
+  - Run email validators (required, pattern)
+  - If invalid: display inline error message below field
+  - If valid: clear error message
+- **Expected Outcome:** Error message appears or disappears based on validation
 
-### Interaction 3: Password Field Input
+**Interaction 5: Enter Password**
 
-**User Action**: User types in password field
+- **User Action:** Types password in password field
+- **Precondition:** Password field is focused
+- **Component Response:**
+  - Update FormControl value
+  - Store value in memory (not visible due to password masking)
+- **Expected Outcome:** Password appears as dots/asterisks in input field
 
-**System Response**:
+**Interaction 6: Leave Password Field (Blur)**
 
-1. Update form control value reactively (masked input)
-2. On blur, validate presence
-3. Display inline error message if empty: "Password is required"
-4. Clear error message when input provided
+- **User Action:** Tabs out or clicks away from password field
+- **Precondition:** Password field contains text (or is empty)
+- **Component Response:**
+  - Run password validators (required, minLength)
+  - If invalid: display inline error message below field
+  - If valid: clear error message
+- **Expected Outcome:** Error message appears or disappears based on validation
 
-### Interaction 4: Form Submission via Button
+**Interaction 7: Submit Form (Click Submit Button)**
 
-**User Action**: User clicks "Log In" button
+- **User Action:** Clicks "Sign In" / "Login" button
+- **Precondition:**
+  - Form is valid (both fields valid)
+  - Not currently loading (no duplicate submission)
+- **Component Response:**
+  - Disable form inputs and submit button
+  - Show loading spinner
+  - Call Supabase `signInWithPassword()` with email and password
+  - Wait for API response
+- **Expected Outcome:** Form disabled, spinner visible
 
-**System Response**:
+**Interaction 8: Submit Form (Press Enter Key)**
 
-1. Validate entire form
-2. If invalid, mark all fields as touched to show errors, prevent submission
-3. If valid, set loading state to true
-4. Disable form inputs and submit button
-5. Call `AuthService.login()` with credentials
-6. On success: Navigate to `/library`
-7. On failure: Display error message, re-enable form
+- **User Action:** Presses Enter key in email or password field
+- **Precondition:** Form is valid
+- **Component Response:**
+  - Same as clicking submit button
+- **Expected Outcome:** Form submitted with same flow as button click
 
-### Interaction 5: Form Submission via Enter Key
+**Interaction 9: API Success - Authentication Successful**
 
-**User Action**: User presses Enter key while focused on any form field
+- **User Action:** Valid credentials submitted
+- **Precondition:** API responds with session token
+- **Component Response:**
+  - Disable loading state
+  - Session automatically created in Supabase SDK
+  - Navigate to `/library` using Angular Router
+  - Optionally: verify profile exists and call onboarding check
+- **Expected Outcome:** Page redirects to `/library`
 
-**System Response**: Same as Interaction 4 (form submission)
+**Interaction 10: API Error - Invalid Credentials**
 
-### Interaction 6: Navigate to Registration
+- **User Action:** Invalid email/password combination submitted
+- **Precondition:** Supabase returns 400 error with "Invalid login credentials"
+- **Component Response:**
+  - Disable loading state
+  - Map error to: "Invalid email or password"
+  - Store error in `authError` signal
+  - Display error message in red box above form
+  - Re-enable form inputs
+- **Expected Outcome:** Error message visible, form ready for retry
 
-**User Action**: User clicks "Create Account" link
+**Interaction 11: API Error - User Not Found**
 
-**System Response**:
+- **User Action:** Email not registered submitted
+- **Precondition:** Supabase returns error indicating user not found
+- **Component Response:**
+  - Disable loading state
+  - Display error: "No account found with this email"
+  - Re-enable form
+- **Expected Outcome:** Error message visible, user can click "Create Account" link
 
-1. Navigate to `/register` route
-2. Form state is cleared (component destroyed)
+**Interaction 12: API Error - Network Error**
 
-### Interaction 7: Retry After Error
+- **User Action:** Login attempt during network outage
+- **Precondition:** Network request fails
+- **Component Response:**
+  - Catch network error in catch block
+  - Display: "Network error. Please check your connection."
+  - Allow retry
+- **Expected Outcome:** User-friendly error message, form remains enabled
 
-**User Action**: User corrects credentials and submits again after authentication failure
+**Interaction 13: API Error - Server Error**
 
-**System Response**:
+- **User Action:** Login attempt when API is down
+- **Precondition:** Supabase returns 500 error
+- **Component Response:**
+  - Display generic message: "Something went wrong. Please try again."
+  - Allow retry
+- **Expected Outcome:** Generic error message, form remains enabled
 
-1. Clear previous error message
-2. Set loading state to true
-3. Attempt authentication again (same flow as Interaction 4)
+**Interaction 14: Navigate to Registration**
+
+- **User Action:** Clicks "Create Account" / "Sign Up" link
+- **Precondition:** User is not yet registered
+- **Component Response:**
+  - Navigate to `/register` using routerLink or router.navigate()
+- **Expected Outcome:** Page changes to registration form
+
+**Interaction 15: Clear Error After Retry**
+
+- **User Action:** User modifies form fields after seeing error
+- **Precondition:** Error message is displayed
+- **Component Response:**
+  - Clear error state when user starts typing in fields
+  - Remove error message from display
+- **Expected Outcome:** Error message disappears as user retries
+
+**Interaction 16: Show/Hide Password (Optional Enhancement)**
+
+- **User Action:** Clicks eye icon on password field
+- **Precondition:** Password field is focused and has content
+- **Component Response:**
+  - Toggle input type between "password" and "text"
+  - Change icon appearance (eye open/closed)
+- **Expected Outcome:** Password text becomes visible or hidden
 
 ## 9. Conditions and Validation
 
-### Email Field Validation
+### Form-Level Conditions
 
-**Component**: LoginFormComponent / inline form
+**Condition 1: Email Format Validation**
 
-**Conditions**:
+- **Component Affected:** AuthFormComponent
+- **Validators Applied:** `Validators.required`, `Validators.email`
+- **Validation Pattern:** `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`
+- **Verification Method:**
+  - React Form automatically validates on blur (updateOn: 'blur')
+  - UI displays inline error if invalid
+  - Submit button disabled if email invalid
+- **State Impact:** If invalid, submit button remains disabled until corrected
+- **Error Message:** "Please enter a valid email address"
 
-1. **Required**: Field must not be empty
-   - Verified: On blur and form submission
-   - Effect: Display error message, prevent form submission
-   - Error message: "Email is required"
+**Condition 2: Email Required**
 
-2. **Email Format**: Field must match valid email pattern
-   - Verified: On blur and form submission (using Angular's `Validators.email`)
-   - Effect: Display error message, prevent form submission
-   - Error message: "Please enter a valid email address"
+- **Component Affected:** AuthFormComponent
+- **Validators Applied:** `Validators.required`
+- **Verification Method:** FormControl touched and empty
+- **State Impact:** Submit button disabled if empty
+- **Error Message:** "Email is required"
 
-**UI State Changes**:
+**Condition 3: Password Minimum Length**
 
-- Field shows error state (red underline) when invalid and touched
-- Error message appears below field
-- Submit button remains disabled while invalid
+- **Component Affected:** AuthFormComponent
+- **Validators Applied:** `Validators.minLength(8)`
+- **Verification Method:** Password length < 8 characters
+- **State Impact:** Submit button disabled if too short
+- **Error Message:** "Password must be at least 8 characters"
 
-### Password Field Validation
+**Condition 4: Password Required**
 
-**Component**: LoginFormComponent / inline form
+- **Component Affected:** AuthFormComponent
+- **Validators Applied:** `Validators.required`
+- **Verification Method:** FormControl touched and empty
+- **State Impact:** Submit button disabled if empty
+- **Error Message:** "Password is required"
 
-**Conditions**:
+**Condition 5: Form Valid for Submission**
 
-1. **Required**: Field must not be empty
-   - Verified: On blur and form submission
-   - Effect: Display error message, prevent form submission
-   - Error message: "Password is required"
+- **Component Affected:** AuthFormComponent
+- **Verification Method:** `formGroup.valid && !formGroup.pending`
+- **State Impact:** Submit button enabled only if condition true
+- **UI Feedback:**
+  - Button disabled state (greyed out)
+  - Cursor changes to not-allowed
 
-**UI State Changes**:
+**Condition 6: No Duplicate Submission**
 
-- Field shows error state (red underline) when invalid and touched
-- Error message appears below field
-- Submit button remains disabled while invalid
+- **Component Affected:** LoginComponent
+- **Verification Method:** `!formLoading()`
+- **State Impact:** Form disabled while loading, prevents multiple clicks
+- **UI Feedback:**
+  - Submit button disabled
+  - Loading spinner displayed
+  - Form inputs disabled
 
-### Form-Level Validation
+### API-Level Conditions
 
-**Component**: LoginComponent
+**Condition 7: Valid Session Exists (Pre-Login Check)**
 
-**Conditions**:
+- **Component Affected:** LoginComponent
+- **Verification Method:** `authService.client.auth.getUser()` returns user object
+- **State Impact:** Auto-redirect to `/library` if true
+- **Skip Condition:** Skip rendering login form entirely
 
-1. **All fields valid**: Both email and password must pass individual validation
-   - Verified: Before API call
-   - Effect: Enable/disable submit button
-2. **Not currently loading**: Form submission disabled during authentication
-   - Verified: Via loading signal
-   - Effect: Disable form controls and submit button
+**Condition 8: Credentials Match Supabase Records**
 
-**UI State Changes**:
+- **Component Affected:** LoginComponent
+- **Verification Method:** Supabase returns session on `signInWithPassword()`
+- **State Impact:** If true, navigate to library; if false, display error
+- **Error Scenarios:**
+  - User not found: "No account found with this email"
+  - Password incorrect: "Invalid email or password"
+  - Account disabled: "This account has been disabled"
 
-- Submit button disabled when form invalid or loading
-- Loading spinner overlay displayed during authentication
-- Form inputs disabled during authentication
+**Condition 9: Email Exists in Supabase**
 
-### Authentication Validation
+- **Component Affected:** LoginComponent
+- **Verification Method:** Supabase validates email format and existence
+- **State Impact:** If not found, specific error returned
+- **User Feedback:** "No account found with this email"
 
-**Component**: LoginComponent
+**Condition 10: Network Connectivity**
 
-**Conditions**:
+- **Component Affected:** LoginComponent
+- **Verification Method:** API call succeeds vs. fails
+- **State Impact:** If fails, display network error message
+- **User Feedback:** "Network error. Please check your connection."
 
-1. **Credentials match existing user**: Validated by Supabase Auth
-   - Verified: Server-side during login attempt
-   - Effect on failure: Display error message, re-enable form
-   - Error message: "Invalid email or password"
+### Route-Level Conditions
 
-**UI State Changes**:
+**Condition 11: User Not Authenticated (Route Guard)**
 
-- Error message banner appears above form
-- Loading state cleared
-- Form re-enabled for retry
+- **Component Affected:** LoginComponent
+- **Verification Method:** PublicOnlyGuard checks auth status
+- **State Impact:** If authenticated, prevent access to `/login`, redirect to `/library`
+- **Redirect Target:** `/library`
+
+**Condition 12: User Authenticated (Post-Login)**
+
+- **Component Affected:** LoginComponent
+- **Verification Method:** Session created after successful login
+- **State Impact:** Allow navigation to protected routes
+- **Redirect Target:** `/library` immediately after successful login
 
 ## 10. Error Handling
 
-### Client-Side Validation Errors
+### Error Scenarios and Handling Strategy
 
-**Scenario**: User submits form with invalid data
+**Error 1: Invalid Email Format**
 
-**Handling**:
+- **Trigger:** User enters non-email text and leaves field
+- **Detection:** `Validators.email` fails
+- **Handling:**
+  - Display inline error below email field: "Please enter a valid email address"
+  - Disable submit button
+  - Keep form enabled for correction
+- **Recovery:** User corrects email format, error clears automatically on blur
+- **User Experience:** Non-blocking, allows immediate correction
 
-1. Prevent API call
-2. Mark all form fields as touched
-3. Display inline validation errors for each invalid field
-4. Maintain focus on first invalid field
-5. No global error message displayed
+**Error 2: Empty Email Field**
 
-**User Recovery**: Correct invalid fields and resubmit
+- **Trigger:** User leaves email field empty and tries to submit
+- **Detection:** `Validators.required` fails
+- **Handling:**
+  - Display inline error: "Email is required"
+  - Disable submit button
+- **Recovery:** User enters email address
+- **User Experience:** Clear message, focus returns to field on error
 
-### Authentication Errors (Invalid Credentials)
+**Error 3: Password Too Short**
 
-**Scenario**: Supabase Auth returns error for invalid email/password
+- **Trigger:** User enters < 8 characters and leaves field
+- **Detection:** `Validators.minLength(8)` fails
+- **Handling:**
+  - Display inline error: "Password must be at least 8 characters"
+  - Disable submit button
+- **Recovery:** User enters longer password
+- **User Experience:** Clear requirement communicated upfront
 
-**Handling**:
+**Error 4: Empty Password Field**
 
-1. Catch `AuthenticationError` from service
-2. Set error signal with message: "Invalid email or password"
-3. Display error message in alert/banner above form
-4. Clear loading state
-5. Re-enable form for retry
-6. Preserve entered email (clear password for security)
+- **Trigger:** User leaves password field empty and tries to submit
+- **Detection:** `Validators.required` fails
+- **Handling:**
+  - Display inline error: "Password is required"
+  - Disable submit button
+- **Recovery:** User enters password
+- **User Experience:** Same as email field
 
-**User Recovery**: Correct credentials and resubmit, or navigate to password reset (future feature)
+**Error 5: Invalid Login Credentials (400 - Invalid login credentials)**
 
-### Network Errors
+- **Trigger:** User submits wrong email/password combination
+- **Detection:** Supabase returns error: `Invalid login credentials`
+- **Handling:**
+  - Hide loading spinner
+  - Display prominent error box: "Invalid email or password"
+  - Re-enable form inputs
+  - Store error in `authError` signal with timestamp
+- **Recovery:** User retries with correct credentials or resets password (future)
+- **User Experience:** Clear error, form ready for retry, no form reset (preserve input for easy retry)
+- **Security Note:** Don't differentiate between "user not found" and "password incorrect" for security
 
-**Scenario**: Network connection fails during authentication
+**Error 6: Email Not Confirmed (400 - Email not confirmed)**
 
-**Handling**:
+- **Trigger:** User registers but doesn't verify email, then tries to login
+- **Detection:** Supabase returns specific error
+- **Handling:**
+  - Display error: "Please verify your email before logging in"
+  - Suggest checking spam folder
+- **Recovery:** User verifies email from link, can then login
+- **User Experience:** Clear guidance on next steps
 
-1. Catch network error from service
-2. Set error signal with message: "Network error. Please check your connection."
-3. Display error message in alert/banner
-4. Clear loading state
-5. Re-enable form
+**Error 7: Account Disabled (400)**
 
-**User Recovery**: Check connection and retry
+- **Trigger:** Admin disables user account for violations
+- **Detection:** Supabase returns account disabled error
+- **Handling:**
+  - Display error: "This account has been disabled"
+  - Provide contact support guidance (optional)
+- **Recovery:** User contacts support
+- **User Experience:** Professional error message
 
-### Unexpected Errors
+**Error 8: Network Error (Network Failure)**
 
-**Scenario**: Unexpected error occurs during authentication flow
+- **Trigger:** User attempts login during network outage
+- **Detection:** `fetch()` or Supabase SDK throws network error
+- **Handling:**
+  ```typescript
+  try {
+    // login attempt
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      authError.set({ message: 'Network error. Please check your connection.' });
+    }
+  }
+  ```
 
-**Handling**:
+  - Display prominent error: "Network error. Please check your connection."
+  - Re-enable form
+- **Recovery:** User waits for network restoration or tries again
+- **User Experience:** Clear cause of error, actionable guidance
 
-1. Catch generic error in catch block
-2. Log error to console for debugging
-3. Set error signal with message: "An unexpected error occurred. Please try again."
-4. Display error message in alert/banner
-5. Clear loading state
-6. Re-enable form
+**Error 9: Server Error (500 Internal Server Error)**
 
-**User Recovery**: Retry or contact support if persistent
+- **Trigger:** Supabase backend encounters unhandled exception
+- **Detection:** HTTP 500 response
+- **Handling:**
+  - Display generic error: "Something went wrong. Please try again."
+  - Log full error to console for debugging
+  - Optionally: track in error monitoring service (e.g., Sentry)
+- **Recovery:** User retries or checks status page
+- **User Experience:** Generic but professional message, doesn't expose internal details
 
-### Already Authenticated Users
+**Error 10: Rate Limiting (429 - Too Many Requests)**
 
-**Scenario**: Authenticated user navigates to `/login`
+- **Trigger:** User attempts multiple failed logins rapidly
+- **Detection:** Supabase returns 429 status
+- **Handling:**
+  - Display error: "Too many login attempts. Please try again in a few minutes."
+  - Disable form temporarily (optional backoff)
+- **Recovery:** User waits for rate limit window to expire
+- **User Experience:** Communicates need to wait, protects against brute force
 
-**Handling**:
+**Error 11: Service Unavailable (503)**
 
-1. `PublicOnlyGuard` intercepts route activation
-2. Redirect to `/library` automatically
-3. No login form displayed
+- **Trigger:** Supabase service is down for maintenance
+- **Detection:** HTTP 503 response
+- **Handling:**
+  - Display error: "Service temporarily unavailable. Please try again later."
+  - Provide status page link (optional)
+- **Recovery:** User waits for service restoration
+- **User Experience:** Clear service status communication
 
-**User Recovery**: None needed (desired behavior)
+**Error 12: Timeout (Request exceeds time limit)**
 
-### Session Expiration During Login Attempt
+- **Trigger:** Supabase doesn't respond within timeout window
+- **Detection:** `AbortController` timeout or RxJS timeout operator
+- **Handling:**
+  - Display error: "Request took too long. Please try again."
+  - Re-enable form
+- **Recovery:** User retries login
+- **User Experience:** Clear timeout indication, no ambiguity about result
 
-**Scenario**: Rare case where session state is inconsistent
+### Global Error Handling Integration
 
-**Handling**:
+**ErrorHandlingService Integration:**
 
-1. Clear any existing session via `AuthService`
-2. Allow login attempt to proceed normally
-3. Supabase Auth handles session replacement
+- All errors caught in LoginComponent should be mapped through ErrorHandlingService
+- Supabase error codes mapped to user-friendly messages
+- Optional: Display toast notifications for transient errors
+- HTTP interceptor automatically handles network errors
 
-**User Recovery**: Continue with login normally
+**Error State Cleanup:**
+
+- Clear error state when user starts modifying form (indicates retry attempt)
+- Clear error state when component destroys (avoid stale errors on revisit)
 
 ## 11. Implementation Steps
 
-### Step 1: Create Component Files
+### Phase 1: Setup and Planning
 
-1. Generate LoginComponent: `ng generate component components/login --changeDetection=OnPush`
-2. Create supporting files:
-   - `login.component.ts` - Component logic
-   - `login.component.html` - Template
-   - `login.component.scss` - Styles (if needed)
-   - `login.component.spec.ts` - Unit tests
+1. **Create feature module structure**
+   - Generate auth feature module (or use existing)
+   - Create login component directory: `src/app/components/login/`
 
-### Step 2: Define Custom Types
+2. **Define types and interfaces**
+   - Create `src/app/models/login.ts` with FormData, AuthError, FormState interfaces
+   - Update main `src/types.ts` if global types needed
 
-1. Create `login.types.ts` in the same directory or `src/app/models/`
-2. Define `LoginFormViewModel` interface
-3. Define `LoginState` interface (if extracted from component)
-4. Export types for use in component
+3. **Review dependencies**
+   - Ensure Angular Material form components available (@angular/material/form-field, etc.)
+   - Verify SupabaseService and AuthService setup in app.config.ts
+   - Check route configuration in app.routes.ts
 
-### Step 3: Set Up Component Structure
+### Phase 2: Component Creation
 
-1. Import required Angular modules:
-   - `ReactiveFormsModule` for forms
-   - `Router`, `RouterLink` for navigation
-   - Material modules: `MatCard`, `MatFormField`, `MatInput`, `MatButton`, `MatError`, `MatProgressSpinner`
-2. Set up dependency injection:
-   - Inject `FormBuilder` using `inject()`
-   - Inject `AuthService` using `inject()`
-   - Inject `Router` using `inject()`
-3. Set `changeDetection: ChangeDetectionStrategy.OnPush`
-4. Configure component standalone mode (Angular 19 default)
+4. **Create LoginComponent**
+   - Generate with Angular CLI or manual creation
+   - Set `standalone: true` and `changeDetection: OnPush`
+   - Import required Angular Material modules
+   - Define signals: `formLoading`, `authError`, `isSessionChecking`
 
-### Step 4: Initialize Form and State
+5. **Implement session check logic in LoginComponent**
+   - In constructor, inject SupabaseService and Router
+   - In ngOnInit:
+     - Set `isSessionChecking = true`
+     - Call `authService.client.auth.getUser()`
+     - If user exists: redirect to `/library`
+     - If no user: set `isSessionChecking = false`
 
-1. Create form group with email and password controls:
-   ```typescript
-   readonly loginForm = this.fb.group({
-     email: ['', [Validators.required, Validators.email]],
-     password: ['', [Validators.required]]
-   });
-   ```
-2. Initialize state signals:
-   ```typescript
-   private readonly loadingSignal = signal<boolean>(false);
-   private readonly errorSignal = signal<string | null>(null);
-   ```
-3. Create computed signal for submit button state:
-   ```typescript
-   readonly isSubmitDisabled = computed(() =>
-     this.loadingSignal() || !this.loginForm.valid
-   );
-   ```
+6. **Create AuthFormComponent**
+   - Generate standalone component
+   - Set `changeDetection: OnPush`
+   - Define FormGroup with email and password controls
+   - Set validators: email (required + pattern), password (required + minLength)
+   - Set updateOn: 'blur' for email and password
 
-### Step 5: Implement Template
+7. **Implement form template (AuthFormComponent)**
+   - Email MatFormField with matInput, email validator errors
+   - Password MatFormField with matInput[type="password"], minLength validator errors
+   - Submit button (matButton) with [disabled] binding
+   - Error message display (NgIf checking error signal)
+   - Loading spinner (MatProgressSpinner with \*ngIf)
+   - Create Account link (routerLink="/register")
 
-1. Create `mat-card` container with title
-2. Add global error message display (conditional with `@if`):
-   ```html
-   @if (errorSignal()) {
-   <mat-error>{{ errorSignal() }}</mat-error>
-   }
-   ```
-3. Create form element with `[formGroup]` and `(ngSubmit)`:
-   ```html
-   <form [formGroup]="loginForm" (ngSubmit)="onSubmitLogin()"></form>
-   ```
-4. Add email `mat-form-field` with validation messages:
-   ```html
-   <mat-form-field>
-     <mat-label>Email</mat-label>
-     <input matInput type="email" formControlName="email" autocomplete="email" />
-     @if (loginForm.controls.email.hasError('required')) {
-     <mat-error>Email is required</mat-error>
-     } @if (loginForm.controls.email.hasError('email')) {
-     <mat-error>Please enter a valid email address</mat-error>
-     }
-   </mat-form-field>
-   ```
-5. Add password `mat-form-field` with validation messages
-6. Add submit button with loading and disabled states:
-   ```html
-   <button matButton="filled" type="submit" [disabled]="isSubmitDisabled()">
-     @if (loadingSignal()) {
-     <mat-spinner diameter="20"></mat-spinner>
-     } @else { Log In }
-   </button>
-   ```
-7. Add "Create Account" link:
-   ```html
-   <a matButton routerLink="/register">Create Account</a>
-   ```
+8. **Implement form logic (AuthFormComponent)**
+   - @Input() isLoading, error properties
+   - @Output() loginSubmit EventEmitter
+   - Form reset after successful submission
+   - Handle keyboard enter on form (keyup.enter)
+   - Auto-focus email field in ngOnInit with @ViewChild
 
-### Step 6: Implement Form Submission Logic
+### Phase 3: Integration and Events
 
-1. Create `onSubmitLogin()` method:
+9. **Implement login flow in LoginComponent**
+   - Define `performLogin()` method
+   - Call `authService.client.auth.signInWithPassword(email, password)`
+   - Handle success: navigate to `/library`
+   - Handle error: map to user-friendly message, update `authError` signal
+   - Set loading state during API call
 
-   ```typescript
-   async onSubmitLogin(): Promise<void> {
-     // Validate form
-     if (this.loginForm.invalid) {
-       this.loginForm.markAllAsTouched();
-       return;
-     }
+10. **Connect AuthFormComponent to LoginComponent**
+    - Bind `@Input() isLoading = formLoading()`
+    - Bind `@Input() error = authError()`
+    - Subscribe to `@Output() loginSubmit` event
+    - Pass submitted form data to `performLogin()`
 
-     // Set loading state
-     this.loadingSignal.set(true);
-     this.errorSignal.set(null);
+11. **Implement error mapping**
+    - Create `mapSupabaseErrorToUserMessage()` helper function
+    - Map error codes: "Invalid login credentials" → "Invalid email or password"
+    - Map other Supabase errors to user-friendly messages
+    - Include fallback for unknown errors
 
-     try {
-       // Extract form values
-       const { email, password } = this.loginForm.value;
+### Phase 4: Styling and UX
 
-       // Call authentication service
-       await this.authService.login(email!, password!);
+12. **Apply Material theming**
+    - Use Angular Material system variables for colors
+    - Import Material modules: MatFormFieldModule, MatInputModule, MatButtonModule, MatProgressSpinnerModule
+    - Apply responsive padding/margins
+    - Center form on screen
+    - Add hover/focus states for accessibility
 
-       // Navigate to library on success
-       await this.router.navigate(['/library']);
-     } catch (error) {
-       // Handle errors
-       this.loadingSignal.set(false);
+13. **Implement responsive design**
+    - Use Angular Material breakpoints
+    - Adjust form width for different screens
+    - Ensure touch targets are adequate (44x44px minimum)
+    - Test on mobile, tablet, desktop
 
-       if (error instanceof AuthenticationError) {
-         this.errorSignal.set('Invalid email or password');
-       } else {
-         this.errorSignal.set('An unexpected error occurred. Please try again.');
-       }
-     }
-   }
-   ```
+14. **Add accessibility features**
+    - Form field labels properly associated
+    - Error messages linked with aria-describedby
+    - Focus management: auto-focus email, focus trap in form
+    - ARIA labels on icon buttons (if any)
+    - Announce loading and error states
 
-### Step 7: Implement Auto-Focus
+15. **Implement keyboard interactions**
+    - Tab order: email → password → submit → create account
+    - Enter key submits form
+    - Escape key optional (close if in modal context)
+    - Focus visible for all interactive elements
 
-1. Add `ViewChild` to get reference to email input:
-   ```typescript
-   @ViewChild('emailInput') emailInput?: ElementRef<HTMLInputElement>;
-   ```
-2. In template, add template reference:
-   ```html
-   <input #emailInput matInput type="email" ... />
-   ```
-3. Implement `AfterViewInit` to focus on load:
-   ```typescript
-   ngAfterViewInit(): void {
-     this.emailInput?.nativeElement.focus();
-   }
-   ```
+### Phase 5: Route and Navigation
 
-### Step 8: Add Route Configuration
+16. **Update routing configuration**
+    - Add `/login` route in app.routes.ts
+    - Lazy load if using feature module: `loadComponent: () => LoginComponent`
+    - Add PublicOnlyGuard to route
+    - Set up root `/` redirect to `/login` or `/library` based on auth state
 
-1. In `app.routes.ts`, add login route:
-   ```typescript
-   {
-     path: 'login',
-     loadComponent: () => import('./components/login/login.component').then(m => m.LoginComponent),
-     canActivate: [PublicOnlyGuard]
-   }
-   ```
+17. **Create/update PublicOnlyGuard**
+    - Check if user authenticated
+    - If yes: redirect to `/library`
+    - If no: allow access to login page
 
-### Step 9: Implement PublicOnlyGuard (if not exists)
+### Phase 6: Testing and Refinement
 
-1. Create functional guard:
+18. **Create unit tests**
+    - Test form validation: email pattern, password length
+    - Test form submission: disabled state, loading state
+    - Test error handling: display error messages
+    - Test navigation: redirect on success/auth check
+    - Mock Supabase service
 
-   ```typescript
-   export const PublicOnlyGuard: CanActivateFn = () => {
-     const authService = inject(AuthService);
-     const router = inject(Router);
+19. **Test error scenarios**
+    - Invalid credentials
+    - Network error
+    - Server error
+    - Empty fields
+    - Invalid email format
 
-     if (authService.isAuthenticated()) {
-       return router.createUrlTree(['/library']);
-     }
+20. **Integration testing**
+    - Test full login flow with mock Supabase
+    - Test redirect after successful login
+    - Test redirect on page load if already authenticated
+    - Test route guard prevents authenticated users accessing login
 
-     return true;
-   };
-   ```
+### Phase 7: Final Review
 
-### Step 10: Style the Component
+21. **Security review**
+    - Verify password field masked
+    - Verify no credential logging
+    - Verify HTTPS enforced (in production)
+    - Verify CORS configured correctly
+    - Verify error messages don't leak sensitive info
 
-1. Add SCSS styling in `login.component.scss`:
-   - Center the login card on the page
-   - Set appropriate max-width for card (e.g., 400px)
-   - Style error message banner
-   - Add proper spacing between form fields
-   - Style loading spinner overlay if needed
-   - Ensure responsive design for mobile
+22. **Accessibility audit**
+    - Test with screen reader (NVDA, JAWS)
+    - Test keyboard-only navigation
+    - Test color contrast (WCAG AA)
+    - Test zoom support (200%)
 
-### Step 11: Add Accessibility Features
+23. **Performance optimization**
+    - Lazy load form component
+    - Use OnPush change detection
+    - Minimize bundle imports from Material
+    - Remove unused Material modules
 
-1. Add ARIA labels to form fields (handled by Material components)
-2. Ensure error messages are announced to screen readers:
-   ```html
-   <div role="alert" aria-live="polite">
-     @if (errorSignal()) {
-     <mat-error>{{ errorSignal() }}</mat-error>
-     }
-   </div>
-   ```
-3. Verify keyboard navigation (Tab order)
-4. Test with screen reader
-5. Ensure focus management (focus returns to email field on error)
-
-### Step 12: Write Unit Tests
-
-1. Test form validation:
-   - Email required validation
-   - Email format validation
-   - Password required validation
-2. Test form submission:
-   - Successful login flow
-   - Invalid credentials error
-   - Network error handling
-   - Form state during loading
-3. Test navigation:
-   - Redirect to library on success
-   - Link to registration page
-4. Test accessibility:
-   - Auto-focus on email field
-   - Error announcements
-
-### Step 13: Integration Testing
-
-1. Test with AuthService integration:
-   - Mock Supabase responses
-   - Test successful authentication
-   - Test failed authentication
-2. Test route guard integration:
-   - Verify redirect when already authenticated
-3. Test navigation flow:
-   - Login → Library
-   - Login → Register → Login
-
-### Step 14: Manual Testing
-
-1. Test in browser with actual Supabase connection
-2. Verify all user interactions work as expected
-3. Test error scenarios:
-   - Invalid email format
-   - Empty fields
-   - Wrong credentials
-   - Network disconnection
-4. Test accessibility:
-   - Keyboard navigation
-   - Screen reader compatibility
-   - Focus management
-5. Test responsive design on various screen sizes
-
-### Step 15: Code Review and Refinement
-
-1. Review code against Angular best practices
-2. Ensure TypeScript strict mode compliance
-3. Verify all error messages are user-friendly
-4. Check for proper logging (console.log for debugging)
-5. Ensure no sensitive data logged
-6. Optimize performance (OnPush change detection)
-7. Final code cleanup and documentation
+24. **Documentation**
+    - Document component props and events
+    - Document error codes and mapping
+    - Document setup in README
+    - Document integration with auth flow
