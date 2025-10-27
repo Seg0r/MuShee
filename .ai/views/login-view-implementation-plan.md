@@ -731,6 +731,7 @@ async verifyProfileExists(): Promise<void> {
 - **Trigger:** User attempts login during network outage
 - **Detection:** `fetch()` or Supabase SDK throws network error
 - **Handling:**
+
   ```typescript
   try {
     // login attempt
@@ -743,6 +744,7 @@ async verifyProfileExists(): Promise<void> {
 
   - Display prominent error: "Network error. Please check your connection."
   - Re-enable form
+
 - **Recovery:** User waits for network restoration or tries again
 - **User Experience:** Clear cause of error, actionable guidance
 
