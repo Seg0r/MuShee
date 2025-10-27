@@ -1,8 +1,8 @@
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      SUPABASE_URL: string;
-      SUPABASE_KEY: string;
-    }
-  }
+// Environment configuration types
+export interface Environment {
+  production: boolean;
+  supabase: {
+    url: string;
+    anonKey: string;
+  };
 }

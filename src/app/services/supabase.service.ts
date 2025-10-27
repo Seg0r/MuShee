@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import type { Database, Json } from '../../db/database.types';
+import { environment } from '../../environments/environment';
 import type {
   ProfileDto,
   UpdateProfileCommand,
@@ -84,8 +85,14 @@ export class SupabaseService {
 
   constructor() {
     // Initialize Supabase client with environment variables
-    const supabaseUrl = 'YOUR_SUPABASE_URL'; // TODO: Replace with environment variable
-    const supabaseKey = 'YOUR_SUPABASE_ANON_KEY'; // TODO: Replace with environment variable
+    const supabaseUrl = environment.supabase.url;
+    const supabaseKey = environment.supabase.anonKey;
+
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error(
+        'Missing Supabase environment variables. Please check your environment configuration.'
+      );
+    }
 
     this.client = createClient<Database>(supabaseUrl, supabaseKey);
   }
