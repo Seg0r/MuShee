@@ -1,0 +1,27 @@
+<div class="login-container">
+  <!-- Loading State -->
+  @if (!isFormVisible()) {
+    <div class="session-check-container">
+      <p class="session-check-message">Checking your session...</p>
+    </div>
+  }
+
+  <!-- Form Visible State -->
+  @if (isFormVisible()) {
+    <div class="form-wrapper">
+      <!-- Header -->
+      <header class="login-header">
+        <h1 class="login-title">Welcome back to MuShee</h1>
+        <p class="login-subtitle">Sign in to your account to access your music library</p>
+      </header>
+
+      <!-- Auth Form -->
+      <app-auth-form
+        [isLoading]="formLoading()"
+        [error]="authError()"
+        (loginSubmit)="onLoginSubmit($event)"
+      >
+      </app-auth-form>
+    </div>
+  }
+</div>

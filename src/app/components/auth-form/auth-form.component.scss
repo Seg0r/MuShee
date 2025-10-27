@@ -1,0 +1,213 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* Error Container */
+.error-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+  border-radius: var(--mat-sys-corner-medium);
+  border-left: 4px solid var(--mat-sys-error);
+  animation: slideDown 0.3s ease-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+.error-icon {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  font-size: 1.25rem;
+}
+
+.error-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.error-message {
+  margin: 0;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-error-container);
+}
+
+/* Form Fields */
+.form-field {
+  width: 100%;
+}
+
+::ng-deep {
+  .auth-form-component {
+    .mat-mdc-form-field {
+      width: 100%;
+    }
+
+    .mdc-text-field {
+      background-color: var(--mat-sys-surface-dim);
+    }
+
+    .mdc-text-field--filled {
+      background-color: var(--mat-sys-surface-dim);
+    }
+
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: var(--mat-sys-outline-variant);
+    }
+
+    .mat-mdc-text-field-wrapper {
+      padding: 0;
+    }
+
+    .mdc-text-field:hover .mdc-notched-outline__leading,
+    .mdc-text-field:hover .mdc-notched-outline__notch,
+    .mdc-text-field:hover .mdc-notched-outline__trailing {
+      border-color: var(--mat-sys-outline);
+    }
+  }
+}
+
+/* Password Toggle Button */
+.password-toggle {
+  margin-right: -0.5rem;
+
+  &:hover {
+    background-color: var(--mat-sys-primary-container);
+    opacity: 0.8;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+  }
+}
+
+/* Button Container */
+.button-container {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.submit-button {
+  width: 100%;
+  height: 2.75rem;
+  font: var(--mat-sys-label-large);
+  text-transform: none;
+  letter-spacing: normal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+
+  &:hover:not(:disabled) {
+    box-shadow: var(--mat-sys-level1);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .spinner {
+    margin: 0;
+  }
+
+  span {
+    display: inline-block;
+  }
+}
+
+/* Sign Up Container */
+.signup-container {
+  text-align: center;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+  line-height: 1.5;
+
+  .signup-link {
+    color: var(--mat-sys-primary);
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--mat-sys-primary);
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--mat-sys-primary);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+}
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .auth-form {
+    gap: 1.25rem;
+  }
+
+  .submit-button {
+    height: 2.5rem;
+    font: var(--mat-sys-label-medium);
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .auth-form {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* Focus Visible for Keyboard Navigation */
+::ng-deep {
+  .auth-form-component {
+    .mat-mdc-text-field-wrapper input:focus-visible {
+      outline: none;
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--mat-sys-primary);
+      outline-offset: 2px;
+    }
+  }
+}

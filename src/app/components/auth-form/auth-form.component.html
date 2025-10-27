@@ -1,0 +1,88 @@
+<form
+  #form
+  [formGroup]="formGroup"
+  (ngSubmit)="onSubmit($event)"
+  (keydown)="onKeyDown($event)"
+  class="auth-form"
+>
+  <!-- Error Display Section -->
+  @if (error()) {
+    <div class="error-container" role="alert" aria-live="assertive">
+      <mat-icon class="error-icon">error</mat-icon>
+      <div class="error-content">
+        <p class="error-message">{{ error()!.message }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- Email Field -->
+  <mat-form-field class="form-field" appearance="outline">
+    <mat-label>Email Address</mat-label>
+    <input
+      matInput
+      type="email"
+      formControlName="email"
+      placeholder="your@email.com"
+      [disabled]="isLoading()"
+      autocomplete="email"
+      aria-label="Email address"
+      required
+    />
+    @if (emailErrorMessage) {
+      <mat-error>{{ emailErrorMessage }}</mat-error>
+    }
+  </mat-form-field>
+
+  <!-- Password Field with Toggle -->
+  <mat-form-field class="form-field" appearance="outline">
+    <mat-label>Password</mat-label>
+    <input
+      matInput
+      [type]="showPassword ? 'text' : 'password'"
+      formControlName="password"
+      placeholder="••••••••"
+      [disabled]="isLoading()"
+      autocomplete="current-password"
+      aria-label="Password"
+      required
+    />
+    <button
+      type="button"
+      matIconButton
+      matSuffix
+      (click)="togglePasswordVisibility()"
+      [disabled]="isLoading()"
+      [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+      class="password-toggle"
+    >
+      <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+    </button>
+    @if (passwordErrorMessage) {
+      <mat-error>{{ passwordErrorMessage }}</mat-error>
+    }
+  </mat-form-field>
+
+  <!-- Submit Button with Loading State -->
+  <div class="button-container">
+    <button
+      type="submit"
+      matButton="filled"
+      class="submit-button"
+      [disabled]="isSubmitDisabled"
+      aria-label="Sign in button"
+    >
+      @if (isLoading()) {
+        <mat-spinner diameter="20" class="spinner"></mat-spinner>
+        <span>Signing in...</span>
+      } @else {
+        <span>Sign In</span>
+      }
+    </button>
+  </div>
+
+  <!-- Sign Up Link -->
+  <div class="signup-container">
+    <span>Don't have an account? </span>
+    <a routerLink="/register" class="signup-link">Create one</a>
+  </div>
+</form>
