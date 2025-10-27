@@ -5,9 +5,12 @@ import {
   output,
   viewChild,
   computed,
+  effect,
+  signal,
   inject,
 } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
@@ -74,9 +77,17 @@ export class AuthFormComponent {
   formGroup: FormGroup;
 
   /**
+   * Signal to track form control changes for reactivity
+   */
+  private formControlsChanged = signal(0);
+
+  /**
    * Computed state to check if submit button should be disabled
    */
   isSubmitDisabled = computed(() => {
+    // Track the signal to ensure reactivity
+    this.formControlsChanged();
+
     const loading = this.isLoading();
     const emailValid = this.emailControl?.valid ?? false;
     const passwordValid = this.passwordControl?.valid ?? false;
@@ -89,6 +100,32 @@ export class AuthFormComponent {
 
   constructor() {
     this.formGroup = this.createFormGroup();
+
+    // Convert form control status changes to signals for reactivity
+    const emailControl = this.formGroup.get('email')!;
+    const passwordControl = this.formGroup.get('password')!;
+
+    const emailStatus = toSignal(emailControl.statusChanges, { initialValue: emailControl.status });
+    const passwordStatus = toSignal(passwordControl.statusChanges, {
+      initialValue: passwordControl.status,
+    });
+
+    // Track status changes to trigger computed signal reactivity
+    effect(() => {
+      emailStatus();
+      passwordStatus();
+      this.formControlsChanged.update(v => v + 1);
+    });
+
+    // Enable/disable form controls based on loading state
+    effect(() => {
+      const loading = this.isLoading();
+      if (loading) {
+        this.formGroup.disable({ emitEvent: false });
+      } else {
+        this.formGroup.enable({ emitEvent: false });
+      }
+    });
   }
 
   /**

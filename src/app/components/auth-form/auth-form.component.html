@@ -23,7 +23,6 @@
       type="email"
       formControlName="email"
       placeholder="your@email.com"
-      [disabled]="isLoading()"
       autocomplete="email"
       aria-label="Email address"
       required
@@ -41,7 +40,6 @@
       [type]="showPassword ? 'text' : 'password'"
       formControlName="password"
       placeholder="••••••••"
-      [disabled]="isLoading()"
       autocomplete="current-password"
       aria-label="Password"
       required
@@ -51,7 +49,6 @@
       matIconButton
       matSuffix
       (click)="togglePasswordVisibility()"
-      [disabled]="isLoading()"
       [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
       class="password-toggle"
     >
@@ -68,7 +65,7 @@
       type="submit"
       matButton="filled"
       class="submit-button"
-      [disabled]="isSubmitDisabled"
+      [disabled]="isSubmitDisabled()"
       aria-label="Sign in button"
     >
       @if (isLoading()) {
