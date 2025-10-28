@@ -17,6 +17,14 @@ export const routes: Routes = [
     data: { title: 'Login - MuShee' },
   },
 
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./components/registration/registration.component').then(m => m.RegistrationComponent),
+    canActivate: [publicOnlyGuard],
+    data: { title: 'Create Account - MuShee' },
+  },
+
   // Protected routes will be added here
   // {
   //   path: 'library',
