@@ -1,10 +1,30 @@
+/* Import Material Design Tokens */
+@use './styles/tokens.scss';
+
 /* You can add global styles to this file, and also import other style files */
 
 html,
 body {
   height: 100%;
-}
-body {
   margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  font-family: var(--mat-sys-brand-font-family), 'Helvetica Neue', sans-serif;
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Ensure proper typography application */
+:root,
+:host {
+  color-scheme: light dark;
 }
