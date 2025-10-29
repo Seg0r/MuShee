@@ -1,194 +1,188 @@
 <div class="registration-container">
-  <mat-card class="registration-card">
-    <mat-card-content>
-      <!-- Page Header -->
-      <div class="page-header">
-        <h1>Create Account</h1>
-        <p class="subtitle">Join MuShee to manage your sheet music library</p>
+  <div class="form-wrapper">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1>Create Account</h1>
+      <p class="subtitle">Join MuShee to manage your sheet music library</p>
+    </div>
+
+    <!-- Registration Form -->
+    <form
+      [formGroup]="registrationForm"
+      (ngSubmit)="onSubmit($event)"
+      (keydown)="onKeyDown($event)"
+      class="registration-form"
+      novalidate
+    >
+      <!-- Server Error Display -->
+      @if (serverError()) {
+        <div class="error-container" role="alert" aria-live="polite" aria-atomic="true">
+          <mat-icon class="error-icon" aria-hidden="true">error</mat-icon>
+          <div class="error-content">
+            <p class="error-message">{{ serverError()!.message }}</p>
+            @if (serverError()!.code === 'CONFLICT') {
+              <p class="error-subtext">
+                <a routerLink="/login" class="error-link">Log in instead</a>
+              </p>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Email Field -->
+      <mat-form-field class="form-field" appearance="outline">
+        <mat-label>Email Address</mat-label>
+        <input
+          matInput
+          type="email"
+          formControlName="email"
+          placeholder="your@email.com"
+          autocomplete="email"
+          aria-label="Email address"
+          aria-describedby="email-error"
+          (blur)="onEmailBlur()"
+          required
+        />
+        @if (emailErrorMessage) {
+          <mat-error id="email-error">{{ emailErrorMessage }}</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Password Field with Visibility Toggle -->
+      <mat-form-field class="form-field" appearance="outline">
+        <mat-label>Password</mat-label>
+        <input
+          matInput
+          [type]="showPassword() ? 'text' : 'password'"
+          formControlName="password"
+          placeholder="••••••••"
+          autocomplete="new-password"
+          aria-label="Password"
+          aria-describedby="password-error password-requirements"
+          (blur)="onPasswordBlur()"
+          (keydown)="onKeyDown($event)"
+          required
+        />
+        <button
+          type="button"
+          matIconButton
+          matSuffix
+          (click)="togglePasswordVisibility()"
+          [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+          [attr.aria-pressed]="showPassword()"
+          class="password-toggle"
+          tabindex="0"
+        >
+          <mat-icon aria-hidden="true">{{
+            showPassword() ? 'visibility_off' : 'visibility'
+          }}</mat-icon>
+        </button>
+        @if (passwordErrorMessage) {
+          <mat-error id="password-error">{{ passwordErrorMessage }}</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Password Requirements Checklist -->
+      <div
+        class="password-requirements"
+        id="password-requirements"
+        role="region"
+        aria-label="Password requirements"
+      >
+        <p class="requirements-label">Password Requirements:</p>
+        <ul class="requirements-list" role="list">
+          <li
+            class="requirement-item"
+            [class.met]="isPasswordRequirementMet('minLength')"
+            role="listitem"
+            [attr.aria-label]="
+              'At least 8 characters: ' +
+              (isPasswordRequirementMet('minLength') ? 'met' : 'not met')
+            "
+          >
+            <mat-icon class="requirement-icon" aria-hidden="true">
+              {{
+                isPasswordRequirementMet('minLength') ? 'check_circle' : 'radio_button_unchecked'
+              }}
+            </mat-icon>
+            <span>At least 8 characters</span>
+          </li>
+          <li
+            class="requirement-item"
+            [class.met]="isPasswordRequirementMet('hasUppercase')"
+            role="listitem"
+            [attr.aria-label]="
+              'One uppercase letter (A-Z): ' +
+              (isPasswordRequirementMet('hasUppercase') ? 'met' : 'not met')
+            "
+          >
+            <mat-icon class="requirement-icon" aria-hidden="true">
+              {{
+                isPasswordRequirementMet('hasUppercase') ? 'check_circle' : 'radio_button_unchecked'
+              }}
+            </mat-icon>
+            <span>One uppercase letter (A-Z)</span>
+          </li>
+          <li
+            class="requirement-item"
+            [class.met]="isPasswordRequirementMet('hasLowercase')"
+            role="listitem"
+            [attr.aria-label]="
+              'One lowercase letter (a-z): ' +
+              (isPasswordRequirementMet('hasLowercase') ? 'met' : 'not met')
+            "
+          >
+            <mat-icon class="requirement-icon" aria-hidden="true">
+              {{
+                isPasswordRequirementMet('hasLowercase') ? 'check_circle' : 'radio_button_unchecked'
+              }}
+            </mat-icon>
+            <span>One lowercase letter (a-z)</span>
+          </li>
+          <li
+            class="requirement-item"
+            [class.met]="isPasswordRequirementMet('hasNumber')"
+            role="listitem"
+            [attr.aria-label]="
+              'One number (0-9): ' + (isPasswordRequirementMet('hasNumber') ? 'met' : 'not met')
+            "
+          >
+            <mat-icon class="requirement-icon" aria-hidden="true">
+              {{
+                isPasswordRequirementMet('hasNumber') ? 'check_circle' : 'radio_button_unchecked'
+              }}
+            </mat-icon>
+            <span>One number (0-9)</span>
+          </li>
+        </ul>
       </div>
 
-      <!-- Registration Form -->
-      <form
-        [formGroup]="registrationForm"
-        (ngSubmit)="onSubmit($event)"
-        (keydown)="onKeyDown($event)"
-        class="registration-form"
-        novalidate
-      >
-        <!-- Server Error Display -->
-        @if (serverError()) {
-          <div class="error-container" role="alert" aria-live="polite" aria-atomic="true">
-            <mat-icon class="error-icon" aria-hidden="true">error</mat-icon>
-            <div class="error-content">
-              <p class="error-message">{{ serverError()!.message }}</p>
-              @if (serverError()!.code === 'CONFLICT') {
-                <p class="error-subtext">
-                  <a routerLink="/login" class="error-link">Log in instead</a>
-                </p>
-              }
-            </div>
-          </div>
-        }
-
-        <!-- Email Field -->
-        <mat-form-field class="form-field" appearance="outline">
-          <mat-label>Email Address</mat-label>
-          <input
-            matInput
-            type="email"
-            formControlName="email"
-            placeholder="your@email.com"
-            autocomplete="email"
-            aria-label="Email address"
-            aria-describedby="email-error"
-            (blur)="onEmailBlur()"
-            required
-          />
-          @if (emailErrorMessage) {
-            <mat-error id="email-error">{{ emailErrorMessage }}</mat-error>
-          }
-        </mat-form-field>
-
-        <!-- Password Field with Visibility Toggle -->
-        <mat-form-field class="form-field" appearance="outline">
-          <mat-label>Password</mat-label>
-          <input
-            matInput
-            [type]="showPassword() ? 'text' : 'password'"
-            formControlName="password"
-            placeholder="••••••••"
-            autocomplete="new-password"
-            aria-label="Password"
-            aria-describedby="password-error password-requirements"
-            (blur)="onPasswordBlur()"
-            (keydown)="onKeyDown($event)"
-            required
-          />
-          <button
-            type="button"
-            matIconButton
-            matSuffix
-            (click)="togglePasswordVisibility()"
-            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
-            [attr.aria-pressed]="showPassword()"
-            class="password-toggle"
-            tabindex="0"
-          >
-            <mat-icon aria-hidden="true">{{
-              showPassword() ? 'visibility_off' : 'visibility'
-            }}</mat-icon>
-          </button>
-          @if (passwordErrorMessage) {
-            <mat-error id="password-error">{{ passwordErrorMessage }}</mat-error>
-          }
-        </mat-form-field>
-
-        <!-- Password Requirements Checklist -->
-        <div
-          class="password-requirements"
-          id="password-requirements"
-          role="region"
-          aria-label="Password requirements"
+      <!-- Submit Button with Loading State -->
+      <div class="button-container">
+        <button
+          type="submit"
+          matButton="filled"
+          class="submit-button"
+          [disabled]="isFormValid()"
+          aria-label="Create account button"
+          [attr.aria-busy]="isLoading()"
         >
-          <p class="requirements-label">Password Requirements:</p>
-          <ul class="requirements-list" role="list">
-            <li
-              class="requirement-item"
-              [class.met]="isPasswordRequirementMet('minLength')"
-              role="listitem"
-              [attr.aria-label]="
-                'At least 8 characters: ' +
-                (isPasswordRequirementMet('minLength') ? 'met' : 'not met')
-              "
-            >
-              <mat-icon class="requirement-icon" aria-hidden="true">
-                {{
-                  isPasswordRequirementMet('minLength') ? 'check_circle' : 'radio_button_unchecked'
-                }}
-              </mat-icon>
-              <span>At least 8 characters</span>
-            </li>
-            <li
-              class="requirement-item"
-              [class.met]="isPasswordRequirementMet('hasUppercase')"
-              role="listitem"
-              [attr.aria-label]="
-                'One uppercase letter (A-Z): ' +
-                (isPasswordRequirementMet('hasUppercase') ? 'met' : 'not met')
-              "
-            >
-              <mat-icon class="requirement-icon" aria-hidden="true">
-                {{
-                  isPasswordRequirementMet('hasUppercase')
-                    ? 'check_circle'
-                    : 'radio_button_unchecked'
-                }}
-              </mat-icon>
-              <span>One uppercase letter (A-Z)</span>
-            </li>
-            <li
-              class="requirement-item"
-              [class.met]="isPasswordRequirementMet('hasLowercase')"
-              role="listitem"
-              [attr.aria-label]="
-                'One lowercase letter (a-z): ' +
-                (isPasswordRequirementMet('hasLowercase') ? 'met' : 'not met')
-              "
-            >
-              <mat-icon class="requirement-icon" aria-hidden="true">
-                {{
-                  isPasswordRequirementMet('hasLowercase')
-                    ? 'check_circle'
-                    : 'radio_button_unchecked'
-                }}
-              </mat-icon>
-              <span>One lowercase letter (a-z)</span>
-            </li>
-            <li
-              class="requirement-item"
-              [class.met]="isPasswordRequirementMet('hasNumber')"
-              role="listitem"
-              [attr.aria-label]="
-                'One number (0-9): ' + (isPasswordRequirementMet('hasNumber') ? 'met' : 'not met')
-              "
-            >
-              <mat-icon class="requirement-icon" aria-hidden="true">
-                {{
-                  isPasswordRequirementMet('hasNumber') ? 'check_circle' : 'radio_button_unchecked'
-                }}
-              </mat-icon>
-              <span>One number (0-9)</span>
-            </li>
-          </ul>
-        </div>
+          @if (isLoading()) {
+            <mat-spinner diameter="20" class="spinner" aria-hidden="true"></mat-spinner>
+            <span>Creating Account...</span>
+          } @else {
+            <span>Create Account</span>
+          }
+        </button>
+      </div>
 
-        <!-- Submit Button with Loading State -->
-        <div class="button-container">
-          <button
-            type="submit"
-            matButton="filled"
-            class="submit-button"
-            [disabled]="isFormValid()"
-            aria-label="Create account button"
-            [attr.aria-busy]="isLoading()"
-          >
-            @if (isLoading()) {
-              <mat-spinner diameter="20" class="spinner" aria-hidden="true"></mat-spinner>
-              <span>Creating Account...</span>
-            } @else {
-              <span>Create Account</span>
-            }
-          </button>
-        </div>
-
-        <!-- Login Link -->
-        <div class="login-container">
-          <span>Already have an account? </span>
-          <a routerLink="/login" class="login-link" tabindex="0">Log in</a>
-        </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
+      <!-- Login Link -->
+      <div class="login-container">
+        <span>Already have an account? </span>
+        <a routerLink="/login" class="login-link" tabindex="0">Log in</a>
+      </div>
+    </form>
+  </div>
 
   <!-- Loading Overlay (during submission) -->
   @if (isLoading()) {

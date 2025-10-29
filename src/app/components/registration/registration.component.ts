@@ -26,7 +26,6 @@ import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { MatCard, MatCardContent } from '@angular/material/card';
 import type {
   AuthError,
   RegistrationFormData,
@@ -51,8 +50,6 @@ import type {
     MatInput,
     MatIcon,
     MatProgressSpinner,
-    MatCard,
-    MatCardContent,
   ],
   templateUrl: './registration.component.html',
   styleUrl: './registration.component.scss',

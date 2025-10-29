@@ -1,91 +1,93 @@
 :host {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   min-height: 100vh;
-  padding: var(--mat-sys-spacing-16);
-  background: var(--mat-sys-surface);
+  width: 100%;
+  background: linear-gradient(
+    135deg,
+    var(--mat-sys-surface) 0%,
+    var(--mat-sys-surface-container-low) 100%
+  );
+  padding: 1rem;
 }
 
 .registration-container {
-  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
-  max-width: 420px;
-  animation: slideIn 0.3s ease-out;
+  min-height: 100vh;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+/* Form Wrapper */
+.form-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem;
+  background-color: var(--mat-sys-surface-container);
+  border-radius: var(--mat-sys-corner-large);
+  box-shadow: var(--mat-sys-level1);
+  animation: fadeInUp 0.4s ease-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
   }
 }
 
 .registration-card {
-  box-shadow: var(--mat-sys-level1);
-  border-radius: var(--mat-sys-corner-large);
+  box-shadow: none;
+  border-radius: 0;
   transition:
     box-shadow 0.3s ease,
     transform 0.2s ease;
-
-  &:focus-within {
-    box-shadow: var(--mat-sys-level2);
-  }
+  background: transparent;
 
   mat-card-content {
-    padding: var(--mat-sys-spacing-24);
+    padding: 0;
   }
 }
 
+/* Page Header */
 .page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   text-align: center;
-  margin-bottom: var(--mat-sys-spacing-24);
 
   h1 {
-    margin: 0 0 var(--mat-sys-spacing-8) 0;
-    color: var(--mat-sys-on-surface);
+    margin: 0;
     font: var(--mat-sys-headline-medium);
+    color: var(--mat-sys-on-surface);
     font-weight: 500;
-    animation: fadeInDown 0.4s ease-out;
   }
 
   .subtitle {
     margin: 0;
-    color: var(--mat-sys-on-surface-variant);
     font: var(--mat-sys-body-medium);
-    animation: fadeInDown 0.5s ease-out;
+    color: var(--mat-sys-on-surface-variant);
+    line-height: 1.5;
   }
 }
 
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+/* Registration Form */
 .registration-form {
   display: flex;
   flex-direction: column;
-  gap: var(--mat-sys-spacing-16);
+  gap: 1.5rem;
 }
 
+/* Error Container */
 .error-container {
   display: flex;
-  gap: var(--mat-sys-spacing-12);
-  padding: var(--mat-sys-spacing-12);
+  gap: 0.75rem;
+  padding: 1rem;
   background: rgba(var(--mat-sys-error-rgb, 179, 38, 30), 0.08);
   border: 1px solid var(--mat-sys-error);
   border-radius: var(--mat-sys-corner-medium);
-  margin-bottom: var(--mat-sys-spacing-8);
   animation: slideDown 0.3s ease-out;
 
   .error-icon {
@@ -106,7 +108,7 @@
   }
 
   .error-subtext {
-    margin: var(--mat-sys-spacing-8) 0 0 0;
+    margin: 0.5rem 0 0 0;
     font: var(--mat-sys-label-small);
   }
 
@@ -140,10 +142,10 @@
   }
 }
 
+/* Form Field */
 .form-field {
   width: 100%;
 
-  // Enhance form field styling
   ::ng-deep {
     .mdc-text-field {
       transition: all 0.3s ease;
@@ -163,15 +165,16 @@
   }
 }
 
+/* Password Requirements */
 .password-requirements {
-  padding: var(--mat-sys-spacing-12);
+  padding: 1rem;
   background: rgba(var(--mat-sys-primary-rgb, 103, 58, 183), 0.04);
   border: 1px solid rgba(var(--mat-sys-primary-rgb, 103, 58, 183), 0.12);
   border-radius: var(--mat-sys-corner-small);
   animation: fadeIn 0.4s ease-out 0.1s both;
 
   .requirements-label {
-    margin: 0 0 var(--mat-sys-spacing-8) 0;
+    margin: 0 0 0.5rem 0;
     color: var(--mat-sys-on-surface);
     font: var(--mat-sys-label-small);
     text-transform: uppercase;
@@ -188,8 +191,8 @@
   .requirement-item {
     display: flex;
     align-items: center;
-    gap: var(--mat-sys-spacing-8);
-    padding: var(--mat-sys-spacing-6) 0;
+    gap: 0.5rem;
+    padding: 0.375rem 0;
     color: var(--mat-sys-on-surface-variant);
     font: var(--mat-sys-body-small);
     transition: color 0.2s ease;
@@ -247,10 +250,11 @@
   }
 }
 
+/* Button Container */
 .button-container {
   display: flex;
-  gap: var(--mat-sys-spacing-8);
-  margin-top: var(--mat-sys-spacing-8);
+  gap: 0.5rem;
+  margin-top: 0.5rem;
 
   .submit-button {
     width: 100%;
@@ -258,26 +262,28 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--mat-sys-spacing-8);
+    gap: 0.5rem;
     font: var(--mat-sys-label-large);
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    background-color: var(--mat-sys-primary);
+    color: var(--mat-sys-on-primary);
 
     &:not(:disabled) {
       &:hover {
         transform: translateY(-2px);
-        box-shadow: var(--mat-sys-level2);
+        box-shadow: var(--mat-sys-level1);
       }
 
       &:active {
         transform: translateY(0);
-        box-shadow: var(--mat-sys-level1);
+        box-shadow: none;
       }
     }
 
     &:disabled {
-      opacity: 0.5;
+      opacity: 0.6;
       cursor: not-allowed;
     }
 
@@ -293,6 +299,7 @@
   }
 }
 
+/* Password Toggle */
 .password-toggle {
   cursor: pointer;
   transition: all 0.2s ease;
@@ -313,11 +320,12 @@
   }
 }
 
+/* Login Container */
 .login-container {
   text-align: center;
   font: var(--mat-sys-body-small);
   color: var(--mat-sys-on-surface-variant);
-  padding-top: var(--mat-sys-spacing-8);
+  padding-top: 0.5rem;
 
   .login-link {
     color: var(--mat-sys-primary);
@@ -358,6 +366,7 @@
   }
 }
 
+/* Loading Overlay */
 .loading-overlay {
   position: fixed;
   top: 0;
@@ -373,27 +382,31 @@
   backdrop-filter: blur(2px);
 }
 
-// Responsive Design
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
 @media (max-width: 600px) {
   :host {
-    padding: var(--mat-sys-spacing-12);
-    align-items: flex-start;
-    padding-top: var(--mat-sys-spacing-24);
+    padding: 0.5rem;
   }
 
-  .registration-container {
+  .form-wrapper {
     max-width: 100%;
-  }
-
-  .registration-card {
-    mat-card-content {
-      padding: var(--mat-sys-spacing-16);
-    }
+    padding: 1.5rem;
+    gap: 1.5rem;
   }
 
   .page-header {
-    margin-bottom: var(--mat-sys-spacing-16);
-
     h1 {
       font: var(--mat-sys-headline-small);
     }
@@ -404,15 +417,14 @@
   }
 
   .registration-form {
-    gap: var(--mat-sys-spacing-12);
+    gap: 1.5rem;
   }
 
   .password-requirements {
-    padding: var(--mat-sys-spacing-8);
-    gap: var(--mat-sys-spacing-8);
+    padding: 0.75rem;
 
     .requirement-item {
-      padding: var(--mat-sys-spacing-4) 0;
+      padding: 0.25rem 0;
     }
   }
 
@@ -423,29 +435,32 @@
   }
 }
 
-// Tablet and larger screens
-@media (min-width: 601px) and (max-width: 960px) {
-  .registration-container {
-    max-width: 360px;
+@media (max-width: 480px) {
+  .form-wrapper {
+    padding: 1rem;
+    gap: 1.25rem;
+    border-radius: var(--mat-sys-corner-medium);
   }
 
-  .registration-card {
-    mat-card-content {
-      padding: var(--mat-sys-spacing-20);
+  .page-header {
+    gap: 0.375rem;
+
+    h1 {
+      font: var(--mat-sys-title-large);
+    }
+
+    .subtitle {
+      font: var(--mat-sys-body-small);
     }
   }
 }
 
-// Dark mode support
-@media (prefers-color-scheme: dark) {
-  .password-requirements {
-    background: rgba(var(--mat-sys-primary-rgb, 177, 222, 255), 0.08);
-    border-color: rgba(var(--mat-sys-primary-rgb, 177, 222, 255), 0.12);
-  }
-}
-
-// Reduced motion support
+/* Accessibility */
 @media (prefers-reduced-motion: reduce) {
+  .form-wrapper {
+    animation: none;
+  }
+
   * {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
@@ -453,8 +468,16 @@
   }
 }
 
-// High contrast mode support
+/* High Contrast Mode Support */
 @media (prefers-contrast: more) {
+  .form-wrapper {
+    border: 2px solid var(--mat-sys-outline);
+  }
+
+  .page-header h1 {
+    font-weight: 600;
+  }
+
   .error-container {
     border-width: 2px;
   }
@@ -467,5 +490,19 @@
     &:focus-visible {
       outline-width: 3px;
     }
+  }
+}
+
+/* Focus Management */
+:focus-visible {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .password-requirements {
+    background: rgba(var(--mat-sys-primary-rgb, 177, 222, 255), 0.08);
+    border-color: rgba(var(--mat-sys-primary-rgb, 177, 222, 255), 0.12);
   }
 }
