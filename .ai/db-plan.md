@@ -66,11 +66,11 @@ This table logs user feedback on the relevance of song suggestions provided by t
 ## 2. Relationships
 
 - **`auth.users` ↔ `profiles`**: One-to-One. Each user has one profile.
-- **`auth.users` ↔ `songs`**: Many-to-Many, via the `user_songs` junction table. A user can have many songs in their library, and a song can be in many users' libraries.
-- **`auth.users` → `songs`**: One-to-Many (for uploads). A user can upload many songs, but each non-public song has only one original uploader.
-- **`auth.users` → `rendering_feedback`**: One-to-Many. A user can provide feedback on many song renderings.
-- **`auth.users` → `ai_suggestion_feedback`**: One-to-Many. A user can provide feedback on many AI suggestions.
-- **`songs` → `rendering_feedback`**: One-to-Many. A song can have many feedback entries associated with it.
+- **`auth.users` ↔ `songs`**: Many-to-Many, via the `user_songs` junction table. A user can have many songs in their library, and a song can be in many users' libraries. Only authenticated users can access songs in the `user_songs` table.
+- **`auth.users` → `songs`**: One-to-Many (for uploads). A user can upload many songs, but each non-public song has only one original uploader. Public songs (where `uploader_id IS NULL`) are accessible to all users (authenticated and unauthenticated) for viewing.
+- **`auth.users` → `rendering_feedback`**: One-to-Many. An authenticated user can provide feedback on many song renderings.
+- **`auth.users` → `ai_suggestion_feedback`**: One-to-Many. An authenticated user can provide feedback on many AI suggestions.
+- **`songs` → `rendering_feedback`**: One-to-Many. A song can have many feedback entries associated with it (only from authenticated users).
 
 ## 3. Indexes
 
@@ -101,15 +101,17 @@ RLS will be enabled on all tables to ensure data privacy and security.
 ### `songs` table
 
 - **Enable RLS**: `ALTER TABLE public.songs ENABLE ROW LEVEL SECURITY;`
-- **Policy**: Users can view all public songs (`uploader_id IS NULL`) and any songs present in their personal library.
+- **Policy**: All users (authenticated and unauthenticated) can view all public songs (`uploader_id IS NULL`). Authenticated users can additionally view any songs present in their personal library.
   ```sql
   CREATE POLICY "Users can view public songs and songs in their library"
   ON public.songs FOR SELECT
   USING (
     uploader_id IS NULL OR
-    EXISTS (
-      SELECT 1 FROM user_songs
-      WHERE user_songs.song_id = songs.id AND user_songs.user_id = auth.uid()
+    (auth.role() = 'authenticated' AND
+      EXISTS (
+        SELECT 1 FROM user_songs
+        WHERE user_songs.song_id = songs.id AND user_songs.user_id = auth.uid()
+      )
     )
   );
   ```
@@ -159,3 +161,4 @@ RLS will be enabled on all tables to ensure data privacy and security.
 - **Historical Ratings**: The `rendering_feedback` table intentionally lacks a unique constraint on `(user_id, song_id)`. The `created_at` column allows for a historical log of user feedback, enabling analysis of rendering quality improvements over time.
 - **JSON vs JSONB**: The `input_songs` column is specifically of json data type instead of jsonb to retain original structure sent to AI.
 - **AI Suggestion Analytics**: The `rating_score` column in `ai_suggestion_feedback` provides a sum of all ratings (1 for thumbs up, -1 for thumbs down) for quick calculation of the 75% thumbs-up success metric. Individual ratings are preserved in the `suggestions` JSON for detailed analysis of which specific suggestions perform well.
+- **Anonymous Access**: Unauthenticated users can view public domain songs (where `uploader_id IS NULL`) and their rendered sheet music, but cannot upload songs, create personal libraries, provide feedback, or access AI suggestions. The `user_songs` table is only accessible to authenticated users.

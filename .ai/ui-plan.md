@@ -30,12 +30,16 @@ The application uses a persistent shell layout built with Angular Material's `ma
   - Application logo/name (left)
   - User avatar with dropdown menu (right)
   - Help/Tour menu item (right)
-- **Navigation Sidebar**:
+- **Navigation Sidebar** (authenticated users only):
   - Desktop (>960px): Persistent sidebar
-  - Tablet/Mobile (<960px): Collapsible drawer
+  - Tablet/Mobile (<600px): Collapsible drawer
   - Navigation items:
     - My Library (/library)
     - Discover (/discover)
+
+- **Unauthenticated Navigation** (for /discover access):
+  - Simplified toolbar with login/register prompts
+  - Song cards show "Sign in to add" instead of active add button
 
 - **Main Content Area**:
   - Router outlet for view components
@@ -202,8 +206,8 @@ The application uses a persistent shell layout built with Angular Material's `ma
 ### 2.4 Public Library Discovery View
 
 - **View Path**: `/discover`
-- **Access**: Protected (authenticated users only)
-- **Main Purpose**: Browse and add pre-loaded public domain songs to personal library
+- **Access**: Public (anonymous and authenticated users)
+- **Main Purpose**: Browse pre-loaded public domain songs and add to personal library (authenticated users only)
 
 #### Key Information to Display
 
@@ -236,23 +240,27 @@ The application uses a persistent shell layout built with Angular Material's `ma
 
 - Song cards keyboard navigable
 - Add button states clearly communicated
-- Disabled button includes ARIA label explaining why ("Already in library")
+- For unauthenticated users: Clicking "Add to Library" prompts login/registration
+- Disabled button includes ARIA label explaining why ("Already in library" or "Sign in to add")
 - Toast notifications announced to screen readers
 - Loading states communicated to assistive technologies
 
 #### Security Considerations
 
-- Row Level Security allows authenticated users to access public songs
+- Row Level Security allows all users (authenticated and anonymous) to access public songs
+- Unauthenticated users cannot perform "Add to library" (redirected to login)
 - Add to library operation validates song exists and user doesn't already have it
 - No ability to modify or delete public domain songs
-- Authorization checked on every API call
+- Authorization checked on every add operation
 
 ---
 
 ### 2.5 Sheet Music Viewer
 
 - **View Path**: `/song/:songId`
-- **Access**: Protected (authenticated users only, must have song in library)
+- **Access**: Public for public domain songs, Protected for personal library songs
+  - Authenticated users: Can view songs from personal library
+  - Unauthenticated users: Can view public domain songs
 - **Main Purpose**: Display rendered sheet music with zoom controls and collect rendering quality feedback
 
 #### Key Information to Display
@@ -287,7 +295,8 @@ The application uses a persistent shell layout built with Angular Material's `ma
 - Zoom increments/decrements by reasonable steps
 - Feedback FABs fixed position, always accessible
 - Visual feedback on rating selection (icon highlight)
-- Users can change their rating by clicking opposite thumb
+- Users can change their rating by clicking opposite thumb (authenticated only)
+- Unauthenticated users see prompts to sign in for rating
 - Automatic fresh signed URL fetch if expired (no user action required)
 - Clean, distraction-free reading experience
 - Keyboard shortcuts for zoom (future enhancement)
@@ -303,7 +312,9 @@ The application uses a persistent shell layout built with Angular Material's `ma
 
 #### Security Considerations
 
-- Authorization check: user must have song in their library
+- Authorization check:
+  - Authenticated users: Must have song in their library
+  - Unauthenticated users: Can access public domain songs only
 - Signed URLs with 1-hour expiration
 - Automatic renewal of expired URLs without exposing storage paths
 - No direct file access from client
@@ -467,7 +478,30 @@ The application uses a persistent shell layout built with Angular Material's `ma
 8. User clicks song to view sheet music
 9. Navigates between library and discover views seamlessly
 
-### 3.3 Error Recovery Flows
+### 3.3 Tertiary User Journey: Anonymous User Browsing Public Library
+
+**Discovery Without Authentication**:
+
+1. User lands on application or navigates directly to `/discover`
+2. `AuthService` checks session - user is not authenticated
+3. Discover view loads without shell sidebar (simplified layout)
+4. Public domain song grid displays with infinite scroll
+5. User can view sheet music by clicking on song cards
+6. User wants to add song to library
+7. User clicks "Sign in to add" button (or "Add to Library" which prompts)
+8. Directed to login/register page
+9. User creates account or logs in
+10. Redirected back to `/discover` or `/library` (depending on implementation)
+
+**View Sheet Music as Anonymous**:
+
+1. Unauthenticated user clicks on song in `/discover`
+2. Navigates to `/song/:songId` for that public song
+3. Sheet music renders with zoom controls
+4. Feedback FABs present but clicking prompts "Sign in to rate"
+5. User can view unrated or navigate back
+
+### 3.4 Error Recovery Flows
 
 **Upload Error Flow**:
 
@@ -578,14 +612,14 @@ The application uses a persistent shell layout that remains consistent across al
 / (root)
   ├── login (public)
   ├── register (public)
+  ├── discover (public, lazy-loaded)
   ├── library (protected, lazy-loaded)
-  ├── discover (protected, lazy-loaded)
   └── song/:songId (protected, lazy-loaded)
 ```
 
 **Route Guards**:
 
-- **AuthGuard**: Protects `/library`, `/discover`, `/song/:songId`
+- **AuthGuard**: Protects `/library`, `/song/:songId`
   - Redirects unauthenticated users to `/login`
   - Implements functional guard pattern
   - Checks `AuthService.isAuthenticated` signal
@@ -1297,8 +1331,8 @@ AppComponent
     │   │       │   ├── LoadingSkeletonComponent[] (during load)
     │   │       │   ├── Upload FAB
     │   │       │   └── Find Similar Music FAB (if songs exist)
-    │   │       ├── DiscoverComponent
-    │   │       │   ├── SongCardComponent[] (with add action)
+    │   │       ├── DiscoverComponent (authenticated)
+    │   │       │   ├── SongCardComponent[] (with active add action)
     │   │       │   └── LoadingSkeletonComponent[] (during load)
     │   │       └── SheetMusicViewerComponent
     │   │           ├── Back Button
@@ -1323,6 +1357,19 @@ AppComponent
     │   └── ConfirmDialogComponent (logout)
     │       ├── Logout message
     │       └── Cancel/Logout Buttons
+    │
+    ├── DiscoverComponent (unauthenticated layout, public route)
+    │   ├── Simplified Toolbar (no user menu)
+    │   ├── SongCardComponent[] (with "Sign in to add" prompts)
+    │   ├── LoadingSkeletonComponent[] (during load)
+    │   └── Login/Register prompts on add action
+    │
+    ├── SheetMusicViewerComponent (unauthenticated, public route)
+    │   ├── Back Button / Toolbar
+    │   ├── Song Title Display
+    │   ├── OSMD Canvas
+    │   ├── Zoom Controls
+    │   └── Feedback FAB Group (prompts to sign in on click)
     │
     ├── LoginComponent (public route)
     │   └── AuthFormComponent
@@ -1354,10 +1401,11 @@ AppComponent
 
 ### FR-3: Pre-loaded Content Library
 
-| Requirement                     | UI Element                     | Location                   |
-| ------------------------------- | ------------------------------ | -------------------------- |
-| Browse public domain songs      | Song grid with infinite scroll | Discover View              |
-| Add song to personal collection | "Add to Library" button        | Discover View (song cards) |
+| Requirement                                     | UI Element                                 | Location                      |
+| ----------------------------------------------- | ------------------------------------------ | ----------------------------- |
+| Browse public domain songs (unauthenticated)    | Song grid with infinite scroll (public)    | Discover View (public access) |
+| View sheet music (unauthenticated)              | Sheet Music Viewer (public access)         | /song/:songId (public access) |
+| Add song to personal collection (authenticated) | "Add to Library" button / "Sign in" prompt | Discover View (authenticated) |
 
 ### FR-4: Sheet Music Rendering
 

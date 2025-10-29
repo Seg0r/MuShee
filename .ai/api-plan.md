@@ -16,7 +16,7 @@ This document defines the API integration architecture for MuShee, a web-based s
 - Direct Supabase SDK calls for database and authentication operations
 - Supabase Edge Functions for external API integrations requiring private keys
 - JSON request/response payloads
-- JWT-based authentication via Supabase Auth
+- JWT-based authentication via Supabase Auth (optional for public content, required for personal library)
 - Row Level Security (RLS) enforcement at the database level
 - Comprehensive error handling with user-friendly messages
 
@@ -41,17 +41,19 @@ This document defines the API integration architecture for MuShee, a web-based s
 
 Authentication is handled entirely through **Supabase Auth** using the client-side SDK. The Angular application will use Supabase's authentication methods for:
 
-- User registration (email/password)
-- User login (email/password)
+- User registration (email/password) - **optional**, required only for personal library management
+- User login (email/password) - **optional**, required only for personal library management
 - User logout
 - Session management
 
 ### Implementation Details
 
-- Authentication is handled entirely through Supabase Auth SDK in the Angular application
+- Authentication is optional for browsing public domain songs and viewing public sheet music
+- Authentication is required for creating/managing personal library, uploading songs, and accessing AI suggestions
 - Supabase SDK automatically manages JWT tokens, refresh, and session persistence
 - Direct database operations use RLS policies with `auth.uid()` for automatic authorization
 - Edge Functions receive authenticated context through Supabase client calls
+- Unauthenticated users can only access endpoints marked as "Optional" authentication
 
 ---
 
@@ -306,11 +308,11 @@ Retrieve song metadata and a signed URL to download the MusicXML file for render
 
 #### Browse Public Domain Songs
 
-Retrieve a paginated list of pre-loaded public domain songs available to all users.
+Retrieve a paginated list of pre-loaded public domain songs accessible to all users.
 
 - **HTTP Method**: `GET`
 - **URL Path**: `/api/songs/public`
-- **Authentication**: Required
+- **Authentication**: Optional
 - **Query Parameters**:
   - `page` (integer, default: 1): Page number
   - `limit` (integer, default: 50, max: 100): Number of items per page
@@ -423,6 +425,7 @@ Add a song (typically from the public domain library) to the user's personal lib
 - **HTTP Method**: `POST`
 - **URL Path**: `/api/user-songs`
 - **Authentication**: Required
+- **Description**: Authenticated users can add any public domain song to their personal library. Unauthenticated users must log in or register first.
 
 **Request Payload**:
 
@@ -450,6 +453,16 @@ Add a song (typically from the public domain library) to the user's personal lib
 
 - `400 Bad Request`: Invalid request payload
 - `401 Unauthorized`: User not authenticated
+
+```json
+{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Authentication required to add songs to your library"
+  }
+}
+```
+
 - `404 Not Found`: Song does not exist or user doesn't have access
 
 ```json
@@ -877,7 +890,8 @@ All database operations respect Supabase Row Level Security policies:
 
 #### Songs
 
-- Users can view public songs (`uploader_id IS NULL`) OR songs in their library
+- All users (authenticated and unauthenticated) can view public songs (`uploader_id IS NULL`)
+- Authenticated users can view songs in their personal library
 - Authenticated users can insert new songs
 
 #### User Songs

@@ -32,11 +32,11 @@ export class SongService {
 
   /**
    * Retrieves paginated list of public domain songs with validation and error handling.
-   * Performs authentication check, parameter validation, and response formatting.
+   * Performs parameter validation and response formatting.
+   * Authentication is optional for public songs browsing.
    *
    * @param queryParams - Query parameters for pagination, sorting, and search
    * @returns Promise resolving to PublicSongsListResponseDto
-   * @throws AuthenticationError if user is not authenticated
    * @throws ValidationError if parameters are invalid
    */
   async getPublicSongsList(
@@ -45,20 +45,10 @@ export class SongService {
     try {
       console.log('Processing public songs list request with params:', queryParams);
 
-      // Validate authentication
-      const {
-        data: { user },
-        error: authError,
-      } = await this.supabaseService.client.auth.getUser();
-      if (authError || !user) {
-        console.warn('Public songs list request failed: Authentication required', { authError });
-        throw new AuthenticationError('Authentication required');
-      }
-
       // Validate parameters
       this.validatePublicSongsParams(queryParams);
 
-      // Execute query
+      // Execute query (RLS policies handle access control automatically)
       const { data, total } = await this.supabaseService.getPublicSongs(queryParams);
 
       // Calculate pagination metadata
@@ -81,7 +71,7 @@ export class SongService {
       };
     } catch (error) {
       // Re-throw known application errors
-      if (error instanceof AuthenticationError || error instanceof ValidationError) {
+      if (error instanceof ValidationError) {
         throw error;
       }
 
