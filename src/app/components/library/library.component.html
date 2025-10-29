@@ -1,0 +1,85 @@
+<div class="library-container" (scroll)="onScroll($event)">
+  <!-- Header -->
+  <div class="library-header">
+    <h1>My Library</h1>
+  </div>
+
+  <!-- Error State -->
+  @if (errorMessage()) {
+    <div class="error-banner">
+      <div class="error-content">
+        <span>{{ errorMessage() }}</span>
+        <button matIconButton (click)="onRetryLoadLibrary()" aria-label="Retry loading library">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Loading Skeleton -->
+  @if (isLoading()) {
+    <app-loading-skeleton [count]="8" [rows]="2" [cols]="4"></app-loading-skeleton>
+  }
+
+  <!-- Empty State -->
+  @if (isEmptyState()) {
+    <app-empty-state [message]="'Your library is empty'" [iconName]="'queue_music'">
+      <div class="empty-state-actions">
+        <button matButton="filled" (click)="onUploadClick()">
+          <mat-icon>cloud_upload</mat-icon>
+          Upload Your Music
+        </button>
+        <button matButton="outlined" (click)="onUploadClick()">
+          <mat-icon>explore</mat-icon>
+          Browse Public Library
+        </button>
+      </div>
+    </app-empty-state>
+  }
+
+  <!-- Songs Grid -->
+  @if (!isEmptyState() && !isLoading()) {
+    <div class="songs-grid">
+      @for (song of visibleSongs(); track song.song_id) {
+        <app-song-card [song]="song" (cardClick)="onSongCardClick(song)">
+          <button
+            matIconButton
+            class="delete-button"
+            (click)="onSongDeleteClick(song)"
+            aria-label="Delete song"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </app-song-card>
+      }
+    </div>
+
+    <!-- Pagination Loading Indicator -->
+    @if (isPaginationLoading()) {
+      <div class="pagination-loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading more songs...</p>
+      </div>
+    }
+  }
+
+  <!-- FABs -->
+  <div class="fab-container">
+    <!-- Upload FAB -->
+    <button matFab class="upload-fab" (click)="onUploadClick()" aria-label="Upload a new song">
+      <mat-icon>cloud_upload</mat-icon>
+    </button>
+
+    <!-- Find Similar Music FAB -->
+    @if (canFindSimilar()) {
+      <button
+        matFab
+        class="find-similar-fab"
+        (click)="onFindSimilarClick()"
+        aria-label="Find similar music"
+      >
+        <mat-icon>lightbulb</mat-icon>
+      </button>
+    }
+  </div>
+</div>

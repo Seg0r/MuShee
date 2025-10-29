@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { publicOnlyGuard } from './guards/public-only.guard';
+import { publicOnlyGuard, authGuard } from './guards/public-only.guard';
 
 export const routes: Routes = [
   // Root redirect - routes to login if not authenticated
@@ -25,13 +25,14 @@ export const routes: Routes = [
     data: { title: 'Create Account - MuShee' },
   },
 
-  // Protected routes will be added here
-  // {
-  //   path: 'library',
-  //   loadComponent: () => import('./components/library/library.component').then(m => m.LibraryComponent),
-  //   canActivate: [authGuard],
-  //   data: { title: 'My Library - MuShee' }
-  // }
+  // Protected routes
+  {
+    path: 'library',
+    loadComponent: () =>
+      import('./components/library/library.component').then(m => m.LibraryComponent),
+    canActivate: [authGuard],
+    data: { title: 'My Library - MuShee' },
+  },
 
   // Wildcard route for 404 handling
   {

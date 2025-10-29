@@ -1,0 +1,311 @@
+@use '@angular/material' as mat;
+
+:host {
+  display: block;
+}
+
+// ============================================================================
+// Dialog Container
+// ============================================================================
+
+.upload-dialog {
+  min-width: 500px;
+
+  @media (max-width: 600px) {
+    min-width: 100%;
+  }
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+  h2 {
+    margin: 0;
+    font-size: var(--mat-sys-headline-large);
+    font-weight: 500;
+    color: var(--mat-sys-on-surface);
+  }
+
+  .close-button {
+    flex-shrink: 0;
+  }
+}
+
+// ============================================================================
+// Dialog Content
+// ============================================================================
+
+.dialog-content {
+  position: relative;
+  min-height: 300px;
+}
+
+// ============================================================================
+// Upload Area
+// ============================================================================
+
+.upload-area {
+  padding: 2rem;
+}
+
+.drag-drop-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  border: 2px dashed var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-surface-container-low);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  min-height: 200px;
+
+  &.drag-over {
+    background: var(--mat-sys-primary-container);
+    border-color: var(--mat-sys-primary);
+    box-shadow: var(--mat-sys-level2);
+  }
+
+  &.has-file {
+    border-style: solid;
+    background: var(--mat-sys-surface-container);
+  }
+
+  &:focus-within {
+    outline: 2px solid var(--mat-sys-primary);
+    outline-offset: 2px;
+  }
+}
+
+// ============================================================================
+// Drop Zone Content
+// ============================================================================
+
+.drop-zone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+
+  .drop-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: var(--mat-sys-primary);
+    opacity: 0.8;
+  }
+
+  .drop-title {
+    margin: 0;
+    font-size: var(--mat-sys-headline-small);
+    font-weight: 500;
+    color: var(--mat-sys-on-surface);
+  }
+
+  .drop-subtitle {
+    margin: 0;
+    font-size: var(--mat-sys-body-medium);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  .select-button {
+    margin-top: 0.5rem;
+  }
+}
+
+// ============================================================================
+// File Selected Content
+// ============================================================================
+
+.file-selected-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+
+  .file-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: var(--mat-sys-primary);
+  }
+
+  .file-name {
+    margin: 0;
+    font-size: var(--mat-sys-body-large);
+    font-weight: 500;
+    color: var(--mat-sys-on-surface);
+    word-break: break-all;
+  }
+
+  .file-size {
+    margin: 0;
+    font-size: var(--mat-sys-body-small);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  .clear-button {
+    margin-top: 0.5rem;
+  }
+}
+
+// ============================================================================
+// Validation Error
+// ============================================================================
+
+.validation-error {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+  border-radius: var(--mat-sys-corner-small);
+  align-items: flex-start;
+
+  .error-icon-small {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  p {
+    margin: 0;
+    font-size: var(--mat-sys-body-small);
+    line-height: 1.5;
+  }
+}
+
+// ============================================================================
+// File Requirements
+// ============================================================================
+
+.file-requirements {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--mat-sys-surface-container);
+  border-radius: var(--mat-sys-corner-small);
+
+  .requirements-title {
+    margin: 0 0 0.5rem 0;
+    font-size: var(--mat-sys-label-medium);
+    font-weight: 500;
+    color: var(--mat-sys-on-surface);
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.5rem;
+    font-size: var(--mat-sys-body-small);
+    color: var(--mat-sys-on-surface-variant);
+    line-height: 1.6;
+
+    li {
+      margin: 0.25rem 0;
+    }
+  }
+}
+
+// ============================================================================
+// State Messages
+// ============================================================================
+
+.success-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+
+  .success-icon {
+    font-size: 60px;
+    width: 60px;
+    height: 60px;
+    color: #4caf50;
+  }
+
+  .success-message {
+    margin: 0;
+    font-size: var(--mat-sys-headline-small);
+    font-weight: 500;
+    color: var(--mat-sys-on-surface);
+  }
+}
+
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+
+  .error-icon {
+    font-size: 60px;
+    width: 60px;
+    height: 60px;
+    color: var(--mat-sys-error);
+  }
+
+  .error-message {
+    margin: 0;
+    font-size: var(--mat-sys-body-large);
+    color: var(--mat-sys-on-surface);
+    line-height: 1.6;
+  }
+}
+
+// ============================================================================
+// Loading Overlay
+// ============================================================================
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: var(--mat-sys-corner-medium);
+  backdrop-filter: blur(2px);
+
+  .loading-message {
+    margin: 0;
+    font-size: var(--mat-sys-body-medium);
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+// ============================================================================
+// Dialog Actions
+// ============================================================================
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+
+  button {
+    min-width: 100px;
+  }
+
+  .cancel-button {
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  .upload-button {
+    background: var(--mat-sys-primary) !important;
+    color: var(--mat-sys-on-primary) !important;
+  }
+}

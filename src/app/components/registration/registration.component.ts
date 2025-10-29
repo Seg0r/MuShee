@@ -5,7 +5,6 @@ import {
   computed,
   inject,
   OnInit,
-  effect,
   Signal,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
@@ -36,6 +35,11 @@ import type {
  * Main registration page component that orchestrates the registration flow.
  * Manages form state using Angular's Reactive Forms API with signal-based state management.
  * Handles client-side validation, server communication via Supabase Auth, and navigation.
+ *
+ * Signal Reactivity Pattern:
+ * - toSignal() converts form control valueChanges to signals
+ * - computed() signals automatically track dependencies when signal functions are called inside
+ * - NO effect() needed for establishing reactivity; only for side effects
  */
 @Component({
   selector: 'app-registration',
@@ -80,25 +84,25 @@ export class RegistrationComponent implements OnInit {
   registrationForm!: FormGroup;
 
   /**
-   * Signal to track form control changes for reactivity
-   */
-  private formControlsChanged = signal(0);
-
-  /**
    * Password value signal for reactive updates
+   * Automatically updated when form control value changes
    */
   private passwordValueSignal!: Signal<string>;
 
   /**
    * Email value signal for reactive updates
+   * Automatically updated when form control value changes
    */
   private emailValueSignal!: Signal<string>;
 
   /**
    * Computed password strength validation state
+   * This computed signal depends on passwordValueSignal.
+   * Reactivity works automatically: when passwordValueSignal() is called inside,
+   * Angular tracks this dependency and re-evaluates when password changes.
    */
   passwordStrength = computed<PasswordValidationState>(() => {
-    // Access the password value signal to trigger this computed signal
+    // Call the signal function to establish reactive dependency
     const password = this.passwordValueSignal?.() ?? '';
     return {
       minLength: password.length >= 8,
@@ -115,17 +119,19 @@ export class RegistrationComponent implements OnInit {
 
   /**
    * Computed derived state to check if submit button should be disabled
+   * This computed signal depends on: emailValueSignal, passwordValueSignal, isLoading, registrationForm.valid
+   * Reactivity is established by calling signal functions inside the computed function.
    */
   isFormValid = computed(() => {
-    // Access signals to trigger reactivity
+    // Call signal functions to establish reactive dependencies
     this.emailValueSignal?.();
     this.passwordValueSignal?.();
-    this.formControlsChanged();
 
     const loading = this.isLoading();
     const formValid = this.registrationForm?.valid ?? false;
     const passwordValid = this.passwordStrength().isValid;
 
+    // Return true when button should be DISABLED (form invalid or loading)
     return !(loading || (formValid && passwordValid));
   });
 
@@ -141,6 +147,7 @@ export class RegistrationComponent implements OnInit {
     const passwordControl = this.registrationForm.get('password')!;
 
     // Convert form value changes to signals for reactive updates
+    // toSignal automatically manages the subscription and unsubscription
     this.emailValueSignal = toSignal(emailControl.valueChanges, {
       initialValue: emailControl.value,
     });
@@ -148,12 +155,8 @@ export class RegistrationComponent implements OnInit {
       initialValue: passwordControl.value,
     });
 
-    // Trigger computed signal updates on form value changes
-    effect(() => {
-      this.emailValueSignal();
-      this.passwordValueSignal();
-      this.formControlsChanged.update(v => v + 1);
-    });
+    // Note: NO effect() is needed. Computed signals automatically track dependencies
+    // when signal functions are called inside them. Effect is only for side effects.
   }
 
   ngOnInit(): void {

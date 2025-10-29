@@ -1,0 +1,235 @@
+@use '@angular/material' as mat;
+
+:host {
+  display: block;
+}
+
+.onboarding-dialog {
+  min-width: 600px;
+  max-width: 800px;
+
+  @media (max-width: 768px) {
+    min-width: 100%;
+  }
+}
+
+// ============================================================================
+// Dialog Header
+// ============================================================================
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+  h2 {
+    margin: 0;
+    font-size: var(--mat-sys-headline-large);
+    font-weight: 500;
+    color: var(--mat-sys-on-surface);
+  }
+
+  .close-button {
+    flex-shrink: 0;
+  }
+}
+
+// ============================================================================
+// Stepper
+// ============================================================================
+
+.onboarding-stepper {
+  ::ng-deep {
+    .mat-mdc-stepper-header {
+      background: var(--mat-sys-surface-container-low);
+    }
+
+    .mat-mdc-step-header {
+      padding: 0.5rem 0 !important;
+
+      .mdc-step-indicator__content {
+        background: var(--mat-sys-primary-container) !important;
+        color: var(--mat-sys-on-primary-container) !important;
+
+        &.mdc-step-indicator__content--with-transition {
+          background: var(--mat-sys-primary) !important;
+          color: var(--mat-sys-on-primary) !important;
+        }
+      }
+
+      &.mat-completed .mdc-step-indicator__content {
+        background: var(--mat-sys-primary) !important;
+        color: var(--mat-sys-on-primary) !important;
+      }
+
+      &.mat-active .mdc-step-indicator__content {
+        background: var(--mat-sys-primary) !important;
+        color: var(--mat-sys-on-primary) !important;
+      }
+    }
+
+    .mat-step-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: var(--mat-sys-label-large);
+      font-weight: 500;
+    }
+  }
+}
+
+.step-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+// ============================================================================
+// Step Content
+// ============================================================================
+
+.step-content {
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+
+  @media (max-width: 600px) {
+    padding: 2rem 1.5rem;
+    gap: 1.5rem;
+  }
+}
+
+.step-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+
+  .large-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: var(--mat-sys-primary);
+    opacity: 0.9;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: var(--mat-sys-headline-large);
+    font-weight: 500;
+    color: var(--mat-sys-on-surface);
+  }
+}
+
+.step-description {
+  margin: 0;
+  font-size: var(--mat-sys-body-large);
+  color: var(--mat-sys-on-surface-variant);
+  line-height: 1.6;
+  text-align: center;
+}
+
+.step-features {
+  display: flex;
+  justify-content: center;
+
+  ul {
+    margin: 0;
+    padding-left: 1.5rem;
+    max-width: 400px;
+    font-size: var(--mat-sys-body-medium);
+    color: var(--mat-sys-on-surface);
+    line-height: 1.8;
+
+    li {
+      margin: 0.5rem 0;
+      padding-left: 0.5rem;
+
+      &::marker {
+        color: var(--mat-sys-primary);
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+.step-action-button {
+  align-self: center;
+  margin-top: 1rem;
+  min-width: 180px;
+
+  mat-icon {
+    margin-right: 0.5rem;
+  }
+}
+
+// ============================================================================
+// Dialog Footer
+// ============================================================================
+
+.dialog-footer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+
+  .spacer {
+    flex: 1;
+  }
+
+  .footer-button {
+    min-width: 100px;
+  }
+
+  .get-started-button {
+    background: var(--mat-sys-primary) !important;
+    color: var(--mat-sys-on-primary) !important;
+    min-width: 150px;
+
+    .spinner-icon {
+      animation: spin 2s linear infinite;
+      margin-right: 0.5rem;
+    }
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+// ============================================================================
+// Stepper Mobile Responsive
+// ============================================================================
+
+@media (max-width: 600px) {
+  .onboarding-stepper {
+    ::ng-deep {
+      .mat-step-label {
+        display: none;
+      }
+
+      .mdc-step-indicator {
+        max-width: 2rem;
+      }
+    }
+  }
+
+  .dialog-footer {
+    flex-wrap: wrap;
+
+    .spacer {
+      flex-basis: 100%;
+    }
+  }
+}

@@ -1,0 +1,47 @@
+@use '@angular/material' as mat;
+
+:host {
+  display: block;
+}
+
+.empty-state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  min-height: 400px;
+  gap: 1.5rem;
+}
+
+.empty-state-icon {
+  font-size: 80px;
+  width: 80px;
+  height: 80px;
+  color: var(--mat-sys-primary);
+  opacity: 0.8;
+}
+
+.empty-state-message {
+  margin: 0;
+  font-size: var(--mat-sys-headline-large);
+  font-weight: 500;
+  color: var(--mat-sys-on-surface);
+}
+
+.empty-state-description {
+  margin: 0;
+  max-width: 500px;
+  font-size: var(--mat-sys-body-large);
+  color: var(--mat-sys-on-surface-variant);
+  line-height: 1.6;
+}
+
+.empty-state-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}

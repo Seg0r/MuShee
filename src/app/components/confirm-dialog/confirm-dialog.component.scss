@@ -1,0 +1,117 @@
+@use '@angular/material' as mat;
+
+:host {
+  display: block;
+}
+
+.confirm-dialog {
+  min-width: 400px;
+
+  @media (max-width: 500px) {
+    min-width: 100%;
+  }
+}
+
+// ============================================================================
+// Dialog Header
+// ============================================================================
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+  .warning-icon {
+    color: var(--mat-sys-error);
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: var(--mat-sys-headline-large);
+    font-weight: 500;
+    color: var(--mat-sys-on-surface);
+  }
+}
+
+// ============================================================================
+// Dialog Content
+// ============================================================================
+
+.dialog-content {
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dialog-message {
+  margin: 0;
+  font-size: var(--mat-sys-body-large);
+  color: var(--mat-sys-on-surface);
+  line-height: 1.6;
+}
+
+.item-details {
+  padding: 1rem;
+  background: var(--mat-sys-surface-container);
+  border-radius: var(--mat-sys-corner-small);
+  border-left: 4px solid var(--mat-sys-primary);
+  font-size: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface);
+  word-break: break-word;
+
+  strong {
+    font-weight: 500;
+  }
+}
+
+// ============================================================================
+// Dialog Actions
+// ============================================================================
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+
+  button {
+    min-width: 100px;
+  }
+
+  .cancel-button {
+    color: var(--mat-sys-on-surface-variant);
+
+    &:hover {
+      background: var(--mat-sys-surface-container);
+    }
+  }
+
+  .confirm-button {
+    &.button-warn {
+      background: var(--mat-sys-error) !important;
+      color: var(--mat-sys-on-error) !important;
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+
+    &.button-primary {
+      background: var(--mat-sys-primary) !important;
+      color: var(--mat-sys-on-primary) !important;
+    }
+
+    &.button-accent {
+      background: var(--mat-sys-tertiary) !important;
+      color: var(--mat-sys-on-tertiary) !important;
+    }
+  }
+}

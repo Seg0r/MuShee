@@ -1,0 +1,139 @@
+<div mat-dialog-container class="upload-dialog">
+  <!-- Header -->
+  <div mat-dialog-title class="dialog-header">
+    <h2>Upload MusicXML File</h2>
+    <button mat-icon-button (click)="onClose()" class="close-button" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div mat-dialog-content class="dialog-content">
+    <!-- Success State -->
+    @if (uploadSuccess() && !uploadError()) {
+      <div class="success-state">
+        <mat-icon class="success-icon">check_circle</mat-icon>
+        <p class="success-message">File uploaded successfully!</p>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (uploadError()) {
+      <div class="error-state">
+        <mat-icon class="error-icon">error</mat-icon>
+        <p class="error-message">{{ uploadError() }}</p>
+      </div>
+    }
+
+    <!-- Main Upload Area -->
+    @if (!uploadSuccess()) {
+      <div class="upload-area">
+        <!-- Drag-Drop Zone -->
+        <div
+          class="drag-drop-zone"
+          [class.drag-over]="isDragOver()"
+          [class.has-file]="hasFile()"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+        >
+          <!-- File Input (Hidden) -->
+          <input
+            #fileInput
+            type="file"
+            hidden
+            accept=".xml,.musicxml"
+            (change)="onFileSelected($event)"
+            aria-label="Select MusicXML file"
+          />
+
+          <!-- Empty State -->
+          @if (!hasFile()) {
+            <div class="drop-zone-content">
+              <mat-icon class="drop-icon">cloud_upload</mat-icon>
+              <p class="drop-title">Drag and drop your MusicXML file here</p>
+              <p class="drop-subtitle">or</p>
+              <button
+                matButton="filled"
+                (click)="onClickFileInput()"
+                [disabled]="uploadLoading()"
+                class="select-button"
+              >
+                Select File
+              </button>
+            </div>
+          }
+
+          <!-- File Selected State -->
+          @if (hasFile()) {
+            <div class="file-selected-content">
+              <mat-icon class="file-icon">description</mat-icon>
+              <p class="file-name">{{ fileName() }}</p>
+              <p class="file-size">{{ fileSize() }}</p>
+              <button
+                matButton="text"
+                (click)="onClearFile()"
+                [disabled]="uploadLoading()"
+                class="clear-button"
+              >
+                Choose Different File
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Validation Error -->
+        @if (validationError()) {
+          <div class="validation-error">
+            <mat-icon class="error-icon-small">info</mat-icon>
+            <p>{{ validationError() }}</p>
+          </div>
+        }
+
+        <!-- File Requirements -->
+        <div class="file-requirements">
+          <p class="requirements-title">Supported Formats:</p>
+          <ul>
+            <li>MusicXML files (.xml, .musicxml)</li>
+            <li>Maximum file size: {{ maxFileSize() }}</li>
+            <li>Valid XML structure required</li>
+          </ul>
+        </div>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (uploadLoading()) {
+      <div class="loading-overlay">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p class="loading-message">Uploading and validating file...</p>
+      </div>
+    }
+  </div>
+
+  <!-- Actions -->
+  <div mat-dialog-actions class="dialog-actions">
+    <button mat-button (click)="onClose()" [disabled]="uploadLoading()" class="cancel-button">
+      @if (uploadSuccess() && !uploadError()) {
+        Close
+      } @else {
+        Cancel
+      }
+    </button>
+
+    @if (!uploadSuccess() || uploadError()) {
+      <button
+        matButton="filled"
+        (click)="onUpload()"
+        [disabled]="!canUpload()"
+        class="upload-button"
+      >
+        @if (uploadLoading()) {
+          Uploading...
+        } @else {
+          Upload
+        }
+      </button>
+    }
+  </div>
+</div>
