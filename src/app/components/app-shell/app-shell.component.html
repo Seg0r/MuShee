@@ -1,0 +1,91 @@
+<mat-drawer-container class="shell-container" hasBackdrop="false">
+  <!-- Main Toolbar -->
+  <mat-toolbar color="primary" class="shell-toolbar">
+    <!-- Mobile Menu Toggle -->
+    @if (isMobileView()) {
+      <button
+        matIconButton
+        (click)="toggleDrawer()"
+        class="menu-toggle"
+        [attr.aria-label]="'Toggle navigation menu'"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+    }
+
+    <!-- Logo -->
+    <span class="toolbar-brand">MuShee</span>
+
+    <!-- Spacer -->
+    <span class="spacer"></span>
+
+    <!-- Help/Tour Button -->
+    <button
+      matIconButton
+      (click)="onHelpClick()"
+      [attr.aria-label]="'Help and tour'"
+      matTooltip="Help"
+    >
+      <mat-icon>help</mat-icon>
+    </button>
+
+    <!-- User Menu -->
+    <button
+      matIconButton
+      [matMenuTriggerFor]="userMenu"
+      class="user-menu-trigger"
+      [attr.aria-label]="'User menu'"
+    >
+      <mat-icon>account_circle</mat-icon>
+    </button>
+
+    <!-- User Dropdown Menu -->
+    <mat-menu #userMenu="matMenu" class="user-dropdown">
+      <button mat-menu-item disabled>
+        <mat-icon>person</mat-icon>
+        <span>{{ userEmail() }}</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="onLogoutClick()">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </mat-menu>
+  </mat-toolbar>
+
+  <!-- Navigation Drawer -->
+  <mat-drawer
+    #drawer
+    [mode]="isMobileView() ? 'over' : 'side'"
+    [opened]="!isMobileView()"
+    [attr.aria-label]="'Navigation menu'"
+    class="shell-drawer"
+  >
+    <nav class="sidebar-nav">
+      <mat-nav-list class="nav-list">
+        <mat-list-item
+          (click)="onNavigation('/library')"
+          [class.active]="isRouteActive('/library')"
+          class="nav-item"
+        >
+          <mat-icon matListItemIcon>library_music</mat-icon>
+          <span matListItemTitle>My Library</span>
+        </mat-list-item>
+
+        <mat-list-item
+          (click)="onNavigation('/discover')"
+          [class.active]="isRouteActive('/discover')"
+          class="nav-item"
+        >
+          <mat-icon matListItemIcon>explore</mat-icon>
+          <span matListItemTitle>Discover</span>
+        </mat-list-item>
+      </mat-nav-list>
+    </nav>
+  </mat-drawer>
+
+  <!-- Main Content Area -->
+  <mat-drawer-content class="shell-content">
+    <router-outlet />
+  </mat-drawer-content>
+</mat-drawer-container>

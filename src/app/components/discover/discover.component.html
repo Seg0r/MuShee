@@ -1,0 +1,60 @@
+<main class="discover-container">
+  <!-- Loading State -->
+  @if (isInitialLoading()) {
+    <div class="loading-state">
+      <app-loading-skeleton [count]="skeletonCount()" />
+    </div>
+  } @else {
+    <!-- Songs Grid -->
+    <div #scrollContainer class="scroll-container">
+      <div class="songs-grid">
+        @for (song of visibleSongs(); track song.id) {
+          <div class="song-card-wrapper">
+            <div class="song-card-content">
+              <h3 class="song-title">{{ song.song_details.title }}</h3>
+              <p class="song-composer">{{ song.song_details.composer }}</p>
+              <button
+                matButton
+                [disabled]="isAddingToLibrary(song.id) || isSongInLibrary(song.id)"
+                (click)="onAddToLibrary(song.id)"
+                [attr.aria-label]="getSongButtonText(song.id)"
+                class="add-button"
+                [class.loading]="isAddingToLibrary(song.id)"
+              >
+                @if (isAddingToLibrary(song.id)) {
+                  <mat-spinner diameter="20"></mat-spinner>
+                  <span>Adding...</span>
+                } @else {
+                  {{ getSongButtonText(song.id) }}
+                }
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Pagination Loading Indicator -->
+      @if (isPaginationLoading()) {
+        <div class="pagination-loading">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading more songs...</p>
+        </div>
+      }
+    </div>
+
+    <!-- Back to Top FAB -->
+    @if (isBackToTopVisible()) {
+      <button matFab (click)="scrollToTop()" class="back-to-top-fab" aria-label="Scroll to top">
+        <mat-icon>arrow_upward</mat-icon>
+      </button>
+    }
+  }
+
+  <!-- Error State -->
+  @if (error()) {
+    <div class="error-banner">
+      <p>{{ error()!.message }}</p>
+      <button matButton (click)="retryInitialize()">Retry</button>
+    </div>
+  }
+</main>
