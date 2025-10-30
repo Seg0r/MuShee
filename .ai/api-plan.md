@@ -41,15 +41,14 @@ This document defines the API integration architecture for MuShee, a web-based s
 
 Authentication is handled entirely through **Supabase Auth** using the client-side SDK. The Angular application will use Supabase's authentication methods for:
 
-- User registration (email/password) - **optional**, required only for personal library management
-- User login (email/password) - **optional**, required only for personal library management
+- User registration (email/password)
+- User login (email/password)
 - User logout
 - Session management
 
 ### Implementation Details
 
-- Authentication is optional for browsing public domain songs and viewing public sheet music
-- Authentication is required for creating/managing personal library, uploading songs, and accessing AI suggestions
+- Authentication is handled entirely through Supabase Auth SDK in the Angular application
 - Supabase SDK automatically manages JWT tokens, refresh, and session persistence
 - Direct database operations use RLS policies with `auth.uid()` for automatic authorization
 - Edge Functions receive authenticated context through Supabase client calls

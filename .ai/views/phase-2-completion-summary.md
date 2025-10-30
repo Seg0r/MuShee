@@ -199,7 +199,6 @@
 3. Calls `ProfileService.updateCurrentUserProfile()`
 4. Sets `has_completed_onboarding: true` in database
 5. Dialog closes with `{ success: true }`
-6. Shows success notification: "Welcome! Happy listening!"
 
 **Auto-Trigger Logic:**
 

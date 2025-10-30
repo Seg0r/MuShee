@@ -211,18 +211,11 @@ export class LibraryComponent implements OnInit, OnDestroy {
   }
 
   private openOnboardingDialog(): void {
-    this.dialog
-      .open(OnboardingDialogComponent, {
-        width: '600px',
-        maxWidth: '90vw',
-        disableClose: true,
-      })
-      .afterClosed()
-      .subscribe(result => {
-        if (result?.success) {
-          this.showSuccessNotification('Welcome! Happy listening!');
-        }
-      });
+    this.dialog.open(OnboardingDialogComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      disableClose: true,
+    });
   }
 
   // ============================================================================
