@@ -2,10 +2,10 @@ import { Routes } from '@angular/router';
 import { publicOnlyGuard, authGuard } from './guards/public-only.guard';
 
 export const routes: Routes = [
-  // Root redirect - routes to login if not authenticated
+  // Root redirect - routes to discover view (public access)
   {
     path: '',
-    redirectTo: '/login',
+    redirectTo: '/discover',
     pathMatch: 'full',
   },
 
@@ -25,6 +25,14 @@ export const routes: Routes = [
     data: { title: 'Create Account - MuShee' },
   },
 
+  // Public discover route
+  {
+    path: 'discover',
+    loadComponent: () =>
+      import('./components/discover/discover.component').then(m => m.DiscoverComponent),
+    data: { title: 'Discover - MuShee' },
+  },
+
   // Protected routes
   {
     path: 'library',
@@ -37,6 +45,6 @@ export const routes: Routes = [
   // Wildcard route for 404 handling
   {
     path: '**',
-    redirectTo: '/login',
+    redirectTo: '/discover',
   },
 ];
