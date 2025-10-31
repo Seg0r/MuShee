@@ -11,7 +11,7 @@ import {
   Injector,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
@@ -33,6 +33,7 @@ import { OnboardingDialogComponent } from '../onboarding-dialog/onboarding-dialo
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     MatButtonModule,
     MatIconModule,
     MatDialogModule,

@@ -29,7 +29,7 @@
           <mat-icon>cloud_upload</mat-icon>
           Upload Your Music
         </button>
-        <button matButton="outlined" (click)="onUploadClick()">
+        <button matButton [routerLink]="['/app/discover']">
           <mat-icon>explore</mat-icon>
           Browse Public Library
         </button>
@@ -65,13 +65,15 @@
 
   <!-- FABs -->
   <div class="fab-container">
-    <!-- Upload FAB -->
-    <button matFab class="upload-fab" (click)="onUploadClick()" aria-label="Upload a new song">
-      <mat-icon>cloud_upload</mat-icon>
-    </button>
+    <!-- Upload FAB - only show after loading and when library has content -->
+    @if (!isLoading() && !isEmptyState()) {
+      <button matFab class="upload-fab" (click)="onUploadClick()" aria-label="Upload a new song">
+        <mat-icon>cloud_upload</mat-icon>
+      </button>
+    }
 
-    <!-- Find Similar Music FAB -->
-    @if (canFindSimilar()) {
+    <!-- Find Similar Music FAB - only show after loading and when library has content -->
+    @if (!isLoading() && canFindSimilar()) {
       <button
         matFab
         class="find-similar-fab"
