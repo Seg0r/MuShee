@@ -6,7 +6,7 @@
     "usageStatisticsEnabled": false
   },
   "context": {
-    "fileName": ["GEMINI.md"],
+    "fileName": ["GEMINI.md", ".gemini/AGENTS.md"],
     "includeDirectories": [".cursor/rules/always"],
     "loadFromIncludeDirectories": false,
     "fileFiltering": {
