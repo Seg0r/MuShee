@@ -109,6 +109,49 @@ Musicians who want to centralize their sheet music collection and discover new p
 3. Configure Row Level Security (RLS) policies for user data isolation
 4. Run database migrations if any are provided in the project
 
+### Seeding Public Domain Scores
+
+The application comes with pre-loaded public domain sheet music scores. To seed these scores into your database:
+
+1. **Ensure your database schema is set up** (run migrations first)
+
+2. **Set up additional environment variables** for seeding:
+
+   Add to your `.env` file:
+
+   ```env
+   # Supabase Service Role Key (required for seeding)
+   SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+   ```
+
+   **Note**: The service role key has admin privileges and should be kept secure. Never commit it to version control.
+
+3. **Run the seeding script**:
+
+   ```bash
+   npm run seed:scores
+   ```
+
+   This will:
+   - Parse MusicXML files from `src/assets/scores/`
+   - Extract metadata (composer, title) from each file
+   - Upload files to Supabase Storage
+   - Create database records with `uploader_id = NULL` (public domain)
+
+4. **Verify the seeding**:
+
+   The script will output a summary of successfully seeded and failed files. Check your Supabase dashboard to confirm the scores appear in the `songs` table and storage bucket.
+
+#### GitHub Actions (Optional CI/CD)
+
+For automated seeding in production, use the provided GitHub Actions workflow:
+
+1. Set up the following secrets in your GitHub repository:
+   - `SUPABASE_URL`: Your Supabase project URL
+   - `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase service role key
+
+2. Trigger the workflow manually from the Actions tab or call it from another workflow after database migrations.
+
 ## Available Scripts
 
 | Command                | Description                                              |
@@ -122,6 +165,7 @@ Musicians who want to centralize their sheet music collection and discover new p
 | `npm run format`       | Formats code using Prettier                              |
 | `npm run format:check` | Checks if code is properly formatted                     |
 | `npm run prepare`      | Sets up Husky git hooks                                  |
+| `npm run seed:scores`  | Seeds public domain scores into the database             |
 
 ## Project Scope
 

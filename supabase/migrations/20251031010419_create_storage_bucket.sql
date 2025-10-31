@@ -1,0 +1,30 @@
+-- Migration: Create storage bucket for MusicXML files
+-- Date: 2025-10-31 01:04:19 UTC
+-- Description: Creates the 'musicxml-files' storage bucket for storing MusicXML files
+-- Purpose: Required for the seed-scores.ts script to upload public domain MusicXML files
+-- Affected: Storage system (not database tables)
+-- Special considerations:
+--   - Storage buckets are managed through Supabase dashboard/CLI, not SQL DDL
+--   - This migration documents the requirement rather than executing it
+--   - Bucket must be created before running the seed-scores script
+
+-- Note: This is a documentation migration for storage bucket creation.
+-- Storage buckets cannot be created through SQL DDL statements.
+-- Execute the following command manually or through CI/CD:
+--
+-- Using Supabase CLI:
+-- supabase storage create-bucket musicxml-files --public
+--
+-- Or through Supabase Dashboard:
+-- 1. Go to Storage in your Supabase project dashboard
+-- 2. Create a new bucket named 'musicxml-files'
+-- 3. Make it public (allow public access for reading MusicXML files)
+--
+-- Bucket configuration:
+-- - Name: musicxml-files
+-- - Public: true (required for anonymous access to sheet music files)
+-- - File size limit: Default (50MB) - sufficient for MusicXML files
+-- - Allowed MIME types: application/vnd.recordare.musicxml (optional, but recommended)
+
+-- This migration serves as documentation and can be marked as applied
+-- once the bucket has been created through the appropriate interface.

@@ -11,7 +11,8 @@
     "lint:fix": "ng lint --fix",
     "format": "prettier --write \"src/**/*.{ts,html,scss,css,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,html,scss,css,json}\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "seed:scores": "tsx scripts/seed-scores.ts"
   },
   "private": true,
   "dependencies": {
@@ -31,6 +32,8 @@
     "opensheetmusicdisplay": "^1.9.2",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "xml2js": "^0.6.2",
+    "yauzl": "^3.2.0",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
@@ -39,6 +42,8 @@
     "@angular/compiler-cli": "^19.2.0",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^24.9.1",
+    "@types/xml2js": "^0.4.14",
+    "@types/yauzl": "^2.10.3",
     "angular-eslint": "20.4.0",
     "eslint": "^9.37.0",
     "eslint-config-prettier": "^10.1.8",
@@ -53,6 +58,7 @@
     "lint-staged": "^16.2.4",
     "prettier": "^3.6.2",
     "supabase": "^2.51.0",
+    "tsx": "^4.7.0",
     "typescript": "~5.7.2",
     "typescript-eslint": "8.46.0"
   },

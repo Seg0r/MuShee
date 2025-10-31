@@ -34,5 +34,14 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "eslint.validate": ["javascript", "typescript", "html"],
-  "cSpell.words": ["Flexbox", "mushee", "musicxml", "OSMD", "Sidenav", "supabase", "WCAG"]
+  "cSpell.words": [
+    "Flexbox",
+    "mushee",
+    "musicxml",
+    "opensheetmusicdisplay",
+    "OSMD",
+    "Sidenav",
+    "supabase",
+    "WCAG"
+  ]
 }
