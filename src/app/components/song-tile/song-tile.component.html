@@ -1,0 +1,50 @@
+<mat-card class="song-tile" (click)="onTileClick()">
+  <mat-card-content class="song-tile-content">
+    <div class="song-details">
+      <h3 class="song-title">{{ song().song_details.title }}</h3>
+      <p class="song-composer">{{ song().song_details.composer }}</p>
+    </div>
+
+    <div class="song-actions">
+      @if (config().action === 'add') {
+        <button
+          matButton
+          [disabled]="buttonState()?.disabled"
+          (click)="onAddToLibrary()"
+          [attr.aria-label]="buttonState()?.text"
+          class="action-button"
+          [class.loading]="buttonState()?.showSpinner"
+        >
+          @if (buttonState()?.showSpinner) {
+            <mat-spinner diameter="20"></mat-spinner>
+            <span>{{ buttonState()?.text }}</span>
+          } @else {
+            {{ buttonState()?.text }}
+          }
+        </button>
+      }
+
+      @if (config().action === 'delete') {
+        <button
+          matIconButton
+          class="delete-button"
+          [disabled]="buttonState()?.disabled"
+          (click)="onDeleteClick($event)"
+          aria-label="Delete song"
+        >
+          @if (buttonState()?.showSpinner) {
+            <mat-spinner diameter="16"></mat-spinner>
+          } @else {
+            <mat-icon>delete</mat-icon>
+          }
+        </button>
+      }
+    </div>
+  </mat-card-content>
+
+  @if (config().showFooter && addedDate()) {
+    <mat-card-footer class="song-tile-footer">
+      <small class="song-added-date"> Added {{ addedDate() | date: 'short' }} </small>
+    </mat-card-footer>
+  }
+</mat-card>

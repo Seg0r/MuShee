@@ -14,27 +14,12 @@
     <div #scrollContainer class="scroll-container">
       <div class="songs-grid">
         @for (song of visibleSongs(); track song.id) {
-          <div class="song-card-wrapper">
-            <div class="song-card-content">
-              <h3 class="song-title">{{ song.song_details.title }}</h3>
-              <p class="song-composer">{{ song.song_details.composer }}</p>
-              <button
-                matButton
-                [disabled]="isAddingToLibrary(song.id) || isSongInLibrary(song.id)"
-                (click)="onAddToLibrary(song.id)"
-                [attr.aria-label]="getSongButtonText(song.id)"
-                class="add-button"
-                [class.loading]="isAddingToLibrary(song.id)"
-              >
-                @if (isAddingToLibrary(song.id)) {
-                  <mat-spinner diameter="20"></mat-spinner>
-                  <span>Adding...</span>
-                } @else {
-                  {{ getSongButtonText(song.id) }}
-                }
-              </button>
-            </div>
-          </div>
+          <app-song-tile
+            [song]="song"
+            [config]="getSongTileConfig(song)"
+            (tileClick)="onSongCardClick(song)"
+            (addToLibrary)="onAddToLibrary(song)"
+          />
         }
       </div>
 

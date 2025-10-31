@@ -41,16 +41,12 @@
   @if (!isEmptyState() && !isLoading()) {
     <div class="songs-grid">
       @for (song of visibleSongs(); track song.song_id) {
-        <app-song-card [song]="song" (cardClick)="onSongCardClick(song)">
-          <button
-            matIconButton
-            class="delete-button"
-            (click)="onSongDeleteClick(song)"
-            aria-label="Delete song"
-          >
-            <mat-icon>delete</mat-icon>
-          </button>
-        </app-song-card>
+        <app-song-tile
+          [song]="song"
+          [config]="getSongTileConfig()"
+          (tileClick)="onSongCardClick(song)"
+          (deleteClick)="onSongDeleteClick(song)"
+        />
       }
     </div>
 

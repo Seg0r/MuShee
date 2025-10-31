@@ -4,7 +4,7 @@
   display: block;
 }
 
-.song-card {
+.song-tile {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -25,7 +25,7 @@
   }
 }
 
-.song-card-content {
+.song-tile-content {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -80,11 +80,31 @@
   align-self: flex-end;
 }
 
+.action-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  &.loading {
+    opacity: 0.8;
+  }
+
+  mat-spinner {
+    display: inline-block;
+  }
+}
+
+.delete-button {
+  flex-shrink: 0;
+}
+
 // ============================================================================
 // Song Footer
 // ============================================================================
 
-.song-card-footer {
+.song-tile-footer {
   padding: 0.75rem 1rem;
   border-top: 1px solid var(--mat-sys-outline-variant);
   background: var(--mat-sys-surface-container);

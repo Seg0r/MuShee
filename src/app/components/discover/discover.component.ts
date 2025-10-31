@@ -17,6 +17,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { LoadingSkeletonComponent } from '../loading-skeleton/loading-skeleton.component';
+import { SongTileComponent, type SongTileConfig } from '../song-tile/song-tile.component';
 import { SongService } from '../../services/song.service';
 import { UserLibraryService } from '../../services/user-library.service';
 import { AuthService } from '../../services/auth.service';
@@ -31,6 +32,7 @@ const pageSongLimit = 50;
   imports: [
     CommonModule,
     LoadingSkeletonComponent,
+    SongTileComponent,
     MatSnackBarModule,
     MatButtonModule,
     MatIconModule,
@@ -168,6 +170,23 @@ export class DiscoverComponent implements OnInit {
       add: 'Add to Library',
     };
     return buttonTexts[state] || 'Add to Library';
+  }
+
+  /**
+   * Get configuration for song tile component
+   */
+  getSongTileConfig(song: PublicSongListItemDto): SongTileConfig {
+    const songId = song.id;
+    const isLoading = this.isAddingToLibrary(songId);
+    const isInLibrary = this.isSongInLibrary(songId);
+    const isAuthenticated = this.authService.isAuthenticated();
+
+    return {
+      showFooter: false, // Public library doesn't show added dates
+      action: 'add', // Public library shows add action
+      isLoading,
+      isInLibrary: isAuthenticated ? isInLibrary : false,
+    };
   }
 
   // ============================================================================
@@ -308,7 +327,8 @@ export class DiscoverComponent implements OnInit {
   /**
    * Handle add to library button click
    */
-  async onAddToLibrary(songId: string): Promise<void> {
+  async onAddToLibrary(song: PublicSongListItemDto): Promise<void> {
+    const songId = song.id;
     // Check authentication
     if (!this.authService.isAuthenticated()) {
       await this.router.navigate(['/login']);

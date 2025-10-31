@@ -21,7 +21,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import type { UserLibraryItemDto, ErrorCode, ProfileDto, UploadSongResponseDto } from '@/types';
 import { UserLibraryService } from '@/app/services/user-library.service';
 import { ProfileService } from '@/app/services/profile.service';
-import { SongCardComponent } from '../song-card/song-card.component';
+import { SongTileComponent, type SongTileConfig } from '../song-tile/song-tile.component';
 import { EmptyStateComponent } from '../empty-state/empty-state.component';
 import { LoadingSkeletonComponent } from '../loading-skeleton/loading-skeleton.component';
 import { UploadDialogComponent } from '../upload-dialog/upload-dialog.component';
@@ -39,7 +39,7 @@ import { OnboardingDialogComponent } from '../onboarding-dialog/onboarding-dialo
     MatDialogModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
-    SongCardComponent,
+    SongTileComponent,
     EmptyStateComponent,
     LoadingSkeletonComponent,
   ],
@@ -153,6 +153,17 @@ export class LibraryComponent implements OnInit, OnDestroy {
     this.error.set(null);
     this.initialLoading.set(true);
     this.loadInitialLibrary();
+  }
+
+  /**
+   * Get configuration for song tile component
+   */
+  getSongTileConfig(): SongTileConfig {
+    return {
+      showFooter: true, // User library shows added dates
+      action: 'delete', // User library shows delete action
+      isLoading: false, // No loading state for delete operations in this view
+    };
   }
 
   onScroll(event: Event): void {

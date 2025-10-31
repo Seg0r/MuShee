@@ -64,93 +64,18 @@
 .songs-grid {
   display: grid;
   gap: 1.5rem;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   grid-auto-rows: max-content;
 
-  // Responsive breakpoints
+  // Responsive breakpoints - consistent with library component
   @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 1rem;
-    padding: 0;
   }
 
-  @media (max-width: 600px) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-  }
-
-  @media (max-width: 400px) {
+  @media (max-width: 480px) {
     grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-}
-
-.song-card-wrapper {
-  background: var(--mat-sys-surface-container);
-  border-radius: var(--mat-sys-corner-medium);
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid var(--mat-sys-outline-variant);
-
-  &:hover {
-    background: var(--mat-sys-surface-container-high);
-    box-shadow: var(--mat-sys-level1);
-    transform: translateY(-2px);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-}
-
-.song-card-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.song-title {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--mat-sys-on-surface);
-  line-height: 1.3;
-  word-wrap: break-word;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  line-clamp: 2;
-}
-
-.song-composer {
-  margin: 0;
-  font-size: 0.875rem;
-  color: var(--mat-sys-on-surface-variant);
-  font-weight: 400;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.add-button {
-  width: 100%;
-  margin-top: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-
-  &.loading {
-    opacity: 0.8;
-  }
-
-  mat-spinner {
-    display: inline-block;
+    gap: 1rem;
   }
 }
 
