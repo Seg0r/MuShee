@@ -208,7 +208,7 @@ async function parseMusicXMLMetadata(xmlContent: string): Promise<MusicXMLMetada
   try {
     const parsed = await parseStringPromise(xmlContent, {
       explicitArray: false,
-      ignoreAttrs: true,
+      ignoreAttrs: false,
       normalize: true,
       normalizeTags: false,
       trim: true,
@@ -377,44 +377,36 @@ async function processScoreFile(
   const filePath = join(SCORES_DIR, fileName);
 
   try {
-    console.log(`\n📄 Processing: ${fileName}`);
+    console.log(`📄 Processing: ${fileName}`);
 
     // Read file content
     const fileBuffer = readFileAsArrayBuffer(filePath);
 
     // Calculate hash for deduplication
     const fileHash = calculateFileHash(fileBuffer);
-    console.log(`   Hash: ${fileHash}`);
 
     // Check if song already exists
     const exists = await checkSongExists(supabase, fileHash);
     if (exists) {
-      console.log(`   ⚠️  Skipping: Song already exists in database`);
-      return { success: true, fileName }; // Not an error, just already seeded
+      console.log(`   ⚠️  Already exists, skipping`);
+      return { success: true, fileName };
     }
 
     // Extract XML content from MXL file
-    console.log(`   📦 Extracting XML from MXL file...`);
     const xmlContent = await extractXMLFromMXL(fileBuffer);
 
     // Parse metadata
     const metadata = await parseMusicXMLMetadata(xmlContent);
-    console.log(`   Title: "${metadata.title}"`);
-    console.log(`   Composer: "${metadata.composer}"`);
 
-    // Upload to storage
-    console.log(`   📤 Uploading to storage...`);
+    // Upload to storage and create database record
     await uploadToStorage(supabase, fileHash, fileBuffer);
-
-    // Create database record
-    console.log(`   💾 Creating database record...`);
     const songId = await createSongRecord(supabase, metadata, fileHash);
 
-    console.log(`   ✅ Successfully seeded: ${songId}`);
+    console.log(`   ✅ Seeded: "${metadata.title}" by ${metadata.composer || 'Unknown'}`);
     return { success: true, fileName, songId };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error(`   ❌ Failed to process ${fileName}: ${errorMessage}`);
+    console.error(`   ❌ Failed: ${errorMessage}`);
     return { success: false, fileName, error: errorMessage };
   }
 }
@@ -429,46 +421,36 @@ async function main() {
 
   try {
     // Initialize Supabase client
-    console.log('🔗 Connecting to Supabase...');
     const supabase = createSupabaseClient();
-    console.log('✅ Connected successfully\n');
+    console.log('✅ Connected to Supabase');
 
     // Ensure storage bucket exists
-    console.log('📦 Checking/creating storage bucket...');
-    try {
-      const { data: buckets } = await supabase.storage.listBuckets();
-      const bucketExists = buckets?.some(bucket => bucket.name === STORAGE_BUCKET);
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const bucketExists = buckets?.some(bucket => bucket.name === STORAGE_BUCKET);
 
-      if (!bucketExists) {
-        console.log(`   Creating bucket '${STORAGE_BUCKET}'...`);
-        const { error: createError } = await supabase.storage.createBucket(STORAGE_BUCKET, {
-          public: true,
-          allowedMimeTypes: ['application/vnd.recordare.musicxml'],
-          fileSizeLimit: 52428800, // 50MB
-        });
+    if (!bucketExists) {
+      const { error: createError } = await supabase.storage.createBucket(STORAGE_BUCKET, {
+        public: true,
+        allowedMimeTypes: ['application/vnd.recordare.musicxml'],
+        fileSizeLimit: 52428800, // 50MB
+      });
 
-        if (createError) {
-          throw new Error(`Failed to create bucket: ${createError.message}`);
-        }
-        console.log('   ✅ Bucket created successfully');
-      } else {
-        console.log('   ✅ Bucket already exists');
+      if (createError) {
+        throw new Error(`Failed to create bucket: ${createError.message}`);
       }
-    } catch (error) {
-      console.error('   ❌ Failed to check/create bucket:', error);
-      throw error;
+      console.log('📦 Created storage bucket');
     }
-    console.log('');
 
     // Get all score files
     const scoreFiles = getScoreFiles();
-    console.log(`📂 Found ${scoreFiles.length} score files in ${SCORES_DIR}/`);
-    console.log(`   Files: ${scoreFiles.join(', ')}\n`);
+    console.log(`📂 Found ${scoreFiles.length} score files`);
 
     if (scoreFiles.length === 0) {
-      console.log('⚠️  No .mxl files found. Please add score files to src/assets/scores/');
+      console.log('⚠️  No .mxl files found in src/assets/scores/');
       process.exit(0);
     }
+
+    console.log(''); // Add spacing before processing
 
     // Process each file
     const results: SeedResult[] = [];
@@ -478,39 +460,21 @@ async function main() {
     }
 
     // Summary
-    console.log('\n==============================================');
-    console.log('📊 Seeding Summary');
-
     const successful = results.filter(r => r.success);
     const failed = results.filter(r => !r.success);
 
-    console.log(`✅ Successful: ${successful.length}`);
-    console.log(`❌ Failed: ${failed.length}`);
-
-    if (successful.length > 0) {
-      console.log('\n🎵 Successfully seeded songs:');
-      successful.forEach(result => {
-        if (result.songId) {
-          console.log(`   • ${result.fileName} → ${result.songId}`);
-        }
-      });
-    }
+    console.log(`\n📊 Summary: ${successful.length} successful, ${failed.length} failed`);
 
     if (failed.length > 0) {
-      console.log('\n❌ Failed to seed:');
+      console.log('\n❌ Failed files:');
       failed.forEach(result => {
         console.log(`   • ${result.fileName}: ${result.error}`);
       });
+      process.exit(1);
     }
 
-    // Exit with appropriate code
-    if (failed.length > 0) {
-      console.log('\n⚠️  Seeding completed with errors. Check the output above.');
-      process.exit(1);
-    } else {
-      console.log('\n🎉 All scores seeded successfully!');
-      process.exit(0);
-    }
+    console.log('🎉 All scores seeded successfully!');
+    process.exit(0);
   } catch (error) {
     console.error('\n💥 Fatal error during seeding:', error);
     process.exit(1);
