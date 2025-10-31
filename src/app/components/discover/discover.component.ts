@@ -24,6 +24,7 @@ import { ErrorHandlingService } from '../../services/error-handling.service';
 
 import type { PublicSongListItemDto, UserLibraryItemDto } from '@/types';
 
+const pageSongLimit = 50;
 @Component({
   selector: 'app-discover',
   standalone: true,
@@ -194,7 +195,7 @@ export class DiscoverComponent implements OnInit {
       // Load public songs (first page)
       const songsResponse = await this.songService.getPublicSongsList({
         page: 1,
-        limit: 50,
+        limit: pageSongLimit,
       });
 
       this.publicSongs.set(songsResponse.data);
@@ -208,7 +209,7 @@ export class DiscoverComponent implements OnInit {
         try {
           const libraryResponse = await this.userLibraryService.getUserLibrary({
             page: 1,
-            limit: 1000, // Load all songs to check library membership
+            limit: pageSongLimit,
           });
           this.userLibrarySongs.set(libraryResponse.data);
         } catch (error) {

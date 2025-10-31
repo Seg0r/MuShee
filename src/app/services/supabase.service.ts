@@ -304,25 +304,25 @@ export class SupabaseService {
         hasAccess = true;
       } else {
         // Check if user has this song in their library
-        const { error: userSongError } = await this.client
+        const { data: userSongData, error: userSongError } = await this.client
           .from('user_songs')
           .select('user_id')
           .eq('song_id', songId)
           .eq('user_id', userId)
-          .single();
+          .maybeSingle();
 
         if (userSongError) {
-          // If not found, user doesn't have access
-          if (userSongError.code === 'PGRST116') {
-            hasAccess = false;
-          } else {
-            console.error(
-              'Database error checking user song access:',
-              { songId, userId },
-              userSongError
-            );
-            throw userSongError;
-          }
+          console.error(
+            'Database error checking user song access:',
+            { songId, userId },
+            userSongError
+          );
+          throw userSongError;
+        }
+
+        if (userSongData === null) {
+          // User doesn't have access
+          hasAccess = false;
         } else {
           // User has this song in their library
           hasAccess = true;
@@ -454,22 +454,22 @@ export class SupabaseService {
     try {
       console.log('Checking if song is already in user library:', { songId, userId });
 
-      const { error } = await this.client
+      const { data, error } = await this.client
         .from('user_songs')
         .select('user_id')
         .eq('song_id', songId)
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) {
-        // If not found, song is not in library
-        if (error.code === 'PGRST116') {
-          console.log('Song not found in user library:', { songId, userId });
-          return false;
-        }
-        // Other database errors should be thrown
         console.error('Database error checking song in library:', { songId, userId }, error);
         throw error;
+      }
+
+      // If data is null, song is not in library
+      if (data === null) {
+        console.log('Song not found in user library:', { songId, userId });
+        return false;
       }
 
       // Song found in library
