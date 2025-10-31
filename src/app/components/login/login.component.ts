@@ -74,7 +74,7 @@ export class LoginComponent implements OnInit {
 
       console.log('Existing session found, redirecting to library');
       // User already authenticated, redirect to library
-      await this.router.navigate(['/library']);
+      await this.router.navigate(['/app/library']);
     } catch (error) {
       console.error('Error checking existing session:', error);
       // On error, show login form (safe fallback)
@@ -151,7 +151,7 @@ export class LoginComponent implements OnInit {
 
       // Navigate to library
       console.log('Login complete, redirecting to library');
-      await this.router.navigate(['/library']);
+      await this.router.navigate(['/app/library']);
     } catch (error) {
       // Handle unexpected errors
       console.error('Unexpected error during login:', error);

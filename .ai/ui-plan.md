@@ -145,7 +145,7 @@ The application uses a persistent shell layout built with Angular Material's `ma
 
 ### 2.3 User Library View
 
-- **View Path**: `/library`
+- **View Path**: `/app/library`
 - **Access**: Protected (authenticated users only)
 - **Main Purpose**: Display and manage the user's personal sheet music collection
 
@@ -205,7 +205,7 @@ The application uses a persistent shell layout built with Angular Material's `ma
 
 ### 2.4 Public Library Discovery View
 
-- **View Path**: `/discover`
+- **View Path**: `/app/discover`
 - **Access**: Public (anonymous and authenticated users)
 - **Main Purpose**: Browse pre-loaded public domain songs and add to personal library (authenticated users only)
 
@@ -261,7 +261,8 @@ The application uses a persistent shell layout built with Angular Material's `ma
 - **Access**: Public for public domain songs, Protected for personal library songs
   - Authenticated users: Can view songs from personal library
   - Unauthenticated users: Can view public domain songs
-- **Main Purpose**: Display rendered sheet music with zoom controls and collect rendering quality feedback
+- **Main Purpose**: Display rendered sheet music in full-screen with zoom controls and collect rendering quality feedback
+- **Layout**: Full-screen view (no shell navigation), maximizes canvas visibility
 
 #### Key Information to Display
 
@@ -340,7 +341,7 @@ The application uses a persistent shell layout built with Angular Material's `ma
 - Loading state displays
 - API creates account via Supabase Auth
 - User automatically authenticated
-- Redirects to `/library`
+- Redirects to `/app/library`
 
 **Step 3: Onboarding Experience**
 
@@ -388,13 +389,13 @@ The application uses a persistent shell layout built with Angular Material's `ma
 **Step 7: Returning to Library**
 
 - User clicks back button
-- Returns to `/library`
+- Returns to `/app/library`
 - Sees their song in the library
 
 **Step 8: Discovering Public Domain Songs**
 
 - User clicks "Discover" in navigation sidebar
-- Navigates to `/discover`
+- Navigates to `/app/discover`
 - Public library view loads with skeleton loaders
 - Song grid appears with public domain collection
 - User scrolls through available songs (infinite scroll)
@@ -411,7 +412,7 @@ The application uses a persistent shell layout built with Angular Material's `ma
 
 **Step 10: Getting AI Recommendations**
 
-- User navigates back to `/library`
+- User navigates back to `/app/library`
 - Now has multiple songs in library
 - "Find Similar Music" FAB is visible (wasn't visible when library was empty)
 - User clicks "Find Similar Music" FAB
@@ -470,10 +471,10 @@ The application uses a persistent shell layout built with Angular Material's `ma
 
 1. User navigates to application URL
 2. `AuthService` initialized via `provideAppInitializer` checks for existing session
-3. If authenticated, redirects to `/library`
+3. If authenticated, redirects to `/app/library`
 4. If not, redirects to `/login`
 5. User logs in with stored credentials (browser autofill)
-6. Redirects to `/library`
+6. Redirects to `/app/library`
 7. Library loads with existing songs
 8. User clicks song to view sheet music
 9. Navigates between library and discover views seamlessly
@@ -482,22 +483,22 @@ The application uses a persistent shell layout built with Angular Material's `ma
 
 **Discovery Without Authentication**:
 
-1. User lands on application or navigates directly to `/discover`
+1. User lands on application or navigates directly to `/app/discover`
 2. `AuthService` checks session - user is not authenticated
-3. Discover view loads without shell sidebar (simplified layout)
+3. Discover view loads with shell sidebar showing only Discover link
 4. Public domain song grid displays with infinite scroll
 5. User can view sheet music by clicking on song cards
 6. User wants to add song to library
 7. User clicks "Sign in to add" button (or "Add to Library" which prompts)
 8. Directed to login/register page
 9. User creates account or logs in
-10. Redirected back to `/discover` or `/library` (depending on implementation)
+10. Redirected back to `/app/discover` or `/app/library` (depending on implementation)
 
 **View Sheet Music as Anonymous**:
 
-1. Unauthenticated user clicks on song in `/discover`
+1. Unauthenticated user clicks on song in `/app/discover`
 2. Navigates to `/song/:songId` for that public song
-3. Sheet music renders with zoom controls
+3. Sheet music renders with zoom controls (full-screen, no shell)
 4. Feedback FABs present but clicking prompts "Sign in to rate"
 5. User can view unrated or navigate back
 
@@ -542,23 +543,24 @@ The application uses a persistent shell layout built with Angular Material's `ma
 
 ### 4.1 Shell Layout (AppShellComponent)
 
-The application uses a persistent shell layout that remains consistent across all authenticated views:
+The application uses a **unified, persistent shell layout** that remains consistent across all main views (library, discover, sheet music viewer). The shell adapts based on authentication state but is always present for these routes:
 
 ```
 +------------------------------------------------------------------+
-|  Toolbar                                                         |
-|  [MuShee Logo]                          [Help] [User Avatar ▼]   |
+||  Toolbar                                                         |
+||  [MuShee Logo]                          [Help] [User Avatar ▼]   |
+||                                         (or Login/Register)       |
 +------------------------------------------------------------------+
-|        |                                                         |
-| Side-  |  Main Content Area                                     |
-| bar    |  (Router Outlet)                                       |
-|        |                                                         |
-| My     |  [View-specific content]                               |
-| Library|                                                         |
-|        |                                                         |
-| Dis-   |                                                         |
-| cover  |                                                         |
-|        |                                                         |
+||        |                                                         |
+|| Side-  |  Main Content Area                                     |
+|| bar    |  (Router Outlet)                                       |
+||        |                                                         |
+|| My     |  [View-specific content]                               |
+|| Library|  - Library View (/app/library)                         |
+||        |  - Discover View (/app/discover)                       |
+|| Dis-   |                                                         |
+|| cover  |                                                         |
+||        |                                                         |
 +------------------------------------------------------------------+
 ```
 
@@ -578,12 +580,24 @@ The application uses a persistent shell layout that remains consistent across al
   - Single column layout for content
   - FAB buttons positioned for thumb access
 
+**Authentication-Based Adaptations**:
+
+- **Authenticated Users**:
+  - Sidebar shows both "My Library" and "Discover" navigation items
+  - Toolbar shows user avatar with dropdown menu (Help, Logout)
+  - Full access to all features and action buttons
+- **Unauthenticated Users** (browsing public content):
+  - Sidebar shows only "Discover" navigation item
+  - "My Library" hidden (guarded by AuthGuard)
+  - Toolbar shows "Login" and "Register" buttons instead of user avatar
+  - Action buttons show "Sign in" prompts instead of active functionality
+
 ### 4.2 Navigation Patterns
 
 #### Primary Navigation (Sidebar/Drawer)
 
-- **My Library** (`/library`): User's personal song collection
-- **Discover** (`/discover`): Browse public domain songs
+- **My Library** (`/app/library`): User's personal song collection
+- **Discover** (`/app/discover`): Browse public domain songs
 
 **Active Route Indication**:
 
@@ -610,34 +624,38 @@ The application uses a persistent shell layout that remains consistent across al
 
 ```
 / (root)
-  ├── login (public)
-  ├── register (public)
-  ├── discover (public, lazy-loaded)
-  ├── library (protected, lazy-loaded)
-  └── song/:songId (protected, lazy-loaded)
+  ├── login (public, no shell)
+  ├── register (public, no shell)
+  ├── song/:songId (full-screen viewer, no shell)
+  └── app (shell layout wrapper)
+      ├── library (protected by AuthGuard)
+      └── discover (public route, accessible to all)
 ```
 
 **Route Guards**:
 
-- **AuthGuard**: Protects `/library`, `/song/:songId`
+- **AuthGuard**: Protects `/app/library` and enforces authorization on `/song/:songId` for personal songs
   - Redirects unauthenticated users to `/login`
   - Implements functional guard pattern
   - Checks `AuthService.isAuthenticated` signal
+  - For song viewer: checks user has access to the specific song or song is public domain
 - **PublicOnlyGuard**: Protects `/login`, `/register`
-  - Redirects authenticated users to `/library`
+  - Redirects authenticated users to `/app/library`
   - Prevents authenticated users from accessing auth pages
 
 **Default Routes**:
 
-- `/` → Redirects to `/library` (if authenticated) or `/login` (if not)
-- Wildcard `**` → Redirects to `/library` or `/login` (404 handling)
+- `/` → Redirects to `/app/library` (if authenticated) or `/login` (if not)
+- Wildcard `**` → Redirects to `/app/library` or `/login` (404 handling)
 
 **Navigation Behaviors**:
 
 - Navigation preserves query parameters where relevant
-- Back button in viewer respects browser history
+- Back button in viewer respects browser history and returns to previous view (library or discover)
 - Programmatic navigation after successful auth/registration
 - Deep linking supported (auth guard redirects if needed)
+- Unauthenticated users accessing `/app/discover` see the shell with limited sidebar and no user menu
+- Song viewer (/song/:songId) operates in full-screen mode for maximum readability
 
 ### 4.4 Modal Navigation
 
@@ -1267,7 +1285,7 @@ Modals overlay the current view without changing the route:
 **US-010: Browse Pre-loaded Library**
 
 - **UI Elements**: Discover navigation item, public song grid with infinite scroll
-- **Flow**: User clicks "Discover" → navigates to `/discover` → public songs display as tiles
+- **Flow**: User clicks "Discover" → navigates to `/app/discover` → public songs display as tiles
 
 **US-011: Add Song from Pre-loaded Library**
 
@@ -1314,67 +1332,63 @@ Modals overlay the current view without changing the route:
 ```
 AppComponent
 ├── Router Outlet
-    ├── AppShellComponent (authenticated layout)
+    ├── AppShellComponent (unified layout for all main views)
     │   ├── Toolbar
     │   │   ├── Logo
     │   │   ├── Help/Tour Menu Item
-    │   │   └── User Avatar Dropdown
-    │   │       └── Logout Menu Item (triggers LogoutConfirmDialog)
+    │   │   └── User Menu (conditional based on auth)
+    │   │       ├── User Avatar Dropdown (authenticated)
+    │   │       │   └── Logout Menu Item (triggers LogoutConfirmDialog)
+    │   │       └── Login/Register Buttons (unauthenticated)
     │   ├── Sidenav Container
     │   │   ├── Sidenav (drawer for mobile)
-    │   │   │   ├── My Library NavLink
-    │   │   │   └── Discover NavLink
+    │   │   │   ├── My Library NavLink (authenticated only, guarded)
+    │   │   │   └── Discover NavLink (always visible)
     │   │   └── Main Content (Router Outlet)
-    │   │       ├── LibraryComponent
+    │   │       ├── LibraryComponent (protected by AuthGuard)
     │   │       │   ├── EmptyStateComponent (if no songs)
     │   │       │   ├── SongCardComponent[] (with delete action)
     │   │       │   ├── LoadingSkeletonComponent[] (during load)
     │   │       │   ├── Upload FAB
     │   │       │   └── Find Similar Music FAB (if songs exist)
-    │   │       ├── DiscoverComponent (authenticated)
-    │   │       │   ├── SongCardComponent[] (with active add action)
-    │   │       │   └── LoadingSkeletonComponent[] (during load)
-    │   │       └── SheetMusicViewerComponent
-    │   │           ├── Back Button
-    │   │           ├── Song Title Display
-    │   │           ├── OSMD Canvas
-    │   │           ├── Zoom Controls
-    │   │           └── Feedback FAB Group
-    │   ├── OnboardingDialogComponent (conditional)
+    │   │       │
+    │   │       └── DiscoverComponent (public route)
+    │   │           ├── SongCardComponent[] (action varies by auth state)
+    │   │           │   ├── "Add to Library" button (authenticated)
+    │   │           │   └── "Sign in to add" prompt (unauthenticated)
+    │   │           └── LoadingSkeletonComponent[] (during load)
+    │   │
+    │   ├── OnboardingDialogComponent (conditional, authenticated only)
     │   │   └── MatStepper (3 steps)
-    │   ├── UploadDialogComponent (triggered by FAB)
+    │   ├── UploadDialogComponent (triggered by FAB, authenticated only)
     │   │   ├── File Selector
     │   │   ├── Drag-Drop Zone
     │   │   └── Upload Button
-    │   ├── AiSuggestionsDialogComponent (triggered by FAB)
+    │   ├── AiSuggestionsDialogComponent (triggered by FAB, authenticated only)
     │   │   ├── Loading Spinner
     │   │   ├── Suggestion List
     │   │   │   └── Suggestion Item[] (with thumbs icons)
     │   │   └── Close Button
-    │   ├── ConfirmDialogComponent (delete)
+    │   ├── ConfirmDialogComponent (delete song)
     │   │   ├── Message with song details
     │   │   └── Cancel/Delete Buttons
     │   └── ConfirmDialogComponent (logout)
     │       ├── Logout message
     │       └── Cancel/Logout Buttons
     │
-    ├── DiscoverComponent (unauthenticated layout, public route)
-    │   ├── Simplified Toolbar (no user menu)
-    │   ├── SongCardComponent[] (with "Sign in to add" prompts)
-    │   ├── LoadingSkeletonComponent[] (during load)
-    │   └── Login/Register prompts on add action
-    │
-    ├── SheetMusicViewerComponent (unauthenticated, public route)
-    │   ├── Back Button / Toolbar
-    │   ├── Song Title Display
-    │   ├── OSMD Canvas
+    ├── SheetMusicViewerComponent (full-screen route, no shell)
+    │   ├── Back Button (top-left, returns to previous view)
+    │   ├── Song Title Display (header)
+    │   ├── OSMD Canvas (full-screen, maximized visibility)
     │   ├── Zoom Controls
-    │   └── Feedback FAB Group (prompts to sign in on click)
+    │   └── Feedback FAB Group (bottom-right)
+    │       ├── Thumbs up/down (authenticated users)
+    │       └── "Sign in to rate" prompts (unauthenticated users)
     │
-    ├── LoginComponent (public route)
+    ├── LoginComponent (public route, no shell)
     │   └── AuthFormComponent
     │
-    └── RegisterComponent (public route)
+    └── RegisterComponent (public route, no shell)
         └── AuthFormComponent
 ```
 

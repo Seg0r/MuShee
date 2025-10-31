@@ -132,7 +132,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
   // ============================================================================
 
   onSongCardClick(song: UserLibraryItemDto): void {
-    this.router.navigate(['/songs', song.song_id]);
+    this.router.navigate(['/song', song.song_id]);
   }
 
   onSongDeleteClick(song: UserLibraryItemDto): void {

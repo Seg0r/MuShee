@@ -1,8 +1,8 @@
 <mat-drawer-container class="shell-container" hasBackdrop="false">
   <!-- Main Toolbar -->
   <mat-toolbar color="primary" class="shell-toolbar">
-    <!-- Mobile Menu Toggle -->
-    @if (isMobileView()) {
+    <!-- Mobile Menu Toggle (only show for authenticated users) -->
+    @if (isMobileView() && isAuthenticated()) {
       <button
         matIconButton
         (click)="toggleDrawer()"
@@ -19,38 +19,49 @@
     <!-- Spacer -->
     <span class="spacer"></span>
 
-    <!-- Help/Tour Button -->
-    <button
-      matIconButton
-      (click)="onHelpClick()"
-      [attr.aria-label]="'Help and tour'"
-      matTooltip="Help"
-    >
-      <mat-icon>help</mat-icon>
-    </button>
-
-    <!-- User Menu -->
-    <button
-      matIconButton
-      [matMenuTriggerFor]="userMenu"
-      class="user-menu-trigger"
-      [attr.aria-label]="'User menu'"
-    >
-      <mat-icon>account_circle</mat-icon>
-    </button>
-
-    <!-- User Dropdown Menu -->
-    <mat-menu #userMenu="matMenu" class="user-dropdown">
-      <button mat-menu-item disabled>
-        <mat-icon>person</mat-icon>
-        <span>{{ userEmail() }}</span>
+    <!-- Help/Tour Button (only for authenticated users) -->
+    @if (isAuthenticated()) {
+      <button
+        matIconButton
+        (click)="onHelpClick()"
+        [attr.aria-label]="'Help and tour'"
+        matTooltip="Help"
+      >
+        <mat-icon>help</mat-icon>
       </button>
-      <mat-divider></mat-divider>
-      <button mat-menu-item (click)="onLogoutClick()">
-        <mat-icon>logout</mat-icon>
-        <span>Logout</span>
+    }
+
+    <!-- Authenticated User Menu -->
+    @if (isAuthenticated()) {
+      <button
+        matIconButton
+        [matMenuTriggerFor]="userMenu"
+        class="user-menu-trigger"
+        [attr.aria-label]="'User menu'"
+      >
+        <mat-icon>account_circle</mat-icon>
       </button>
-    </mat-menu>
+
+      <!-- User Dropdown Menu -->
+      <mat-menu #userMenu="matMenu" class="user-dropdown">
+        <button mat-menu-item disabled>
+          <mat-icon>person</mat-icon>
+          <span>{{ userEmail() }}</span>
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="onLogoutClick()">
+          <mat-icon>logout</mat-icon>
+          <span>Logout</span>
+        </button>
+      </mat-menu>
+    } @else {
+      <!-- Unauthenticated User Actions -->
+      <button matButton (click)="onNavigation('/login')" class="auth-button">Login</button>
+
+      <button mat-raised-button (click)="onNavigation('/register')" class="auth-button primary">
+        Create Account
+      </button>
+    }
   </mat-toolbar>
 
   <!-- Navigation Drawer -->
@@ -63,18 +74,22 @@
   >
     <nav class="sidebar-nav">
       <mat-nav-list class="nav-list">
-        <mat-list-item
-          (click)="onNavigation('/library')"
-          [class.active]="isRouteActive('/library')"
-          class="nav-item"
-        >
-          <mat-icon matListItemIcon>library_music</mat-icon>
-          <span matListItemTitle>My Library</span>
-        </mat-list-item>
+        <!-- Authenticated navigation -->
+        @if (isAuthenticated()) {
+          <mat-list-item
+            (click)="onNavigation('/app/library')"
+            [class.active]="isRouteActive('/app/library')"
+            class="nav-item"
+          >
+            <mat-icon matListItemIcon>library_music</mat-icon>
+            <span matListItemTitle>My Library</span>
+          </mat-list-item>
+        }
 
+        <!-- Always show Discover -->
         <mat-list-item
-          (click)="onNavigation('/discover')"
-          [class.active]="isRouteActive('/discover')"
+          (click)="onNavigation('/app/discover')"
+          [class.active]="isRouteActive('/app/discover')"
           class="nav-item"
         >
           <mat-icon matListItemIcon>explore</mat-icon>
@@ -86,6 +101,7 @@
 
   <!-- Main Content Area -->
   <mat-drawer-content class="shell-content">
+    <!-- Router outlet for child routes (/app/library, /app/discover) -->
     <router-outlet />
   </mat-drawer-content>
 </mat-drawer-container>

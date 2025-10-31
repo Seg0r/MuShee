@@ -1,0 +1,116 @@
+<!-- Full-screen sheet music viewer - no shell layout -->
+
+<!-- Loading State -->
+@if (isLoading()) {
+  <div class="viewer-loading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading sheet music...</p>
+  </div>
+}
+
+<!-- Error State -->
+@if (error(); as errorMessage) {
+  <div class="viewer-error">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <h2>Unable to Load Sheet Music</h2>
+    <p>{{ errorMessage }}</p>
+    <button matButton (click)="onBackClick()">
+      <mat-icon>arrow_back</mat-icon>
+      Go Back
+    </button>
+  </div>
+}
+
+<!-- Main Viewer Content -->
+@if (!isLoading() && !error()) {
+  <div class="viewer-container">
+    <!-- Header with back button and song info -->
+    <header class="viewer-header">
+      <button
+        matIconButton
+        (click)="onBackClick()"
+        class="back-button"
+        [attr.aria-label]="'Go back to previous page'"
+      >
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+
+      <div class="song-info">
+        @if (song(); as songData) {
+          <h1 class="song-title">{{ songData.song_details.title || 'Untitled' }}</h1>
+          <p class="song-composer">{{ songData.song_details.composer || 'Unknown Composer' }}</p>
+        }
+      </div>
+
+      <div class="header-spacer"></div>
+    </header>
+
+    <!-- Sheet Music Canvas -->
+    <main class="viewer-main">
+      <div
+        #osmdContainer
+        class="osmd-container"
+        [attr.aria-label]="'Rendered sheet music'"
+        role="img"
+      ></div>
+    </main>
+
+    <!-- Control Panel - Bottom of screen -->
+    <div class="viewer-controls">
+      <!-- Zoom Controls -->
+      <div class="zoom-controls">
+        <button
+          matIconButton
+          (click)="onZoomOut()"
+          [disabled]="!canZoomOut()"
+          [attr.aria-label]="'Zoom out'"
+        >
+          <mat-icon>zoom_out</mat-icon>
+        </button>
+
+        <span class="zoom-level">{{ getZoomDisplay() }}</span>
+
+        <button
+          matIconButton
+          (click)="onZoomIn()"
+          [disabled]="!canZoomIn()"
+          [attr.aria-label]="'Zoom in'"
+        >
+          <mat-icon>zoom_in</mat-icon>
+        </button>
+      </div>
+
+      <!-- Feedback Controls -->
+      @if (isUserAuthenticated()) {
+        <div class="feedback-controls">
+          <p class="feedback-label">How's the rendering quality?</p>
+          <div class="feedback-buttons">
+            <button
+              matIconButton
+              (click)="onThumbsUp()"
+              [class.selected]="renderingFeedback() === 'thumbs_up'"
+              [attr.aria-label]="'Thumbs up - good rendering'"
+              class="thumbs-up"
+            >
+              <mat-icon>thumb_up</mat-icon>
+            </button>
+            <button
+              matIconButton
+              (click)="onThumbsDown()"
+              [class.selected]="renderingFeedback() === 'thumbs_down'"
+              [attr.aria-label]="'Thumbs down - poor rendering'"
+              class="thumbs-down"
+            >
+              <mat-icon>thumb_down</mat-icon>
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div class="feedback-controls">
+          <p class="feedback-label">Sign in to rate rendering quality</p>
+          <button matButton (click)="onThumbsUp()" class="sign-in-prompt">Sign In</button>
+        </div>
+      }
+    </div>
+  </div>
+}

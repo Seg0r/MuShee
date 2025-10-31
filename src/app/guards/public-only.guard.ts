@@ -33,8 +33,8 @@ export const publicOnlyGuard: CanActivateFn = async (): Promise<boolean> => {
     }
 
     // User is authenticated, redirect to library
-    console.log('Authenticated user detected, redirecting to /library');
-    await router.navigate(['/library']);
+    console.log('Authenticated user detected, redirecting to /app/library');
+    await router.navigate(['/app/library']);
     return false;
   } catch (error) {
     // On error checking auth status, allow access to public route (safe default)
