@@ -14,16 +14,32 @@
   color: var(--mat-sys-on-surface);
 }
 
+// ============================================================================
+// Header
+// ============================================================================
+
+.discover-header {
+  padding: 2rem 1.5rem 1.5rem;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+  h1 {
+    margin: 0;
+    font-size: var(--mat-sys-display-medium);
+    font-weight: 500;
+    color: var(--mat-sys-on-surface);
+  }
+}
+
 .loading-state {
   flex: 1;
   overflow-y: auto;
-  padding: 1rem;
+  padding: 2rem 1.5rem;
 }
 
 .scroll-container {
   flex: 1;
   overflow-y: auto;
-  padding: 1.5rem;
+  padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
 
