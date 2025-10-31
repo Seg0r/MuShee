@@ -10,7 +10,7 @@
         <button
           matButton
           [disabled]="buttonState()?.disabled"
-          (click)="onAddToLibrary()"
+          (click)="onAddToLibrary($event)"
           [attr.aria-label]="buttonState()?.text"
           class="action-button"
           [class.loading]="buttonState()?.showSpinner"

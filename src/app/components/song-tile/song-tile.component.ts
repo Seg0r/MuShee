@@ -137,7 +137,8 @@ export class SongTileComponent {
   /**
    * Handle add to library button click - emit addToLibrary event
    */
-  onAddToLibrary(): void {
+  onAddToLibrary(event: Event): void {
+    event.stopPropagation();
     if (!this.buttonState()?.disabled) {
       this.addToLibrary.emit(this.song());
     }
