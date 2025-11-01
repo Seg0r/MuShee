@@ -15,6 +15,7 @@
       <app-song-list
         [songs]="visibleSongs()"
         [isUserLibrary]="false"
+        [isSongInLibrary]="isSongInLibrary.bind(this)"
         (tileClick)="onSongCardClick($event)"
         (addToLibrary)="onAddToLibrary($event)"
       />

@@ -2,7 +2,7 @@
   @for (song of songs(); track trackByFn($index, song)) {
     <app-song-tile
       [song]="song"
-      [config]="internalGetSongTileConfig()"
+      [config]="internalGetSongTileConfig(song)"
       (tileClick)="onTileClick(song)"
       (addToLibrary)="onAddToLibrary(song)"
       (deleteClick)="onDeleteClick(song)"
