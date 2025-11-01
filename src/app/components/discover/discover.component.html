@@ -12,16 +12,12 @@
   } @else {
     <!-- Songs Grid -->
     <div #scrollContainer class="scroll-container">
-      <div class="songs-grid">
-        @for (song of visibleSongs(); track song.id) {
-          <app-song-tile
-            [song]="song"
-            [config]="getSongTileConfig(song)"
-            (tileClick)="onSongCardClick(song)"
-            (addToLibrary)="onAddToLibrary(song)"
-          />
-        }
-      </div>
+      <app-song-list
+        [songs]="visibleSongs()"
+        [isUserLibrary]="false"
+        (tileClick)="onSongCardClick($event)"
+        (addToLibrary)="onAddToLibrary($event)"
+      />
 
       <!-- Pagination Loading Indicator -->
       @if (isPaginationLoading()) {

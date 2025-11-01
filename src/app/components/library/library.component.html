@@ -39,16 +39,12 @@
 
   <!-- Songs Grid -->
   @if (!isEmptyState() && !isLoading()) {
-    <div class="songs-grid">
-      @for (song of visibleSongs(); track song.song_id) {
-        <app-song-tile
-          [song]="song"
-          [config]="getSongTileConfig()"
-          (tileClick)="onSongCardClick(song)"
-          (deleteClick)="onSongDeleteClick(song)"
-        />
-      }
-    </div>
+    <app-song-list
+      [songs]="visibleSongs()"
+      [isUserLibrary]="true"
+      (tileClick)="onSongCardClick($event)"
+      (deleteClick)="onSongDeleteClick($event)"
+    />
 
     <!-- Pagination Loading Indicator -->
     @if (isPaginationLoading()) {

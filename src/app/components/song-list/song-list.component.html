@@ -1,0 +1,11 @@
+<div class="songs-grid">
+  @for (song of songs(); track trackByFn($index, song)) {
+    <app-song-tile
+      [song]="song"
+      [config]="internalGetSongTileConfig()"
+      (tileClick)="onTileClick(song)"
+      (addToLibrary)="onAddToLibrary(song)"
+      (deleteClick)="onDeleteClick(song)"
+    />
+  }
+</div>

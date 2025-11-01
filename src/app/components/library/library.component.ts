@@ -19,14 +19,16 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import type { UserLibraryItemDto, ErrorCode, ProfileDto, UploadSongResponseDto } from '@/types';
+import { SongTileData } from '../song-tile/song-tile.component';
 import { UserLibraryService } from '@/app/services/user-library.service';
 import { ProfileService } from '@/app/services/profile.service';
-import { SongTileComponent, type SongTileConfig } from '../song-tile/song-tile.component';
+
 import { EmptyStateComponent } from '../empty-state/empty-state.component';
 import { LoadingSkeletonComponent } from '../loading-skeleton/loading-skeleton.component';
 import { UploadDialogComponent } from '../upload-dialog/upload-dialog.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { OnboardingDialogComponent } from '../onboarding-dialog/onboarding-dialog.component';
+import { SongListComponent } from '../song-list/song-list.component';
 
 @Component({
   selector: 'app-library',
@@ -39,7 +41,7 @@ import { OnboardingDialogComponent } from '../onboarding-dialog/onboarding-dialo
     MatDialogModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
-    SongTileComponent,
+    SongListComponent,
     EmptyStateComponent,
     LoadingSkeletonComponent,
   ],
@@ -132,12 +134,20 @@ export class LibraryComponent implements OnInit, OnDestroy {
   // Public Methods
   // ============================================================================
 
-  onSongCardClick(song: UserLibraryItemDto): void {
-    this.router.navigate(['/song', song.song_id]);
+  onSongCardClick(song: SongTileData): void {
+    if (!('song_id' in song)) {
+      console.error('Invalid song data for onSongCardClick', song);
+      return;
+    }
+    this.router.navigate(['/song', (song as UserLibraryItemDto).song_id]);
   }
 
-  onSongDeleteClick(song: UserLibraryItemDto): void {
-    this.selectedSongForDelete.set(song);
+  onSongDeleteClick(song: SongTileData): void {
+    if (!('song_id' in song)) {
+      console.error('Invalid song data for onSongDeleteClick', song);
+      return;
+    }
+    this.selectedSongForDelete.set(song as UserLibraryItemDto);
     this.openDeleteConfirmDialog();
   }
 
@@ -158,13 +168,6 @@ export class LibraryComponent implements OnInit, OnDestroy {
   /**
    * Get configuration for song tile component
    */
-  getSongTileConfig(): SongTileConfig {
-    return {
-      showFooter: true, // User library shows added dates
-      action: 'delete', // User library shows delete action
-      isLoading: false, // No loading state for delete operations in this view
-    };
-  }
 
   onScroll(event: Event): void {
     const scrollElement = event.target as HTMLElement;

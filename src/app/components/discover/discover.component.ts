@@ -17,13 +17,15 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { LoadingSkeletonComponent } from '../loading-skeleton/loading-skeleton.component';
-import { SongTileComponent, type SongTileConfig } from '../song-tile/song-tile.component';
+import { SongListComponent } from '../song-list/song-list.component';
+
 import { SongService } from '../../services/song.service';
 import { UserLibraryService } from '../../services/user-library.service';
 import { AuthService } from '../../services/auth.service';
 import { ErrorHandlingService } from '../../services/error-handling.service';
 
 import type { PublicSongListItemDto, UserLibraryItemDto } from '@/types';
+import { SongTileData } from '../song-tile/song-tile.component';
 
 const pageSongLimit = 50;
 @Component({
@@ -32,7 +34,7 @@ const pageSongLimit = 50;
   imports: [
     CommonModule,
     LoadingSkeletonComponent,
-    SongTileComponent,
+    SongListComponent,
     MatSnackBarModule,
     MatButtonModule,
     MatIconModule,
@@ -175,19 +177,6 @@ export class DiscoverComponent implements OnInit {
   /**
    * Get configuration for song tile component
    */
-  getSongTileConfig(song: PublicSongListItemDto): SongTileConfig {
-    const songId = song.id;
-    const isLoading = this.isAddingToLibrary(songId);
-    const isInLibrary = this.isSongInLibrary(songId);
-    const isAuthenticated = this.authService.isAuthenticated();
-
-    return {
-      showFooter: false, // Public library doesn't show added dates
-      action: 'add', // Public library shows add action
-      isLoading,
-      isInLibrary: isAuthenticated ? isInLibrary : false,
-    };
-  }
 
   // ============================================================================
   // Lifecycle Hooks
@@ -327,8 +316,13 @@ export class DiscoverComponent implements OnInit {
   /**
    * Handle add to library button click
    */
-  async onAddToLibrary(song: PublicSongListItemDto): Promise<void> {
-    const songId = song.id;
+  async onAddToLibrary(song: SongTileData): Promise<void> {
+    if (!('id' in song)) {
+      console.error('Invalid song data for onAddToLibrary', song);
+      return;
+    }
+    const publicSong = song as PublicSongListItemDto;
+    const songId = publicSong.id;
     // Check authentication
     if (!this.authService.isAuthenticated()) {
       await this.router.navigate(['/login']);
@@ -379,8 +373,12 @@ export class DiscoverComponent implements OnInit {
   /**
    * Handle song card click (navigate to sheet music viewer)
    */
-  async onSongCardClick(song: PublicSongListItemDto): Promise<void> {
-    await this.router.navigate(['/song', song.id]);
+  async onSongCardClick(song: SongTileData): Promise<void> {
+    if (!('id' in song)) {
+      console.error('Invalid song data for onSongCardClick', song);
+      return;
+    }
+    await this.router.navigate(['/song', (song as PublicSongListItemDto).id]);
   }
 
   // ============================================================================
