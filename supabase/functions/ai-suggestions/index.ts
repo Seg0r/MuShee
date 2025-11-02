@@ -13,7 +13,7 @@ import type {
 // =============================================================================
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const AI_MODEL = 'anthropic/claude-3-haiku:beta'; // Cost-effective model for this use case
+const AI_MODEL = 'openai/gpt-4o-mini'; // Cost-effective model for this use case
 
 // =============================================================================
 // CORS Headers

@@ -22,12 +22,15 @@ import type { UserLibraryItemDto, ErrorCode, ProfileDto, UploadSongResponseDto }
 import { SongTileData } from '../song-tile/song-tile.component';
 import { UserLibraryService } from '@/app/services/user-library.service';
 import { ProfileService } from '@/app/services/profile.service';
+import { AiSuggestionsService } from '@/app/services/ai-suggestions.service';
+import { AuthService } from '@/app/services/auth.service';
 
 import { EmptyStateComponent } from '../empty-state/empty-state.component';
 import { LoadingSkeletonComponent } from '../loading-skeleton/loading-skeleton.component';
 import { UploadDialogComponent } from '../upload-dialog/upload-dialog.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { OnboardingDialogComponent } from '../onboarding-dialog/onboarding-dialog.component';
+import { SuggestionsDialogComponent } from '../suggestions-dialog/suggestions-dialog.component';
 import { SongListComponent } from '../song-list/song-list.component';
 
 @Component({
@@ -52,6 +55,8 @@ import { SongListComponent } from '../song-list/song-list.component';
 export class LibraryComponent implements OnInit, OnDestroy {
   private readonly userLibraryService = inject(UserLibraryService);
   private readonly profileService = inject(ProfileService);
+  private readonly aiSuggestionsService = inject(AiSuggestionsService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
@@ -73,6 +78,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
 
   private readonly initialLoading = signal<boolean>(true);
   private readonly paginationLoading = signal<boolean>(false);
+  private readonly suggestionsLoading = signal<boolean>(false);
 
   // ============================================================================
   // Error Signals
@@ -101,7 +107,9 @@ export class LibraryComponent implements OnInit, OnDestroy {
 
   readonly hasMoreItems = computed(() => this.currentPage() * this.pageSize() < this.totalItems());
 
-  readonly showFindSimilarFab = computed(() => this.songs().length > 0);
+  readonly showFindSimilarFab = computed(
+    () => this.songs().length > 0 && !this.suggestionsLoading()
+  );
 
   readonly totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize()));
 
@@ -155,8 +163,31 @@ export class LibraryComponent implements OnInit, OnDestroy {
     this.openUploadDialog();
   }
 
-  onFindSimilarClick(): void {
-    // TODO: Implement AI suggestions dialog
+  async onFindSimilarClick(): Promise<void> {
+    const userId = this.authService.user()?.id;
+    if (!userId) {
+      this.showErrorNotification('You must be logged in to use this feature.');
+      return;
+    }
+
+    const dialogRef = this.dialog.open(SuggestionsDialogComponent, {
+      width: '500px',
+      data: { isLoading: true, suggestions: null, error: null },
+    });
+
+    this.suggestionsLoading.set(true);
+    try {
+      const suggestions = await this.aiSuggestionsService.generateSuggestionsForUser(userId);
+      dialogRef.componentInstance.isLoading.set(false);
+      dialogRef.componentInstance.suggestions.set(suggestions);
+    } catch (error) {
+      console.error('Error getting AI suggestions:', error);
+      const errorMessage = 'Could not generate suggestions at this time.';
+      dialogRef.componentInstance.isLoading.set(false);
+      dialogRef.componentInstance.error.set(errorMessage);
+    } finally {
+      this.suggestionsLoading.set(false);
+    }
   }
 
   onRetryLoadLibrary(): void {

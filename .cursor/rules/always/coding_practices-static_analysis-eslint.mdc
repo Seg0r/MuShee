@@ -13,3 +13,13 @@ alwaysApply: true
 - Configure integration with Prettier to avoid rule conflicts for code formatting
 - Use the --fix flag in CI/CD pipelines to automatically correct fixable issues
 - Implement staged linting with husky and lint-staged to prevent committing non-compliant code
+
+### Workflow
+
+**After making any code changes, you MUST run the linter to verify the changes.**
+
+1.  Identify the linting command from `package.json` or other project documentation. The command is usually `npm run lint` or similar.
+2.  Execute the linting command.
+3.  Execute the build command.
+4.  If there are errors, fix them.
+5.  Only after the linter and build passes should you consider the task complete.

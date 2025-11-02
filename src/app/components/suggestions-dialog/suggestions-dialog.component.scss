@@ -1,0 +1,37 @@
+.suggestions-dialog-content {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-state,
+.error-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 1rem;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.suggestion-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.suggestion-title {
+  font-weight: 500;
+}
+
+.suggestion-composer {
+  font-size: 0.9rem;
+  color: #666;
+}
