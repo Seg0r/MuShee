@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { AiService } from './ai.service';
-import { SupabaseService } from './supabase.service';
+import { UserLibraryService } from './user-library.service';
 import type { SongReferenceDto, GenerateAiSuggestionsResponseDto } from '../../types';
 
 /**
@@ -12,7 +12,7 @@ import type { SongReferenceDto, GenerateAiSuggestionsResponseDto } from '../../t
 })
 export class AiSuggestionsService {
   private readonly aiService = inject(AiService);
-  private readonly supabaseService = inject(SupabaseService);
+  private readonly userLibraryService = inject(UserLibraryService);
 
   /**
    * Generates AI-powered song suggestions for a user.
@@ -43,7 +43,7 @@ export class AiSuggestionsService {
       } else {
         // Retrieve user's current library
         console.log('Retrieving user library for analysis');
-        const libraryResult = await this.supabaseService.getUserLibrary(userId, {
+        const libraryResult = await this.userLibraryService.getUserLibrary({
           page: 1,
           limit: 100, // Reasonable limit for AI analysis
         });

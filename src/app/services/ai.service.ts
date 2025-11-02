@@ -36,7 +36,7 @@ export class AiService {
       // Call Supabase Edge Function with 3-second timeout (PRD requirement)
       const { data, error } = await aiServiceTimeout(
         this.supabaseService.client.functions.invoke('ai-suggestions', {
-          body: requestBody,
+          body: JSON.stringify(requestBody),
           headers: {
             'Content-Type': 'application/json',
           },

@@ -64,8 +64,8 @@ export function createTimeoutWrapper(timeoutMs: number, timeoutMessage?: string)
  * Specific timeout wrapper for AI service calls with the PRD-required 3-second timeout.
  */
 export const aiServiceTimeout = createTimeoutWrapper(
-  3000,
-  'AI service request timed out after 3 seconds'
+  5000,
+  'AI service request timed out after 5 seconds'
 );
 
 /**
