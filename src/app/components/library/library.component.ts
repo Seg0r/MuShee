@@ -171,7 +171,8 @@ export class LibraryComponent implements OnInit, OnDestroy {
     }
 
     const dialogRef = this.dialog.open(SuggestionsDialogComponent, {
-      width: '500px',
+      width: this.getResponsiveDialogWidth(),
+      height: this.getResponsiveDialogHeight(),
       data: { isLoading: true, suggestions: null, error: null },
     });
 
@@ -405,5 +406,21 @@ export class LibraryComponent implements OnInit, OnDestroy {
       horizontalPosition: 'end',
       verticalPosition: 'bottom',
     });
+  }
+
+  private getResponsiveDialogWidth(): string {
+    const width = window.innerWidth;
+    if (width < 768) {
+      return '90vw'; // For mobile screens
+    }
+    return '67vw'; // For larger screens
+  }
+
+  private getResponsiveDialogHeight(): string {
+    const height = window.innerHeight;
+    if (height < 768) {
+      return '90vh'; // For mobile screens
+    }
+    return '67vh'; // For larger screens
   }
 }

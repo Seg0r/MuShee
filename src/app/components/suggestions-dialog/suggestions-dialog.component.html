@@ -12,6 +12,11 @@
       <p>{{ error() }}</p>
     </div>
   } @else if (suggestions() && suggestions()!.suggestions.length > 0) {
+    <div class="suggestions-header">
+      <p class="suggestions-description">
+        Based on your music collection, we recommend these pieces that complement your taste:
+      </p>
+    </div>
     <mat-list>
       @for (suggestion of suggestions()!.suggestions; track suggestion.song_details.title) {
         <mat-list-item>

@@ -1,8 +1,31 @@
 .suggestions-dialog-content {
   min-height: 200px;
+  max-height: 60vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  padding: 0;
+
+  mat-list {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+}
+
+.suggestions-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.suggestions-description {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  font-weight: 500;
 }
 
 .loading-state,
@@ -13,25 +36,66 @@
   align-items: center;
   gap: 1rem;
   text-align: center;
-  padding: 1rem;
+  padding: 2rem 1.5rem;
 
   mat-icon {
     font-size: 48px;
     width: 48px;
     height: 48px;
+    color: var(--mat-sys-primary);
+  }
+
+  p {
+    margin: 0;
+    color: var(--mat-sys-on-surface);
   }
 }
 
 .suggestion-item {
   display: flex;
   flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  padding-left: 1rem;
+  border-left: 4px solid var(--mat-sys-primary);
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  min-width: 0;
+}
+
+mat-list-item {
+  padding: 0.75rem 1rem !important;
+  margin: 0.5rem 1rem !important;
+  border-radius: var(--mat-sys-corner-small);
+  height: auto !important;
+  align-items: flex-start !important;
+
+  &:not(:last-child) {
+    margin-bottom: 1rem;
+  }
 }
 
 .suggestion-title {
   font-weight: 500;
+  color: var(--mat-sys-on-surface);
+  font-size: var(--mat-sys-body-large);
+  line-height: 1.5;
+  word-break: break-word;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
 }
 
 .suggestion-composer {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--mat-sys-on-surface-variant);
+  line-height: 1.4;
+  word-break: break-word;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
 }
