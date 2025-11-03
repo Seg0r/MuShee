@@ -115,15 +115,6 @@
       (mouseenter)="onSidebarHoverEnter()"
       (mouseleave)="onSidebarHoverLeave()"
     >
-      <!-- Drawer Header (Mobile only) -->
-      @if (isMobileView()) {
-        <div class="drawer-header">
-          <button matIconButton (click)="toggleDrawer()" [attr.aria-label]="'Close navigation'">
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-      }
-
       <!-- Navigation List with Labels -->
       <nav class="nav-labels">
         <mat-nav-list class="nav-list">
@@ -135,6 +126,9 @@
               [attr.aria-disabled]="isNavItemDisabled(item)"
               class="nav-item"
             >
+              @if (isMobileView()) {
+                <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+              }
               <span matListItemTitle>{{ item.label }}</span>
             </mat-list-item>
           }
