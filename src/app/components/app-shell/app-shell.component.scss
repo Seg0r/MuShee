@@ -28,12 +28,30 @@
     flex: 1 1 auto;
   }
 
+  .toolbar-control {
+    margin-left: 16px;
+  }
+
   .menu-toggle,
-  .user-menu-trigger {
+  .user-menu-trigger,
+  .help-button {
     color: var(--mat-sys-on-primary);
 
     &:hover {
       background-color: rgba(255, 255, 255, 0.12);
+    }
+  }
+
+  .theme-toggle {
+    ::ng-deep .mdc-switch {
+      height: 20px;
+    }
+
+    ::ng-deep .mdc-switch__labels {
+      margin-left: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--mat-sys-on-primary);
     }
   }
 }

@@ -14,8 +14,10 @@ import { MatNavList, MatListItem, MatListItemTitle } from '@angular/material/lis
 import { MatIcon } from '@angular/material/icon';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { MatDivider } from '@angular/material/divider';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AuthService } from '../../services/auth.service';
+import { ThemeService } from '../../services/theme.service';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { OnboardingDialogComponent } from '../onboarding-dialog/onboarding-dialog.component';
 import { ProfileService } from '../../services/profile.service';
@@ -51,6 +53,7 @@ interface NavItem {
     MatMenu,
     MatMenuTrigger,
     MatDivider,
+    MatSlideToggle,
     MatDialogModule,
   ],
   templateUrl: './app-shell.component.html',
@@ -63,6 +66,7 @@ interface NavItem {
 export class AppShellComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly profileService = inject(ProfileService);
+  private readonly themeService = inject(ThemeService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
 
@@ -106,6 +110,11 @@ export class AppShellComponent implements OnInit {
    */
   readonly user = this.authService.user;
   readonly isAuthenticated = this.authService.isAuthenticated;
+
+  /**
+   * Expose theme service signals to template
+   */
+  readonly isDarkMode = this.themeService.isDarkMode;
 
   /**
    * Get user email for display in menu
@@ -154,6 +163,13 @@ export class AppShellComponent implements OnInit {
    */
   toggleDrawer(): void {
     this.drawer()?.toggle();
+  }
+
+  /**
+   * Toggles dark mode
+   */
+  toggleDarkMode(): void {
+    this.themeService.toggleDarkMode();
   }
 
   /**

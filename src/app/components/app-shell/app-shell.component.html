@@ -18,9 +18,25 @@
   <!-- Spacer -->
   <span class="spacer"></span>
 
+  <!-- Dark Mode Toggle (only for authenticated users) -->
+
+  <mat-slide-toggle
+    [checked]="isDarkMode()"
+    (change)="toggleDarkMode()"
+    [attr.aria-label]="'Dark mode toggle'"
+    class="toolbar-control theme-toggle"
+  >
+    Dark mode
+  </mat-slide-toggle>
+
   <!-- Help/Tour Button (only for authenticated users) -->
   @if (isAuthenticated()) {
-    <button matIconButton (click)="onHelpClick()" [attr.aria-label]="'Help and tour'">
+    <button
+      matIconButton
+      (click)="onHelpClick()"
+      [attr.aria-label]="'Help and tour'"
+      class="toolbar-control help-button"
+    >
       <mat-icon>help</mat-icon>
     </button>
   }
@@ -30,7 +46,7 @@
     <button
       matIconButton
       [matMenuTriggerFor]="userMenu"
-      class="user-menu-trigger"
+      class="toolbar-control user-menu-trigger"
       [attr.aria-label]="'User menu'"
     >
       <mat-icon>account_circle</mat-icon>
