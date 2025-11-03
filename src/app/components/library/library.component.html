@@ -1,58 +1,61 @@
-<div class="library-container" (scroll)="onScroll($event)">
+<div class="library-container">
   <!-- Header -->
   <div class="library-header">
     <h1>My Library</h1>
   </div>
 
-  <!-- Error State -->
-  @if (errorMessage()) {
-    <div class="error-banner">
-      <div class="error-content">
-        <span>{{ errorMessage() }}</span>
-        <button matIconButton (click)="onRetryLoadLibrary()" aria-label="Retry loading library">
-          <mat-icon>refresh</mat-icon>
-        </button>
-      </div>
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <app-loading-skeleton [count]="8" [rows]="2" [cols]="4"></app-loading-skeleton>
+    </div>
+  } @else {
+    <!-- Scroll Container -->
+    <div class="scroll-container" #scrollContainer>
+      <!-- Empty State -->
+      @if (isEmptyState()) {
+        <div class="empty-state-wrapper">
+          <app-empty-state [message]="'Your library is empty'" [iconName]="'queue_music'">
+            <div class="empty-state-actions">
+              <button matButton="filled" (click)="onUploadClick()">
+                <mat-icon>cloud_upload</mat-icon>
+                Upload Your Music
+              </button>
+              <button matButton [routerLink]="['/app/discover']">
+                <mat-icon>explore</mat-icon>
+                Browse Public Library
+              </button>
+            </div>
+          </app-empty-state>
+        </div>
+      } @else {
+        <!-- Songs Grid -->
+        <app-song-list
+          [songs]="visibleSongs()"
+          [isUserLibrary]="true"
+          (tileClick)="onSongCardClick($event)"
+          (deleteClick)="onSongDeleteClick($event)"
+        />
+      }
+
+      <!-- Pagination Loading Indicator -->
+      @if (isPaginationLoading()) {
+        <div class="pagination-loading">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading more songs...</p>
+        </div>
+      }
     </div>
   }
 
-  <!-- Loading Skeleton -->
-  @if (isLoading()) {
-    <app-loading-skeleton [count]="8" [rows]="2" [cols]="4"></app-loading-skeleton>
-  }
-
-  <!-- Empty State -->
-  @if (isEmptyState()) {
-    <app-empty-state [message]="'Your library is empty'" [iconName]="'queue_music'">
-      <div class="empty-state-actions">
-        <button matButton="filled" (click)="onUploadClick()">
-          <mat-icon>cloud_upload</mat-icon>
-          Upload Your Music
-        </button>
-        <button matButton [routerLink]="['/app/discover']">
-          <mat-icon>explore</mat-icon>
-          Browse Public Library
-        </button>
-      </div>
-    </app-empty-state>
-  }
-
-  <!-- Songs Grid -->
-  @if (!isEmptyState() && !isLoading()) {
-    <app-song-list
-      [songs]="visibleSongs()"
-      [isUserLibrary]="true"
-      (tileClick)="onSongCardClick($event)"
-      (deleteClick)="onSongDeleteClick($event)"
-    />
-
-    <!-- Pagination Loading Indicator -->
-    @if (isPaginationLoading()) {
-      <div class="pagination-loading">
-        <mat-spinner diameter="40"></mat-spinner>
-        <p>Loading more songs...</p>
-      </div>
-    }
+  <!-- Error State -->
+  @if (errorMessage()) {
+    <div class="error-banner">
+      <p>{{ errorMessage() }}</p>
+      <button matIconButton (click)="onRetryLoadLibrary()" aria-label="Retry loading library">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
   }
 
   <!-- FABs -->

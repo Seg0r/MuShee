@@ -9,6 +9,8 @@ import {
   effect,
   DestroyRef,
   Injector,
+  viewChild,
+  ElementRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
@@ -53,6 +55,10 @@ import { SongListComponent } from '../song-list/song-list.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LibraryComponent implements OnInit, OnDestroy {
+  // ============================================================================
+  // Dependency Injection
+  // ============================================================================
+
   private readonly userLibraryService = inject(UserLibraryService);
   private readonly profileService = inject(ProfileService);
   private readonly aiSuggestionsService = inject(AiSuggestionsService);
@@ -62,6 +68,12 @@ export class LibraryComponent implements OnInit, OnDestroy {
   private readonly snackBar = inject(MatSnackBar);
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
+
+  // ============================================================================
+  // Template References
+  // ============================================================================
+
+  readonly scrollContainer = viewChild<ElementRef>('scrollContainer');
 
   // ============================================================================
   // Data Signals
@@ -131,6 +143,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadInitialLibrary();
     this.checkOnboardingStatus();
+    this.setupScrollListener();
   }
 
   ngOnDestroy(): void {
@@ -201,8 +214,19 @@ export class LibraryComponent implements OnInit, OnDestroy {
    * Get configuration for song tile component
    */
 
-  onScroll(event: Event): void {
-    const scrollElement = event.target as HTMLElement;
+  private setupScrollListener(): void {
+    if (!this.scrollContainer()) {
+      console.warn('Scroll container not found');
+      return;
+    }
+
+    const container = this.scrollContainer()!.nativeElement;
+    container.addEventListener('scroll', () => {
+      this.handleScroll(container);
+    });
+  }
+
+  private handleScroll(scrollElement: HTMLElement): void {
     const scrollPosition = scrollElement.scrollHeight - scrollElement.scrollTop;
     const threshold = 500;
 
