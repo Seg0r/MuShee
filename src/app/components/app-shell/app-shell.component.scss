@@ -100,6 +100,19 @@
       }
     }
 
+    &.disabled {
+      opacity: 0.5;
+      color: var(--mat-sys-on-surface-variant);
+
+      &:hover {
+        background-color: transparent;
+      }
+
+      mat-icon {
+        color: var(--mat-sys-on-surface-variant);
+      }
+    }
+
     mat-icon {
       color: var(--mat-sys-on-surface-variant);
       transition: margin 200ms cubic-bezier(0.4, 0, 0.2, 1);

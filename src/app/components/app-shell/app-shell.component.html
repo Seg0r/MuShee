@@ -89,21 +89,27 @@
 
     <nav class="sidebar-nav">
       <mat-nav-list class="nav-list">
-        <!-- My Library Navigation (authenticated users only) -->
-        @if (isAuthenticated()) {
-          <mat-list-item
-            (click)="onNavigation('/app/library')"
-            [class.active]="isRouteActive('/app/library')"
-            class="nav-item"
-            [matTooltip]="!isDrawerExpanded() ? 'My Library' : ''"
-            matTooltipPosition="right"
-          >
-            <mat-icon matListItemIcon>library_music</mat-icon>
-            @if (isDrawerExpanded()) {
-              <span matListItemTitle>My Library</span>
-            }
-          </mat-list-item>
-        }
+        <!-- My Library Navigation (disabled for unauthenticated users) -->
+        <mat-list-item
+          (click)="onNavigation(isAuthenticated() ? '/app/library' : '/login')"
+          [class.active]="isAuthenticated() && isRouteActive('/app/library')"
+          [class.disabled]="!isAuthenticated()"
+          [attr.aria-disabled]="!isAuthenticated()"
+          class="nav-item"
+          [matTooltip]="
+            !isAuthenticated()
+              ? 'Sign in to access your library'
+              : !isDrawerExpanded()
+                ? 'My Library'
+                : ''
+          "
+          matTooltipPosition="right"
+        >
+          <mat-icon matListItemIcon>library_music</mat-icon>
+          @if (isDrawerExpanded()) {
+            <span matListItemTitle>My Library</span>
+          }
+        </mat-list-item>
 
         <!-- Discover Navigation (for all users) -->
         <mat-list-item
