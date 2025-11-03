@@ -36,16 +36,24 @@
 }
 
 .shell-drawer {
-  width: 256px;
+  width: auto;
+  min-width: fit-content;
+  max-width: 256px;
   background-color: var(--mat-sys-surface);
   border-right: 1px solid var(--mat-sys-outline-variant);
+  overflow: hidden;
 
   .sidebar-nav {
     padding-top: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
   .nav-list {
     padding: 0;
+    width: 100%;
+    overflow: hidden;
   }
 
   .nav-item {
@@ -55,6 +63,7 @@
     border-radius: 4px;
     margin-left: 8px;
     margin-right: 8px;
+    overflow: hidden;
 
     &:hover {
       background-color: var(--mat-sys-surface-container-highest);

@@ -47,6 +47,9 @@ import type { ProfileDto } from '@/types';
   templateUrl: './app-shell.component.html',
   styleUrl: './app-shell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(window:resize)': 'onWindowResize()',
+  },
 })
 export class AppShellComponent implements OnInit {
   private readonly authService = inject(AuthService);
@@ -60,6 +63,11 @@ export class AppShellComponent implements OnInit {
    * User profile for onboarding status check
    */
   private readonly userProfile = signal<ProfileDto | null>(null);
+
+  /**
+   * Track if current view is mobile
+   */
+  private readonly isMobileViewSignal = signal<boolean>(this.checkMobileView());
 
   /**
    * Expose auth service signals to template
@@ -98,7 +106,7 @@ export class AppShellComponent implements OnInit {
     this.router.navigate([path]);
     // Close drawer on mobile after navigation
     const drawer = this.drawer();
-    if (drawer && this.isMobileView()) {
+    if (drawer && this.isMobileViewSignal()) {
       drawer.close();
     }
   }
@@ -117,6 +125,30 @@ export class AppShellComponent implements OnInit {
    * Checks if the current view is mobile (< 960px)
    */
   isMobileView(): boolean {
+    return this.isMobileViewSignal();
+  }
+
+  /**
+   * Handles window resize event
+   */
+  onWindowResize(): void {
+    const wasMobile = this.isMobileViewSignal();
+    const isMobileNow = this.checkMobileView();
+
+    // Update mobile view signal
+    this.isMobileViewSignal.set(isMobileNow);
+
+    // If transitioning from mobile to desktop, close drawer
+    const drawer = this.drawer();
+    if (drawer && wasMobile && !isMobileNow && drawer.opened) {
+      drawer.close();
+    }
+  }
+
+  /**
+   * Helper to check mobile view
+   */
+  private checkMobileView(): boolean {
     return window.innerWidth < 960;
   }
 
