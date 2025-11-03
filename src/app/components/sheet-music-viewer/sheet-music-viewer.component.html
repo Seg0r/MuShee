@@ -1,29 +1,30 @@
 <!-- Full-screen sheet music viewer - no shell layout -->
 
-<!-- Loading State -->
-@if (isLoading()) {
-  <div class="viewer-loading">
-    <mat-spinner diameter="50"></mat-spinner>
-    <p>Loading sheet music...</p>
-  </div>
-}
+<!-- Main Viewer Content - Always render to ensure container availability -->
+<div class="viewer-container">
+  <!-- Loading State Overlay -->
+  @if (isLoading()) {
+    <div class="viewer-loading">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading sheet music...</p>
+    </div>
+  }
 
-<!-- Error State -->
-@if (error(); as errorMessage) {
-  <div class="viewer-error">
-    <mat-icon class="error-icon">error_outline</mat-icon>
-    <h2>Unable to Load Sheet Music</h2>
-    <p>{{ errorMessage }}</p>
-    <button matButton (click)="onBackClick()">
-      <mat-icon>arrow_back</mat-icon>
-      Go Back
-    </button>
-  </div>
-}
+  <!-- Error State Overlay -->
+  @if (error(); as errorMessage) {
+    <div class="viewer-error">
+      <mat-icon class="error-icon">error_outline</mat-icon>
+      <h2>Unable to Load Sheet Music</h2>
+      <p>{{ errorMessage }}</p>
+      <button matButton (click)="onBackClick()">
+        <mat-icon>arrow_back</mat-icon>
+        Go Back
+      </button>
+    </div>
+  }
 
-<!-- Main Viewer Content -->
-@if (!isLoading() && !error()) {
-  <div class="viewer-container">
+  <!-- Content visible only when not loading and no errors -->
+  @if (!isLoading() && !error()) {
     <!-- Header with back button and song info -->
     <header class="viewer-header">
       <button
@@ -44,16 +45,6 @@
 
       <div class="header-spacer"></div>
     </header>
-
-    <!-- Sheet Music Canvas -->
-    <main class="viewer-main">
-      <div
-        #osmdContainer
-        class="osmd-container"
-        [attr.aria-label]="'Rendered sheet music'"
-        role="img"
-      ></div>
-    </main>
 
     <!-- Control Panel - Bottom of screen -->
     <div class="viewer-controls">
@@ -112,5 +103,15 @@
         </div>
       }
     </div>
-  </div>
-}
+  }
+
+  <!-- Sheet Music Canvas - Always present for OSMD initialization -->
+  <main class="viewer-main">
+    <div
+      #osmdContainer
+      class="osmd-container"
+      [attr.aria-label]="'Rendered sheet music'"
+      role="img"
+    ></div>
+  </main>
+</div>

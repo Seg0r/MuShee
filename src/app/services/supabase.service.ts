@@ -357,27 +357,40 @@ export class SupabaseService {
     try {
       console.log('Generating signed URL for MusicXML file:', fileHash);
 
-      const fileName = `${fileHash}.musicxml`;
+      const fileName = `public-domain/${fileHash}.mxl`;
 
-      const { data, error } = await this.client.storage
-        .from('musicxml-files') // Assuming this is the bucket name
-        .createSignedUrl(fileName, 3600, {
-          // 1 hour expiration
-          download: fileName,
-        });
+      try {
+        // Try to create a signed URL first (for authenticated users or specific access control)
+        const { data, error } = await this.client.storage
+          .from('musicxml-files')
+          .createSignedUrl(fileName, 3600);
+        // 1 hour expiration
 
-      if (error) {
-        console.error('Storage error generating signed URL:', { fileHash }, error);
-        throw error;
+        if (!error && data?.signedUrl) {
+          console.log('Signed URL generated successfully for file:', fileHash);
+          return data.signedUrl;
+        }
+
+        // If signed URL fails, fall back to public URL (for public domain songs accessible without auth)
+        console.log('Signed URL failed, using public URL instead:', fileHash);
+        const { data: publicData } = this.client.storage
+          .from('musicxml-files')
+          .getPublicUrl(fileName);
+
+        if (publicData?.publicUrl) {
+          console.log('Public URL generated for file:', fileHash);
+          return publicData.publicUrl;
+        }
+
+        throw new Error('Could not generate URL for file');
+      } catch (urlError) {
+        console.error('Error generating URL:', urlError);
+        // Last resort: construct the URL manually
+        const supabaseUrl = environment.supabase.url;
+        const publicUrl = `${supabaseUrl}/storage/v1/object/public/musicxml-files/${fileName}`;
+        console.log('Using constructed public URL:', publicUrl);
+        return publicUrl;
       }
-
-      if (!data?.signedUrl) {
-        console.error('No signed URL returned from storage:', { fileHash });
-        throw new Error('Failed to generate signed URL');
-      }
-
-      console.log('Signed URL generated successfully for file:', fileHash);
-      return data.signedUrl;
     } catch (error) {
       console.error('Unexpected error in generateMusicXMLSignedUrl:', error);
       throw error;

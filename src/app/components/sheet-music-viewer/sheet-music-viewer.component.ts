@@ -8,6 +8,8 @@ import {
   viewChild,
   effect,
   ChangeDetectionStrategy,
+  AfterViewInit,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -43,7 +45,7 @@ import type { SongAccessDto } from '../../../types';
   styleUrl: './sheet-music-viewer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SheetMusicViewerComponent implements OnInit, OnDestroy {
+export class SheetMusicViewerComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly songService = inject(SongService);
@@ -51,6 +53,7 @@ export class SheetMusicViewerComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   // View children references
   readonly osmdContainer = viewChild<ElementRef<HTMLDivElement>>('osmdContainer');
@@ -65,6 +68,9 @@ export class SheetMusicViewerComponent implements OnInit, OnDestroy {
   readonly song = signal<SongAccessDto | null>(null);
   readonly songId = signal<string>('');
 
+  // OSMD state - use signal to enable reactive tracking in effects
+  readonly osmdReady = signal(false);
+
   // OSMD instance
   private osmd: OpenSheetMusicDisplay | null = null;
 
@@ -76,20 +82,39 @@ export class SheetMusicViewerComponent implements OnInit, OnDestroy {
   private readonly MIN_ZOOM = 0.5;
   private readonly MAX_ZOOM = 2.0;
 
+  private osmdInitialized = false;
+
   constructor() {
-    // Effect to load song when component initializes
+    // Effect to load song when songId changes (after OSMD initialization)
+    // This effect will run whenever songId or osmdReady signals change
     effect(() => {
-      const id = this.route.snapshot.params['songId'];
-      if (id && id !== this.songId()) {
-        this.songId.set(id);
+      const id = this.songId();
+      const ready = this.osmdReady();
+      // Only load if we have an ID and OSMD is initialized
+      if (id && ready) {
         this.loadSong(id);
       }
     });
   }
 
   ngOnInit(): void {
-    // Initialize OSMD instance
-    this.initializeOSMD();
+    // Read the route parameter and set it as the songId signal
+    // This will trigger the effect to load the song (once OSMD is ready)
+    const routeSongId = this.route.snapshot.params['songId'];
+    if (routeSongId) {
+      this.songId.set(routeSongId);
+    }
+  }
+
+  ngAfterViewInit(): void {
+    // Initialize OSMD instance after view is rendered and available
+    // Use setTimeout to ensure the DOM is fully rendered in the next tick
+    setTimeout(() => {
+      this.initializeOSMD();
+      this.osmdInitialized = true;
+      // Signal to effect that OSMD is ready - this will trigger the effect to run
+      this.osmdReady.set(true);
+    }, 0);
   }
 
   ngOnDestroy(): void {

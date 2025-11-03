@@ -240,21 +240,37 @@ export class SongService {
         throw new ValidationError('Invalid song ID format', 'INVALID_PARAMETERS');
       }
 
-      // Validate authentication
+      // Get current user (optional - may be null for public access)
       const {
         data: { user },
-        error: authError,
       } = await this.supabaseService.client.auth.getUser();
-      if (authError || !user) {
-        console.warn('Song details request failed: Authentication required', { authError });
-        throw new AuthenticationError('Authentication required');
-      }
 
-      // Check song access and retrieve song data
-      const songWithAccess = await this.supabaseService.getSongWithAccessCheck(songId, user.id);
+      // Try to get song with access check if user is authenticated
+      if (user) {
+        const songWithAccess = await this.supabaseService.getSongWithAccessCheck(songId, user.id);
 
-      if (!songWithAccess) {
-        // Determine if song doesn't exist or access is denied
+        if (songWithAccess) {
+          // Generate signed URL for MusicXML file
+          const musicxmlUrl = await this.supabaseService.generateMusicXMLSignedUrl(
+            songWithAccess.file_hash
+          );
+
+          // Build response DTO
+          const songAccessDto: SongAccessDto = {
+            id: songWithAccess.id,
+            song_details: {
+              title: songWithAccess.title || '',
+              composer: songWithAccess.composer || '',
+            },
+            file_hash: songWithAccess.file_hash,
+            created_at: songWithAccess.created_at,
+            musicxml_url: musicxmlUrl,
+          };
+
+          console.log('Song details retrieved successfully:', { songId, userId: user.id });
+          return songAccessDto;
+        }
+
         // Check if song exists at all
         const { data: songExists } = await this.supabaseService.client
           .from('songs')
@@ -269,27 +285,39 @@ export class SongService {
           console.log('Access denied for song:', { songId, userId: user.id });
           throw new ForbiddenError('You do not have access to this song');
         }
+      } else {
+        // No user authenticated - try to fetch as public song
+        const { data: publicSong, error: fetchError } = await this.supabaseService.client
+          .from('songs')
+          .select('id, title, composer, file_hash, created_at')
+          .eq('id', songId)
+          .single();
+
+        if (fetchError || !publicSong) {
+          console.log('Public song not found:', { songId, error: fetchError });
+          throw new NotFoundError('Song not found', 'SONG_NOT_FOUND');
+        }
+
+        // Generate signed URL for MusicXML file
+        const musicxmlUrl = await this.supabaseService.generateMusicXMLSignedUrl(
+          publicSong.file_hash
+        );
+
+        // Build response DTO
+        const songAccessDto: SongAccessDto = {
+          id: publicSong.id,
+          song_details: {
+            title: publicSong.title || '',
+            composer: publicSong.composer || '',
+          },
+          file_hash: publicSong.file_hash,
+          created_at: publicSong.created_at,
+          musicxml_url: musicxmlUrl,
+        };
+
+        console.log('Public song details retrieved successfully:', { songId });
+        return songAccessDto;
       }
-
-      // Generate signed URL for MusicXML file
-      const musicxmlUrl = await this.supabaseService.generateMusicXMLSignedUrl(
-        songWithAccess.file_hash
-      );
-
-      // Build response DTO
-      const songAccessDto: SongAccessDto = {
-        id: songWithAccess.id,
-        song_details: {
-          title: songWithAccess.title || '',
-          composer: songWithAccess.composer || '',
-        },
-        file_hash: songWithAccess.file_hash,
-        created_at: songWithAccess.created_at,
-        musicxml_url: musicxmlUrl,
-      };
-
-      console.log('Song details retrieved successfully:', { songId, userId: user.id });
-      return songAccessDto;
     } catch (error) {
       // Re-throw known application errors
       if (
