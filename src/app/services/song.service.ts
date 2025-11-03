@@ -250,9 +250,13 @@ export class SongService {
         const songWithAccess = await this.supabaseService.getSongWithAccessCheck(songId, user.id);
 
         if (songWithAccess) {
-          // Generate signed URL for MusicXML file
-          const musicxmlUrl = await this.supabaseService.generateMusicXMLSignedUrl(
-            songWithAccess.file_hash
+          // Determine if song is public domain (uploader_id IS NULL)
+          const isPublic = songWithAccess.uploader_id === null;
+
+          // Generate appropriate URL based on song ownership
+          const musicxmlUrl = await this.supabaseService.generateMusicXMLUrl(
+            songWithAccess.file_hash,
+            isPublic
           );
 
           // Build response DTO
@@ -267,7 +271,11 @@ export class SongService {
             musicxml_url: musicxmlUrl,
           };
 
-          console.log('Song details retrieved successfully:', { songId, userId: user.id });
+          console.log('Song details retrieved successfully:', {
+            songId,
+            userId: user.id,
+            isPublic,
+          });
           return songAccessDto;
         }
 
@@ -289,7 +297,7 @@ export class SongService {
         // No user authenticated - try to fetch as public song
         const { data: publicSong, error: fetchError } = await this.supabaseService.client
           .from('songs')
-          .select('id, title, composer, file_hash, created_at')
+          .select('id, title, composer, file_hash, created_at, uploader_id')
           .eq('id', songId)
           .single();
 
@@ -298,9 +306,16 @@ export class SongService {
           throw new NotFoundError('Song not found', 'SONG_NOT_FOUND');
         }
 
-        // Generate signed URL for MusicXML file
-        const musicxmlUrl = await this.supabaseService.generateMusicXMLSignedUrl(
-          publicSong.file_hash
+        // Verify song is public domain (only public songs are accessible without auth)
+        if (publicSong.uploader_id !== null) {
+          console.log('Access denied for non-public song:', { songId });
+          throw new ForbiddenError('You do not have access to this song');
+        }
+
+        // Generate public URL for the song (no signing needed for public songs)
+        const musicxmlUrl = await this.supabaseService.generateMusicXMLUrl(
+          publicSong.file_hash,
+          true // isPublic = true
         );
 
         // Build response DTO

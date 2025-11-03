@@ -346,33 +346,22 @@ export class SupabaseService {
   }
 
   /**
-   * Generates a signed URL for secure access to a MusicXML file in Supabase Storage.
-   * Uses the file hash as filename with .musicxml extension.
-   * Signed URLs expire after 1 hour for security.
+   * Generates the appropriate URL for accessing a MusicXML file based on ownership status.
+   * For public domain songs (uploader_id IS NULL), uses a direct public URL.
+   * For private songs (user-uploaded), generates a temporary signed URL for secure access.
    *
-   * @param fileHash - SHA-256 hash of the MusicXML file (used as filename)
-   * @returns Promise resolving to signed URL string
+   * @param fileHash - Hash of the MusicXML file (used as filename)
+   * @param isPublic - Whether the song is from the public domain (uploader_id IS NULL)
+   * @returns Promise resolving to the appropriate URL (public or signed)
    */
-  async generateMusicXMLSignedUrl(fileHash: string): Promise<string> {
+  async generateMusicXMLUrl(fileHash: string, isPublic: boolean): Promise<string> {
     try {
-      console.log('Generating signed URL for MusicXML file:', fileHash);
+      console.log('Generating MusicXML URL:', { fileHash, isPublic });
 
       const fileName = `public-domain/${fileHash}.mxl`;
 
-      try {
-        // Try to create a signed URL first (for authenticated users or specific access control)
-        const { data, error } = await this.client.storage
-          .from('musicxml-files')
-          .createSignedUrl(fileName, 3600);
-        // 1 hour expiration
-
-        if (!error && data?.signedUrl) {
-          console.log('Signed URL generated successfully for file:', fileHash);
-          return data.signedUrl;
-        }
-
-        // If signed URL fails, fall back to public URL (for public domain songs accessible without auth)
-        console.log('Signed URL failed, using public URL instead:', fileHash);
+      // For public domain songs, use direct public URL without signing attempt
+      if (isPublic) {
         const { data: publicData } = this.client.storage
           .from('musicxml-files')
           .getPublicUrl(fileName);
@@ -382,17 +371,31 @@ export class SupabaseService {
           return publicData.publicUrl;
         }
 
-        throw new Error('Could not generate URL for file');
-      } catch (urlError) {
-        console.error('Error generating URL:', urlError);
-        // Last resort: construct the URL manually
+        // Fallback: construct the URL manually
         const supabaseUrl = environment.supabase.url;
         const publicUrl = `${supabaseUrl}/storage/v1/object/public/musicxml-files/${fileName}`;
         console.log('Using constructed public URL:', publicUrl);
         return publicUrl;
       }
+
+      // For private songs, generate a signed URL with time-limited access
+      console.log('Generating signed URL for private file:', fileHash);
+      const { data, error } = await this.client.storage
+        .from('musicxml-files')
+        .createSignedUrl(fileName, 3600); // 1 hour expiration
+
+      if (!error && data?.signedUrl) {
+        console.log('Signed URL generated successfully for file:', fileHash);
+        return data.signedUrl;
+      }
+
+      // Fallback: if signed URL creation fails, construct public URL
+      console.log('Signed URL generation failed, falling back to public URL for file:', fileHash);
+      const supabaseUrl = environment.supabase.url;
+      const publicUrl = `${supabaseUrl}/storage/v1/object/public/musicxml-files/${fileName}`;
+      return publicUrl;
     } catch (error) {
-      console.error('Unexpected error in generateMusicXMLSignedUrl:', error);
+      console.error('Unexpected error in generateMusicXMLUrl:', error);
       throw error;
     }
   }
