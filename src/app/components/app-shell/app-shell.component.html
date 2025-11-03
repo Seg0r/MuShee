@@ -1,136 +1,151 @@
-<mat-drawer-container class="shell-container" hasBackdrop="false">
-  <!-- Main Toolbar -->
-  <mat-toolbar color="primary" class="shell-toolbar">
-    <!-- Mobile Menu Toggle (show for all users on mobile) -->
-    @if (isMobileView()) {
-      <button
-        matIconButton
-        (click)="toggleDrawer()"
-        class="menu-toggle"
-        [attr.aria-label]="'Toggle navigation menu'"
-      >
-        <mat-icon>menu</mat-icon>
+<!-- Main Toolbar -->
+<mat-toolbar color="primary" class="shell-toolbar">
+  <!-- Mobile Menu Toggle (show only on mobile) -->
+  @if (isMobileView()) {
+    <button
+      matIconButton
+      (click)="toggleDrawer()"
+      class="menu-toggle"
+      [attr.aria-label]="'Toggle navigation menu'"
+    >
+      <mat-icon>menu</mat-icon>
+    </button>
+  }
+
+  <!-- Logo -->
+  <span class="toolbar-brand">MuShee</span>
+
+  <!-- Spacer -->
+  <span class="spacer"></span>
+
+  <!-- Help/Tour Button (only for authenticated users) -->
+  @if (isAuthenticated()) {
+    <button matIconButton (click)="onHelpClick()" [attr.aria-label]="'Help and tour'">
+      <mat-icon>help</mat-icon>
+    </button>
+  }
+
+  <!-- Authenticated User Menu -->
+  @if (isAuthenticated()) {
+    <button
+      matIconButton
+      [matMenuTriggerFor]="userMenu"
+      class="user-menu-trigger"
+      [attr.aria-label]="'User menu'"
+    >
+      <mat-icon>account_circle</mat-icon>
+    </button>
+
+    <!-- User Dropdown Menu -->
+    <mat-menu #userMenu="matMenu" class="user-dropdown">
+      <button mat-menu-item disabled>
+        <mat-icon>person</mat-icon>
+        <span>{{ userEmail() }}</span>
       </button>
-    }
-
-    <!-- Logo -->
-    <span class="toolbar-brand">MuShee</span>
-
-    <!-- Spacer -->
-    <span class="spacer"></span>
-
-    <!-- Help/Tour Button (only for authenticated users) -->
-    @if (isAuthenticated()) {
-      <button
-        matIconButton
-        (click)="onHelpClick()"
-        [attr.aria-label]="'Help and tour'"
-        matTooltip="Help"
-      >
-        <mat-icon>help</mat-icon>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="onLogoutClick()">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
       </button>
-    }
+    </mat-menu>
+  } @else {
+    <!-- Unauthenticated User Actions -->
+    <button
+      matButton
+      (click)="
+        onNavigationClick({ icon: 'login', label: 'Login', path: '/login', requiresAuth: false })
+      "
+      class="auth-button"
+    >
+      Login
+    </button>
 
-    <!-- Authenticated User Menu -->
-    @if (isAuthenticated()) {
-      <button
-        matIconButton
-        [matMenuTriggerFor]="userMenu"
-        class="user-menu-trigger"
-        [attr.aria-label]="'User menu'"
-      >
-        <mat-icon>account_circle</mat-icon>
-      </button>
+    <button
+      matButton="filled"
+      (click)="
+        onNavigationClick({
+          icon: 'person_add',
+          label: 'Create Account',
+          path: '/register',
+          requiresAuth: false,
+        })
+      "
+      class="auth-button"
+    >
+      Create Account
+    </button>
+  }
+</mat-toolbar>
 
-      <!-- User Dropdown Menu -->
-      <mat-menu #userMenu="matMenu" class="user-dropdown">
-        <button mat-menu-item disabled>
-          <mat-icon>person</mat-icon>
-          <span>{{ userEmail() }}</span>
-        </button>
-        <mat-divider></mat-divider>
-        <button mat-menu-item (click)="onLogoutClick()">
-          <mat-icon>logout</mat-icon>
-          <span>Logout</span>
-        </button>
-      </mat-menu>
-    } @else {
-      <!-- Unauthenticated User Actions -->
-      <button matButton (click)="onNavigation('/login')" class="auth-button">Login</button>
-
-      <button matButton="filled" (click)="onNavigation('/register')" class="auth-button">
-        Create Account
-      </button>
-    }
-  </mat-toolbar>
-
-  <!-- Navigation Drawer (show for all users) -->
-  <mat-drawer
-    #drawer
-    mode="side"
-    [opened]="true"
-    [attr.aria-label]="'Navigation menu'"
-    class="shell-drawer"
-    [class.collapsed]="!isDrawerExpanded()"
-  >
-    <div class="drawer-header">
-      <!-- Toggle button for mobile/collapsed state -->
-      @if (isMobileView()) {
+<!-- Main Layout Container -->
+<div class="shell-layout">
+  <!-- Left Icon Container (Desktop: sticky, Mobile: hidden) -->
+  @if (!isMobileView()) {
+    <div
+      class="nav-icon-container"
+      (mouseenter)="onSidebarHoverEnter()"
+      (mouseleave)="onSidebarHoverLeave()"
+    >
+      <!-- Icon buttons for each navigation item -->
+      @for (item of navItems(); track item.path) {
         <button
           matIconButton
-          (click)="toggleDrawer()"
-          class="drawer-toggle"
-          [attr.aria-label]="'Close navigation'"
+          (click)="onNavigationClick(item)"
+          [class.active]="isRouteActive(item.path)"
+          [class.disabled]="isNavItemDisabled(item)"
+          [attr.aria-disabled]="isNavItemDisabled(item)"
+          class="nav-icon-button"
         >
-          <mat-icon>chevron_left</mat-icon>
+          <mat-icon>{{ item.icon }}</mat-icon>
         </button>
       }
     </div>
+  }
 
-    <nav class="sidebar-nav">
-      <mat-nav-list class="nav-list">
-        <!-- My Library Navigation (disabled for unauthenticated users) -->
-        <mat-list-item
-          (click)="onNavigation(isAuthenticated() ? '/app/library' : '/login')"
-          [class.active]="isAuthenticated() && isRouteActive('/app/library')"
-          [class.disabled]="!isAuthenticated()"
-          [attr.aria-disabled]="!isAuthenticated()"
-          class="nav-item"
-          [matTooltip]="
-            !isAuthenticated()
-              ? 'Sign in to access your library'
-              : !isDrawerExpanded()
-                ? 'My Library'
-                : ''
-          "
-          matTooltipPosition="right"
-        >
-          <mat-icon matListItemIcon>library_music</mat-icon>
-          @if (isDrawerExpanded()) {
-            <span matListItemTitle>My Library</span>
+  <!-- Side Navigation Container (Sidenav + Content) -->
+  <mat-sidenav-container class="nav-container" [hasBackdrop]="isMobileView()">
+    <!-- Side Drawer with Labels (Desktop: side mode with hover, Mobile: over mode) -->
+    <mat-sidenav
+      #drawer
+      [mode]="isMobileView() ? 'over' : 'side'"
+      [opened]="isMobileView() ? false : isSidebarHovered()"
+      [attr.aria-label]="'Navigation labels'"
+      class="nav-drawer"
+      [class.mobile]="isMobileView()"
+      (mouseenter)="onSidebarHoverEnter()"
+      (mouseleave)="onSidebarHoverLeave()"
+    >
+      <!-- Drawer Header (Mobile only) -->
+      @if (isMobileView()) {
+        <div class="drawer-header">
+          <button matIconButton (click)="toggleDrawer()" [attr.aria-label]="'Close navigation'">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+
+      <!-- Navigation List with Labels -->
+      <nav class="nav-labels">
+        <mat-nav-list class="nav-list">
+          @for (item of navItems(); track item.path) {
+            <mat-list-item
+              (click)="onNavigationClick(item)"
+              [class.active]="isRouteActive(item.path)"
+              [class.disabled]="isNavItemDisabled(item)"
+              [attr.aria-disabled]="isNavItemDisabled(item)"
+              class="nav-item"
+            >
+              <span matListItemTitle>{{ item.label }}</span>
+            </mat-list-item>
           }
-        </mat-list-item>
+        </mat-nav-list>
+      </nav>
+    </mat-sidenav>
 
-        <!-- Discover Navigation (for all users) -->
-        <mat-list-item
-          (click)="onNavigation('/app/discover')"
-          [class.active]="isRouteActive('/app/discover')"
-          class="nav-item"
-          [matTooltip]="!isDrawerExpanded() ? 'Discover' : ''"
-          matTooltipPosition="right"
-        >
-          <mat-icon matListItemIcon>explore</mat-icon>
-          @if (isDrawerExpanded()) {
-            <span matListItemTitle>Discover</span>
-          }
-        </mat-list-item>
-      </mat-nav-list>
-    </nav>
-  </mat-drawer>
-
-  <!-- Main Content Area -->
-  <mat-drawer-content class="shell-content">
-    <!-- Router outlet for child routes (/app/library, /app/discover) -->
-    <router-outlet />
-  </mat-drawer-content>
-</mat-drawer-container>
+    <!-- Main Content Area -->
+    <mat-sidenav-content class="shell-content">
+      <!-- Router outlet for child routes (/app/library, /app/discover) -->
+      <router-outlet />
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

@@ -1,9 +1,12 @@
 @use '@angular/material' as mat;
 
-.shell-container {
+/* Shell Layout - Main flex container */
+.shell-layout {
   display: flex;
-  flex-direction: column;
-  height: 100vh;
+  flex-direction: row;
+  flex: 1;
+  width: 100%;
+  height: 100%;
   background-color: var(--mat-sys-surface);
 }
 
@@ -35,16 +38,74 @@
   }
 }
 
-.shell-drawer {
-  width: 256px;
+/* Left Icon Container (Desktop only) */
+.nav-icon-container {
+  display: flex;
+  flex-direction: column;
+  width: 64px;
+  background-color: var(--mat-sys-surface-container-lowest);
+  border-right: 1px solid var(--mat-sys-outline-variant);
+  flex-shrink: 0;
+  align-items: center;
+  padding-top: 8px;
+  gap: 8px;
+  overflow-y: auto;
+  height: 100%;
+
+  .nav-icon-button {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mat-sys-on-surface-variant);
+    border-radius: 8px;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      background-color: var(--mat-sys-surface-container-high);
+      color: var(--mat-sys-on-surface);
+    }
+
+    &.active {
+      background-color: var(--mat-sys-primary-container);
+      color: var(--mat-sys-on-primary-container);
+    }
+
+    &.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+
+      &:hover {
+        background-color: transparent;
+      }
+    }
+  }
+}
+
+/* Navigation Container with Sidenav */
+.nav-container {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  background-color: var(--mat-sys-surface);
+}
+
+/* Side Drawer with Labels */
+.nav-drawer {
   background-color: var(--mat-sys-surface);
   border-right: 1px solid var(--mat-sys-outline-variant);
-  transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
 
-  // Collapsed state: icon-only sidebar
-  &.collapsed {
-    width: 64px;
+  // Desktop mode: opens on hover next to icon container
+  &:not(.mobile) {
+    width: 240px;
+    box-shadow: var(--mat-sys-level1);
+  }
+
+  // Mobile mode: overlay drawer
+  &.mobile {
+    width: 256px;
   }
 
   .drawer-header {
@@ -55,7 +116,7 @@
     min-height: 56px;
     border-bottom: 1px solid var(--mat-sys-outline-variant);
 
-    .drawer-toggle {
+    button {
       color: var(--mat-sys-on-surface-variant);
 
       &:hover {
@@ -64,7 +125,7 @@
     }
   }
 
-  .sidebar-nav {
+  .nav-labels {
     padding-top: 8px;
     overflow: hidden;
     display: flex;
@@ -75,55 +136,38 @@
     padding: 0;
     width: 100%;
     overflow: hidden;
-  }
 
-  .nav-item {
-    margin-bottom: 0;
-    color: var(--mat-sys-on-surface);
-    cursor: pointer;
-    border-radius: 4px;
-    margin-left: 8px;
-    margin-right: 8px;
-    overflow: hidden;
-    transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
-
-    &:hover {
-      background-color: var(--mat-sys-surface-container-highest);
-    }
-
-    &.active {
-      background-color: var(--mat-sys-primary-container);
-      color: var(--mat-sys-on-primary-container);
-
-      mat-icon {
-        color: var(--mat-sys-on-primary-container);
-      }
-    }
-
-    &.disabled {
-      opacity: 0.5;
-      color: var(--mat-sys-on-surface-variant);
+    .nav-item {
+      margin: 0 8px 0 8px;
+      color: var(--mat-sys-on-surface);
+      cursor: pointer;
+      border-radius: 4px;
+      overflow: hidden;
+      transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+      min-height: 48px;
+      padding-left: 16px;
 
       &:hover {
-        background-color: transparent;
+        background-color: var(--mat-sys-surface-container-high);
       }
 
-      mat-icon {
+      &.active {
+        background-color: var(--mat-sys-primary-container);
+        color: var(--mat-sys-on-primary-container);
+      }
+
+      &.disabled {
+        opacity: 0.5;
         color: var(--mat-sys-on-surface-variant);
+        cursor: not-allowed;
+
+        &:hover {
+          background-color: transparent;
+        }
       }
-    }
 
-    mat-icon {
-      color: var(--mat-sys-on-surface-variant);
-      transition: margin 200ms cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    // When collapsed, ensure icons are centered
-    .shell-drawer.collapsed & {
-      justify-content: center;
-
-      mat-icon {
-        margin-right: 0;
+      span {
+        flex: 1;
       }
     }
   }
@@ -135,6 +179,7 @@
   display: flex;
   flex-direction: column;
   background-color: var(--mat-sys-surface);
+  width: 100%;
 
   ::ng-deep router-outlet + * {
     flex: 1;
@@ -143,6 +188,7 @@
 
 :host {
   display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
 }

@@ -8,25 +8,31 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatSidenavModule, MatDrawer } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatToolbar } from '@angular/material/toolbar';
+import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
+import { MatNavList, MatListItem, MatListItemTitle } from '@angular/material/list';
+import { MatIcon } from '@angular/material/icon';
+import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
+import { MatDivider } from '@angular/material/divider';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AuthService } from '../../services/auth.service';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { OnboardingDialogComponent } from '../onboarding-dialog/onboarding-dialog.component';
 import { ProfileService } from '../../services/profile.service';
 import type { ProfileDto } from '@/types';
 
+interface NavItem {
+  icon: string;
+  label: string;
+  path: string;
+  requiresAuth: boolean;
+}
+
 /**
  * Main shell layout component for authenticated views.
- * Provides persistent navigation, toolbar with user menu, and content area.
- * Responsive design: expanded sidebar on desktop, collapsible icon-only sidebar on mobile.
+ * Provides persistent navigation with icon sidebar and drawer labels.
+ * Desktop: hover expands drawer with labels and shifts content right
+ * Mobile: click icon toggles drawer overlay
  */
 @Component({
   selector: 'app-shell',
@@ -34,14 +40,17 @@ import type { ProfileDto } from '@/types';
   imports: [
     CommonModule,
     RouterModule,
-    MatToolbarModule,
-    MatSidenavModule,
-    MatListModule,
-    MatIconModule,
-    MatButtonModule,
-    MatMenuModule,
-    MatTooltipModule,
-    MatDividerModule,
+    MatToolbar,
+    MatSidenavContainer,
+    MatSidenav,
+    MatSidenavContent,
+    MatNavList,
+    MatListItem,
+    MatListItemTitle,
+    MatIcon,
+    MatMenu,
+    MatMenuTrigger,
+    MatDivider,
     MatDialogModule,
   ],
   templateUrl: './app-shell.component.html',
@@ -57,7 +66,7 @@ export class AppShellComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
 
-  readonly drawer = viewChild<MatDrawer>('drawer');
+  readonly drawer = viewChild<MatSidenav>('drawer');
 
   /**
    * User profile for onboarding status check
@@ -70,10 +79,27 @@ export class AppShellComponent implements OnInit {
   private readonly isMobileViewSignal = signal<boolean>(this.checkMobileView());
 
   /**
-   * Track if sidebar is expanded (for collapsible behavior on mobile)
-   * Desktop: always expanded, Mobile: starts collapsed
+   * Track if sidebar is hovered (for desktop expand behavior)
    */
-  readonly isDrawerExpanded = signal<boolean>(!this.checkMobileView());
+  readonly isSidebarHovered = signal<boolean>(false);
+
+  /**
+   * Navigation items configuration
+   */
+  readonly navItems = signal<NavItem[]>([
+    {
+      icon: 'library_music',
+      label: 'My Library',
+      path: '/app/library',
+      requiresAuth: true,
+    },
+    {
+      icon: 'explore',
+      label: 'Discover',
+      path: '/app/discover',
+      requiresAuth: false,
+    },
+  ]);
 
   /**
    * Expose auth service signals to template
@@ -106,21 +132,46 @@ export class AppShellComponent implements OnInit {
   }
 
   /**
-   * Navigates to a route and closes drawer on mobile
+   * Handles navigation and drawer behavior
    */
-  onNavigation(path: string): void {
-    this.router.navigate([path]);
-    // Collapse drawer on mobile after navigation
+  onNavigationClick(item: NavItem): void {
+    // Check if user is authenticated and item requires auth
+    if (item.requiresAuth && !this.isAuthenticated()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    this.router.navigate([item.path]);
+
+    // Close drawer on mobile after navigation
     if (this.isMobileViewSignal()) {
-      this.isDrawerExpanded.set(false);
+      this.drawer()?.close();
     }
   }
 
   /**
-   * Toggles the drawer expansion state
+   * Toggles the drawer (mobile behavior)
    */
   toggleDrawer(): void {
-    this.isDrawerExpanded.update(value => !value);
+    this.drawer()?.toggle();
+  }
+
+  /**
+   * Handles sidebar hover enter (desktop only)
+   */
+  onSidebarHoverEnter(): void {
+    if (!this.isMobileViewSignal()) {
+      this.isSidebarHovered.set(true);
+    }
+  }
+
+  /**
+   * Handles sidebar hover leave (desktop only)
+   */
+  onSidebarHoverLeave(): void {
+    if (!this.isMobileViewSignal()) {
+      this.isSidebarHovered.set(false);
+    }
   }
 
   /**
@@ -140,13 +191,15 @@ export class AppShellComponent implements OnInit {
     // Update mobile view signal
     this.isMobileViewSignal.set(isMobileNow);
 
-    // Transition from mobile to desktop: expand sidebar
+    // Transition from mobile to desktop: reset hover state
     if (wasMobile && !isMobileNow) {
-      this.isDrawerExpanded.set(true);
+      this.isSidebarHovered.set(false);
+      this.drawer()?.close();
     }
-    // Transition from desktop to mobile: collapse sidebar
+    // Transition from desktop to mobile: close sidebar
     if (!wasMobile && isMobileNow) {
-      this.isDrawerExpanded.set(false);
+      this.isSidebarHovered.set(false);
+      this.drawer()?.close();
     }
   }
 
@@ -194,7 +247,14 @@ export class AppShellComponent implements OnInit {
   /**
    * Check if current route is active
    */
-  isRouteActive(route: string): boolean {
-    return this.router.url.startsWith(route);
+  isRouteActive(path: string): boolean {
+    return this.router.url.startsWith(path);
+  }
+
+  /**
+   * Check if nav item is disabled
+   */
+  isNavItemDisabled(item: NavItem): boolean {
+    return item.requiresAuth && !this.isAuthenticated();
   }
 }
