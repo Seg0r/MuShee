@@ -14,6 +14,7 @@ export class SongListComponent {
   readonly songs = input.required<SongTileData[]>();
   readonly isUserLibrary = input<boolean>(false);
   readonly isSongInLibrary = input<(songId: string) => boolean>(() => false);
+  readonly isAuthenticated = input<boolean>(false);
 
   readonly tileClick = output<SongTileData>();
   readonly addToLibrary = output<SongTileData>();
@@ -33,6 +34,7 @@ export class SongListComponent {
         action: 'add', // Public library shows add action
         isLoading: false,
         isInLibrary: this.isSongInLibrary()('id' in song ? song.id : song.song_id),
+        isAuthenticated: this.isAuthenticated(),
       };
     }
   }

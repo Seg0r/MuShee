@@ -25,6 +25,7 @@ export interface SongTileConfig {
   action: SongTileAction;
   isLoading?: boolean;
   isInLibrary?: boolean;
+  isAuthenticated?: boolean;
 }
 
 @Component({
@@ -108,9 +109,11 @@ export class SongTileComponent {
   readonly buttonState = computed(() => {
     const config = this.config();
     const isLoading = config.isLoading ?? false;
+    const isAuthenticated = config.isAuthenticated ?? false;
 
     if (config.action === 'add') {
       if (isLoading) return { text: 'Adding...', disabled: true, showSpinner: true };
+      if (!isAuthenticated) return { text: 'Sign in to add', disabled: false, showSpinner: false };
       if (config.isInLibrary)
         return { text: 'Already in library', disabled: true, showSpinner: false };
       return { text: 'Add to Library', disabled: false, showSpinner: false };

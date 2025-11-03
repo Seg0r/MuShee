@@ -16,6 +16,7 @@
         [songs]="visibleSongs()"
         [isUserLibrary]="false"
         [isSongInLibrary]="isSongInLibrary.bind(this)"
+        [isAuthenticated]="isAuthenticated()"
         (tileClick)="onSongCardClick($event)"
         (addToLibrary)="onAddToLibrary($event)"
       />

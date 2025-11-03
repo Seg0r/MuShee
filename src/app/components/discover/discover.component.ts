@@ -126,6 +126,11 @@ export class DiscoverComponent implements OnInit {
    */
   readonly isLoading = computed(() => this.isInitialLoading() || this.isPaginationLoading());
 
+  /**
+   * Public authentication state for template binding
+   */
+  readonly isAuthenticated = computed(() => this.authService.isAuthenticated());
+
   // ============================================================================
   // Public Helper Methods for Template
   // ============================================================================

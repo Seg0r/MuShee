@@ -7,8 +7,8 @@ import { AuthService } from '../../services/auth.service';
  * and redirects users to the appropriate starting page.
  *
  * - Authenticated users: /app/library
- * - Unauthenticated users: /login
- * - 404 fallback: /login (safe default)
+ * - Unauthenticated users: /app/discover (public library)
+ * - 404 fallback: /app/discover (safe default)
  */
 @Component({
   selector: 'app-root-redirect',
@@ -37,14 +37,14 @@ export class RootRedirectComponent implements OnInit {
         console.log('Authenticated user detected, redirecting to /app/library');
         await this.router.navigate(['/app/library']);
       } else {
-        // Unauthenticated users go to login
-        console.log('No authenticated user, redirecting to /login');
-        await this.router.navigate(['/login']);
+        // Unauthenticated users go to public discover page
+        console.log('No authenticated user, redirecting to /app/discover');
+        await this.router.navigate(['/app/discover']);
       }
     } catch (error) {
-      // On error, default to login page (safe fallback)
-      console.error('Error checking authentication status, redirecting to /login:', error);
-      await this.router.navigate(['/login']);
+      // On error, default to discover page (safe fallback)
+      console.error('Error checking authentication status, redirecting to /app/discover:', error);
+      await this.router.navigate(['/app/discover']);
     }
   }
 
