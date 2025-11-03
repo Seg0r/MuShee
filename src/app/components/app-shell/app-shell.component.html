@@ -1,7 +1,7 @@
 <mat-drawer-container class="shell-container" hasBackdrop="false">
   <!-- Main Toolbar -->
   <mat-toolbar color="primary" class="shell-toolbar">
-    <!-- Mobile Menu Toggle (only show for authenticated users) -->
+    <!-- Mobile Menu Toggle (only show for authenticated users on mobile) -->
     @if (isMobileView() && isAuthenticated()) {
       <button
         matIconButton
@@ -64,40 +64,63 @@
     }
   </mat-toolbar>
 
-  <!-- Navigation Drawer -->
-  <mat-drawer
-    #drawer
-    [mode]="isMobileView() ? 'over' : 'side'"
-    [opened]="!isMobileView()"
-    [attr.aria-label]="'Navigation menu'"
-    class="shell-drawer"
-  >
-    <nav class="sidebar-nav">
-      <mat-nav-list class="nav-list">
-        <!-- Authenticated navigation -->
-        @if (isAuthenticated()) {
+  <!-- Navigation Drawer (always side mode for authenticated users) -->
+  @if (isAuthenticated()) {
+    <mat-drawer
+      #drawer
+      mode="side"
+      [opened]="true"
+      [attr.aria-label]="'Navigation menu'"
+      class="shell-drawer"
+      [class.collapsed]="!isDrawerExpanded()"
+    >
+      <div class="drawer-header">
+        <!-- Toggle button for mobile/collapsed state -->
+        @if (isMobileView()) {
+          <button
+            matIconButton
+            (click)="toggleDrawer()"
+            class="drawer-toggle"
+            [attr.aria-label]="'Close navigation'"
+          >
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+        }
+      </div>
+
+      <nav class="sidebar-nav">
+        <mat-nav-list class="nav-list">
+          <!-- My Library Navigation -->
           <mat-list-item
             (click)="onNavigation('/app/library')"
             [class.active]="isRouteActive('/app/library')"
             class="nav-item"
+            [matTooltip]="!isDrawerExpanded() ? 'My Library' : ''"
+            matTooltipPosition="right"
           >
             <mat-icon matListItemIcon>library_music</mat-icon>
-            <span matListItemTitle>My Library</span>
+            @if (isDrawerExpanded()) {
+              <span matListItemTitle>My Library</span>
+            }
           </mat-list-item>
-        }
 
-        <!-- Always show Discover -->
-        <mat-list-item
-          (click)="onNavigation('/app/discover')"
-          [class.active]="isRouteActive('/app/discover')"
-          class="nav-item"
-        >
-          <mat-icon matListItemIcon>explore</mat-icon>
-          <span matListItemTitle>Discover</span>
-        </mat-list-item>
-      </mat-nav-list>
-    </nav>
-  </mat-drawer>
+          <!-- Discover Navigation -->
+          <mat-list-item
+            (click)="onNavigation('/app/discover')"
+            [class.active]="isRouteActive('/app/discover')"
+            class="nav-item"
+            [matTooltip]="!isDrawerExpanded() ? 'Discover' : ''"
+            matTooltipPosition="right"
+          >
+            <mat-icon matListItemIcon>explore</mat-icon>
+            @if (isDrawerExpanded()) {
+              <span matListItemTitle>Discover</span>
+            }
+          </mat-list-item>
+        </mat-nav-list>
+      </nav>
+    </mat-drawer>
+  }
 
   <!-- Main Content Area -->
   <mat-drawer-content class="shell-content">

@@ -36,12 +36,33 @@
 }
 
 .shell-drawer {
-  width: auto;
-  min-width: fit-content;
-  max-width: 256px;
+  width: 256px;
   background-color: var(--mat-sys-surface);
   border-right: 1px solid var(--mat-sys-outline-variant);
+  transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+
+  // Collapsed state: icon-only sidebar
+  &.collapsed {
+    width: 64px;
+  }
+
+  .drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 8px;
+    min-height: 56px;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+    .drawer-toggle {
+      color: var(--mat-sys-on-surface-variant);
+
+      &:hover {
+        background-color: var(--mat-sys-surface-container-highest);
+      }
+    }
+  }
 
   .sidebar-nav {
     padding-top: 8px;
@@ -64,6 +85,7 @@
     margin-left: 8px;
     margin-right: 8px;
     overflow: hidden;
+    transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
 
     &:hover {
       background-color: var(--mat-sys-surface-container-highest);
@@ -80,7 +102,16 @@
 
     mat-icon {
       color: var(--mat-sys-on-surface-variant);
-      margin-right: 16px;
+      transition: margin 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    // When collapsed, ensure icons are centered
+    .shell-drawer.collapsed & {
+      justify-content: center;
+
+      mat-icon {
+        margin-right: 0;
+      }
     }
   }
 }

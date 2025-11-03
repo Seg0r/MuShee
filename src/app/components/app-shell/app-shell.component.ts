@@ -26,7 +26,7 @@ import type { ProfileDto } from '@/types';
 /**
  * Main shell layout component for authenticated views.
  * Provides persistent navigation, toolbar with user menu, and content area.
- * Responsive design: sidebar on desktop, drawer on mobile.
+ * Responsive design: expanded sidebar on desktop, collapsible icon-only sidebar on mobile.
  */
 @Component({
   selector: 'app-shell',
@@ -70,6 +70,12 @@ export class AppShellComponent implements OnInit {
   private readonly isMobileViewSignal = signal<boolean>(this.checkMobileView());
 
   /**
+   * Track if sidebar is expanded (for collapsible behavior on mobile)
+   * Desktop: always expanded, Mobile: starts collapsed
+   */
+  readonly isDrawerExpanded = signal<boolean>(!this.checkMobileView());
+
+  /**
    * Expose auth service signals to template
    */
   readonly user = this.authService.user;
@@ -104,21 +110,17 @@ export class AppShellComponent implements OnInit {
    */
   onNavigation(path: string): void {
     this.router.navigate([path]);
-    // Close drawer on mobile after navigation
-    const drawer = this.drawer();
-    if (drawer && this.isMobileViewSignal()) {
-      drawer.close();
+    // Collapse drawer on mobile after navigation
+    if (this.isMobileViewSignal()) {
+      this.isDrawerExpanded.set(false);
     }
   }
 
   /**
-   * Toggles the drawer (mobile only)
+   * Toggles the drawer expansion state
    */
   toggleDrawer(): void {
-    const drawer = this.drawer();
-    if (drawer) {
-      drawer.toggle();
-    }
+    this.isDrawerExpanded.update(value => !value);
   }
 
   /**
@@ -138,10 +140,13 @@ export class AppShellComponent implements OnInit {
     // Update mobile view signal
     this.isMobileViewSignal.set(isMobileNow);
 
-    // If transitioning from mobile to desktop, close drawer
-    const drawer = this.drawer();
-    if (drawer && wasMobile && !isMobileNow && drawer.opened) {
-      drawer.close();
+    // Transition from mobile to desktop: expand sidebar
+    if (wasMobile && !isMobileNow) {
+      this.isDrawerExpanded.set(true);
+    }
+    // Transition from desktop to mobile: collapse sidebar
+    if (!wasMobile && isMobileNow) {
+      this.isDrawerExpanded.set(false);
     }
   }
 
