@@ -1,8 +1,15 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import {
+  MatDialogRef,
+  MatDialogContainer,
+  MatDialogTitle,
+  MatDialogContent,
+  MatDialogActions,
+  MAT_DIALOG_DATA,
+} from '@angular/material/dialog';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 interface ConfirmDialogData {
   title: string;
@@ -16,7 +23,15 @@ interface ConfirmDialogData {
 @Component({
   selector: 'app-confirm-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
+  imports: [
+    CommonModule,
+    MatButton,
+    MatIcon,
+    MatDialogContainer,
+    MatDialogTitle,
+    MatDialogContent,
+    MatDialogActions,
+  ],
   templateUrl: './confirm-dialog.component.html',
   styleUrl: './confirm-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

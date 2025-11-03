@@ -54,12 +54,12 @@
 
     <!-- User Dropdown Menu -->
     <mat-menu #userMenu="matMenu" class="user-dropdown">
-      <button mat-menu-item disabled>
+      <button matMenuItem disabled>
         <mat-icon>person</mat-icon>
         <span>{{ userEmail() }}</span>
       </button>
       <mat-divider></mat-divider>
-      <button mat-menu-item (click)="onLogoutClick()">
+      <button matMenuItem (click)="onLogoutClick()">
         <mat-icon>logout</mat-icon>
         <span>Logout</span>
       </button>

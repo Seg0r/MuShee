@@ -1,10 +1,15 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatListModule } from '@angular/material/list';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatIconModule } from '@angular/material/icon';
+import {
+  MatDialogRef,
+  MatDialogContent,
+  MatDialogActions,
+  MAT_DIALOG_DATA,
+} from '@angular/material/dialog';
+import { MatButton } from '@angular/material/button';
+import { MatList, MatListItem } from '@angular/material/list';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatIcon } from '@angular/material/icon';
 
 import type { GenerateAiSuggestionsResponseDto } from '@/types';
 
@@ -19,11 +24,13 @@ export interface SuggestionsDialogData {
   standalone: true,
   imports: [
     CommonModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatListModule,
-    MatProgressSpinnerModule,
-    MatIconModule,
+    MatButton,
+    MatList,
+    MatListItem,
+    MatProgressSpinner,
+    MatIcon,
+    MatDialogContent,
+    MatDialogActions,
   ],
   templateUrl: './suggestions-dialog.component.html',
   styleUrls: ['./suggestions-dialog.component.scss'],

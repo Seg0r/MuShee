@@ -1,9 +1,9 @@
 import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCard, MatCardContent, MatCardFooter } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 import type { PublicSongListItemDto, UserLibraryItemDto } from '@/types';
 
@@ -31,7 +31,15 @@ export interface SongTileConfig {
 @Component({
   selector: 'app-song-tile',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatIconModule, MatButtonModule, MatProgressSpinnerModule],
+  imports: [
+    CommonModule,
+    MatCard,
+    MatCardContent,
+    MatCardFooter,
+    MatIcon,
+    MatIconButton,
+    MatProgressSpinner,
+  ],
   templateUrl: './song-tile.component.html',
   styleUrl: './song-tile.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -13,11 +13,11 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { OpenSheetMusicDisplay, IOSMDOptions } from 'opensheetmusicdisplay';
 
 import { SongService } from '../../services/song.service';
@@ -33,14 +33,7 @@ import type { SongAccessDto } from '../../../types';
 @Component({
   selector: 'app-sheet-music-viewer',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    MatProgressSpinnerModule,
-    MatSnackBarModule,
-    MatDialogModule,
-  ],
+  imports: [CommonModule, MatIcon, MatIconButton, MatProgressSpinner],
   templateUrl: './sheet-music-viewer.component.html',
   styleUrl: './sheet-music-viewer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

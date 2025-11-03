@@ -14,11 +14,11 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 import type { UserLibraryItemDto, ErrorCode, ProfileDto, UploadSongResponseDto } from '@/types';
 import { SongTileData } from '../song-tile/song-tile.component';
@@ -41,11 +41,10 @@ import { SongListComponent } from '../song-list/song-list.component';
   imports: [
     CommonModule,
     RouterModule,
-    MatButtonModule,
-    MatIconModule,
-    MatDialogModule,
-    MatSnackBarModule,
-    MatProgressSpinnerModule,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatProgressSpinner,
     SongListComponent,
     EmptyStateComponent,
     LoadingSkeletonComponent,

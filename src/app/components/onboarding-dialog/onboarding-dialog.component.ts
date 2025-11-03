@@ -1,16 +1,25 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatStepperModule } from '@angular/material/stepper';
+import { MatDialogRef } from '@angular/material/dialog';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatStepper, MatStep, MatStepperNext, MatStepperPrevious } from '@angular/material/stepper';
 
 import { ProfileService } from '@/app/services/profile.service';
 
 @Component({
   selector: 'app-onboarding-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule, MatStepperModule],
+  imports: [
+    CommonModule,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatStepper,
+    MatStep,
+    MatStepperNext,
+    MatStepperPrevious,
+  ],
   templateUrl: './onboarding-dialog.component.html',
   styleUrl: './onboarding-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
