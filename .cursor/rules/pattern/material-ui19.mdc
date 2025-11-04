@@ -1,0 +1,276 @@
+---
+description: This rule provides comprehensive best practices and coding standards for Angular development with Angular Material v19, focusing on Material 3 (a.k.a. M3) design, theme configuration and various API usages.
+globs: **/*.ts,**/*.html,**/*.scss,**/*.css
+alwaysApply: false
+---
+
+# AI Agent Ruleset: Angular Material v19
+
+## 1\. Introduction
+
+This document provides the definitive ruleset for AI agents generating or migrating code for Angular Material version 19. These rules are derived from the stable API of v19 and explicitly forbid the use of APIs and patterns introduced in Angular v20. Adherence to these rules is critical to prevent breaking changes and ensure v19 compatibility.
+
+---
+
+## 2\. Core Framework Rules (Angular v19)
+
+### Rule 2.1: Built-in Control Flow (Stable)
+
+**Directive:** The built-in control flow syntax (`@if`, `@for`, `@switch`) is stable and the **preferred** method in Angular v19.[1, 2]
+
+**Rationale:** This syntax offers better performance, type safety, and ergonomics, and does not require `CommonModule` to be imported in standalone components.[2, 3] The `track` expression is mandatory for `@for` blocks.[4]
+
+**Correct (v19):**
+
+```html
+@for (item of items; track item.id) {
+<div>{{ item.name }}</div>
+} @if (user.isLoggedIn) {
+<welcome-message />
+}
+```
+
+**Incorrect (Legacy/Deprecated):**
+
+```html
+<ng-container *ngFor="let item of items; trackBy: trackById">
+  <div>{{ item.name }}</div>
+</ng-container>
+<welcome-message *ngIf="user.isLoggedIn" />
+```
+
+### Rule 2.2: Standalone Components (Default)
+
+**Directive:** Components, directives, and pipes are `standalone: true` by **default** in Angular v19.[5, 6]
+
+**Rationale:** The `ng update` schematic for v19 automatically removes `standalone: true` from existing components (as it is default) and adds `standalone: false` to NgModule-based components to maintain compatibility.[5, 6]
+
+**Correct (v19):**
+
+```typescript
+// New components are standalone by default
+@Component({
+  selector: 'app-user-profile',
+  template: `...`,
+  imports: // Material modules are imported directly
+})
+export class UserProfileComponent {... }
+```
+
+**Incorrect (Pre-v19 Pattern):**
+
+```typescript
+// This component will be migrated to standalone: false by the v19 update schematic
+@Component({
+  selector: 'app-user-profile',
+  template: `...`,
+})
+export class UserProfileComponent {... }
+
+// And would require an NgModule
+@NgModule({
+  declarations: [UserProfileComponent],
+  imports:,
+  exports: [UserProfileComponent]
+})
+export class UserProfileModule {... }
+```
+
+### Rule 2.3: Material Module Imports
+
+**Directive:** When using standalone components, Angular Material components MUST be imported by their `NgModule` (e.g., `MatButtonModule`, `MatCardModule`) into the component's `imports` array.[7]
+
+**Rationale:** This is the standard pattern for consuming NgModule-based libraries in standalone components.[7, 8] Importing individual components (e.g., `MatButton`) is possible but often discouraged as it can miss related directives (like `MatRipple`).[8]
+
+---
+
+## 3\. Component API Rules (Material v19)
+
+### Rule 3.1: Button Directives (Critical)
+
+**Directive:** Use the attribute-selector directives for button variants. The `matButton` directive with an `appearance` input is **NOT** the primary API in v19, with the exception of the 'tonal' button.[9, 10]
+
+**Rationale:** Angular Material v20 unified the button API, changing `[mat-raised-button]` to `matButton="elevated"`, `[mat-flat-button]` to `matButton="filled"`, and `[mat-stroked-button]` to `matButton="outlined"`.[11, 12] Using the v20 syntax in a v19 project will fail.
+
+**Correct (v19):**
+
+```html
+<button mat-button>Text</button>
+
+<button mat-raised-button>Raised</button>
+
+<button mat-flat-button>Flat</button>
+
+<button mat-stroked-button>Stroked</button>
+```
+
+**Incorrect (v20+ Syntax):**
+
+```html
+<button matButton>Text</button>
+<button matButton="elevated">Elevated</button>
+<button matButton="filled">Filled</button>
+<button matButton="outlined">Outlined</button>
+```
+
+### Rule 3.2: Tonal Button (Exception)
+
+**Directive:** The 'tonal' button variant is an exception and MUST be specified using `matButton="tonal"`.[10]
+
+**Rationale:** The 'tonal' variant was added as part of the M3 alignment and used the input-based API that would later be adopted by all buttons in v20.[13, 10]
+
+**Correct (v19):**
+
+```html
+<button matButton="tonal">Tonal</button>
+```
+
+### Rule 3.3: Icon Button Directives
+
+**Directive:** Use the `[mat-icon-button]` selector for icon buttons.[9]
+
+**Rationale:** v20 introduced \`\` for consistency.[13, 9] The `[mat-icon-button]` selector is the correct one for v19.
+
+**Correct (v19):**
+
+```html
+<button mat-icon-button aria-label="Example icon button">
+  <mat-icon>home</mat-icon>
+</button>
+```
+
+**Incorrect (v20+ Syntax):**
+
+```html
+<button matIconButton aria-label="Example icon button">
+  <mat-icon>home</mat-icon>
+</button>
+```
+
+### Rule 3.4: Legacy Components (Obsolete)
+
+**Directive:** MUST NOT use any "legacy" prefixed components (e.g., `mat-legacy-button`).
+
+**Rationale:** The migration to Material Design Components (MDC) was completed before v19.[14, 1] All legacy components were officially removed in Angular Material v17.[15] All v19 components are MDC-based.
+
+---
+
+## 4\. Theming & Styling Rules (Material v19)
+
+### Rule 4.1: Theming API (Sass)
+
+**Directive:** The application theme MUST be defined using the new `mat.theme` mixin introduced in v19.[16, 17]
+
+**Rationale:** This new API is based on Material 3 design tokens and generates CSS custom properties.[17, 18] The older API from v18 and earlier (`mat.define-theme`, `mat.define-light-theme`) is considered obsolete in v19.[16]
+
+**Correct (v19):**
+
+```scss
+@use '@angular/material' as mat;
+
+html {
+  // Enables light/dark mode based on user preference
+  color-scheme: light dark;
+
+  @include mat.theme(
+    (
+      color: mat.$violet-palette,
+      typography: Roboto,
+      density: 0,
+    )
+  );
+}
+```
+
+**Incorrect (v18 and earlier):**
+
+```scss
+@use '@angular/material' as mat;
+
+// This API is obsolete in v19
+$my-light-theme: mat.define-light-theme(
+  (
+    color: (
+      primary: mat.define-palette(mat.$indigo-palette),
+      accent: mat.define-palette(mat.$pink-palette),
+    ),
+  )
+);
+
+@include mat.all-component-themes($my-light-theme);
+```
+
+### Rule 4.2: Component Style Customization (Sass)
+
+**Directive:** To customize component styles, MUST use the `overrides` Sass mixin provided by each component (e.g., `mat.card-overrides`).[16, 19]
+
+**Rationale:** This is the official, safe, and forward-compatible API for customizing M3-based components.[16] It validates token names and ensures styles are applied correctly.
+
+**Correct (v19):**
+
+```scss
+@use '@angular/material' as mat;
+
+html {
+  // Safely overrides card tokens
+  @include mat.card-overrides(
+    (
+      elevated-container-color: red,
+      elevated-container-shape: 32px,
+    )
+  );
+}
+```
+
+### Rule 4.3: Deep Selector (Forbidden)
+
+**Directive:** MUST NOT use the `::ng-deep` shadow-piercing combinator to style internals of Material components.
+
+**Rationale:** This practice was always discouraged and is extremely brittle, especially after the MDC migration.[20] It breaks encapsulation and is guaranteed to fail in future updates.[21] Use the `overrides` mixins (Rule 4.2) or CSS Custom Properties (Rule 4.4) instead.
+
+### Rule 4.4: CSS Custom Property Tokens (MDC Prefix)
+
+**Directive:** When overriding component styles via CSS custom properties directly, MUST use the `mdc-` prefix for tokens that were renamed in v20.
+
+**Rationale:** v19 components are based on MDC, and many CSS tokens retain the `mdc-` prefix.[22] v20 "cleaned" these, renaming them to `mat-`.[11, 12] Using the `mat-` prefix for these specific tokens will not work in v19.
+
+**Correct (v19):**
+
+```css
+/* To change the border radius of an outlined card in v19 */
+:root {
+  --mdc-outlined-card-container-shape: 8px;
+}
+```
+
+**Incorrect (v20+ Syntax):**
+
+```css
+/* This token name is used in v20+ and will have no effect in v19 */
+:root {
+  --mat-card-outlined-container-shape: 8px;
+}
+```
+
+---
+
+## 5\. Angular CDK Rules (v19)
+
+### Rule 5.1: CDK Overlay Service
+
+**Directive:** Use the standard `Overlay` service (`overlay.create()`) for creating floating panels.[23]
+
+**Rationale:** The standard `Overlay` service is the stable API in v19. Tree-shakeable alternatives for the overlay system were introduced in v20 and are not available in v19.[24, 25]
+
+**Correct (v19):**
+
+```typescript
+import { Overlay } from '@angular/cdk/overlay';
+
+constructor(private overlay: Overlay) {}
+
+createOverlay() {
+  const overlayRef = this.overlay.create();
+  //... attach portal
+}
+```
