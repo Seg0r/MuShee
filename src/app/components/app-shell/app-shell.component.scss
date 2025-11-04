@@ -43,11 +43,16 @@
   }
 
   .theme-toggle {
-    ::ng-deep .mdc-switch {
-      height: 20px;
-    }
+    @include mat.slide-toggle-overrides(
+      (
+        handle-height: 20px,
+        track-outline-color: transparent,
+        selected-handle-color: var(--mat-sys-on-primary),
+        selected-track-color: rgba(255, 255, 255, 0.12),
+      )
+    );
 
-    ::ng-deep .mdc-switch__labels {
+    .mdc-switch__labels {
       margin-left: 8px;
       font-size: 14px;
       font-weight: 500;
@@ -193,7 +198,7 @@
   background-color: var(--mat-sys-surface);
   width: 100%;
 
-  ::ng-deep router-outlet + * {
+  router-outlet + * {
     flex: 1;
   }
 }

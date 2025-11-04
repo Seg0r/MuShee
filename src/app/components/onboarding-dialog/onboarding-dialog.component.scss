@@ -42,18 +42,16 @@
 // ============================================================================
 
 .onboarding-stepper {
-  ::ng-deep {
-    .mat-mdc-stepper-header {
-      background: var(--mat-sys-surface-container-low);
-    }
+  .mat-mdc-stepper-header {
+    background: var(--mat-sys-surface-container-low);
+  }
 
-    .mat-step-label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: var(--mat-sys-label-large);
-      font-weight: 500;
-    }
+  .mat-step-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--mat-sys-label-large);
+    font-weight: 500;
   }
 }
 
@@ -145,14 +143,12 @@
 
 @media (max-width: 600px) {
   .onboarding-stepper {
-    ::ng-deep {
-      .mat-step-label {
-        display: none;
-      }
+    .mat-step-label {
+      display: none;
+    }
 
-      .mdc-step-indicator {
-        max-width: 2rem;
-      }
+    .mdc-step-indicator {
+      max-width: 2rem;
     }
   }
 }

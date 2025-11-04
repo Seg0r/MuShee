@@ -2,7 +2,6 @@ import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   MatDialogRef,
-  MatDialogContainer,
   MatDialogTitle,
   MatDialogContent,
   MatDialogActions,
@@ -27,7 +26,6 @@ interface ConfirmDialogData {
     CommonModule,
     MatButtonModule,
     MatIcon,
-    MatDialogContainer,
     MatDialogTitle,
     MatDialogContent,
     MatDialogActions,

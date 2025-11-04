@@ -146,21 +146,19 @@
 .form-field {
   width: 100%;
 
-  ::ng-deep {
-    .mdc-text-field {
-      transition: all 0.3s ease;
-    }
+  .mdc-text-field {
+    transition: all 0.3s ease;
+  }
 
-    .mdc-text-field--focused {
-      .mdc-text-field__input {
-        caret-color: var(--mat-sys-primary);
-      }
+  .mdc-text-field--focused {
+    .mdc-text-field__input {
+      caret-color: var(--mat-sys-primary);
     }
+  }
 
-    .mdc-text-field--invalid {
-      .mdc-text-field__input {
-        color: var(--mat-sys-error);
-      }
+  .mdc-text-field--invalid {
+    .mdc-text-field__input {
+      color: var(--mat-sys-error);
     }
   }
 }

@@ -16,7 +16,7 @@
       <mat-icon class="error-icon">error_outline</mat-icon>
       <h2>Unable to Load Sheet Music</h2>
       <p>{{ errorMessage }}</p>
-      <button matButton (click)="onBackClick()">
+      <button mat-button (click)="onBackClick()">
         <mat-icon>arrow_back</mat-icon>
         Go Back
       </button>
@@ -99,7 +99,7 @@
       } @else {
         <div class="feedback-controls">
           <p class="feedback-label">Sign in to rate rendering quality</p>
-          <button matButton (click)="onThumbsUp()" class="sign-in-prompt">Sign In</button>
+          <button mat-button (click)="onThumbsUp()" class="sign-in-prompt">Sign In</button>
         </div>
       }
     </div>

@@ -42,7 +42,7 @@
   @if (error()) {
     <div class="error-banner">
       <p>{{ error()!.message }}</p>
-      <button matButton (click)="retryInitialize()">Retry</button>
+      <button mat-button (click)="retryInitialize()">Retry</button>
     </div>
   }
 </main>

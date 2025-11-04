@@ -8,7 +8,7 @@
     <div class="song-actions">
       @if (config().action === 'add') {
         <button
-          matButton
+          mat-button
           [disabled]="buttonState()?.disabled"
           (click)="onAddToLibrary($event)"
           [attr.aria-label]="buttonState()?.text"

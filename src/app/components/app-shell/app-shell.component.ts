@@ -12,7 +12,7 @@ import { MatToolbar } from '@angular/material/toolbar';
 import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
 import { MatNavList, MatListItem, MatListItemTitle } from '@angular/material/list';
 import { MatIcon } from '@angular/material/icon';
-import { MatMenu, MatMenuTrigger, MatMenuItem } from '@angular/material/menu';
+import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { MatDivider } from '@angular/material/divider';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatButtonModule } from '@angular/material/button';
@@ -53,10 +53,8 @@ interface NavItem {
     MatIcon,
     MatMenu,
     MatMenuTrigger,
-    MatMenuItem,
     MatDivider,
     MatSlideToggle,
-    MatButtonModule,
     MatButtonModule,
   ],
   templateUrl: './app-shell.component.html',
