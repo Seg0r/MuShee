@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -41,8 +41,7 @@ import { SongListComponent } from '../song-list/song-list.component';
   imports: [
     CommonModule,
     RouterModule,
-    MatButton,
-    MatIconButton,
+    MatButtonModule,
     MatIcon,
     MatProgressSpinner,
     SongListComponent,

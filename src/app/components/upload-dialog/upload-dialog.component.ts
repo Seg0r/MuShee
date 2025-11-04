@@ -13,7 +13,7 @@ import {
   MatDialogContent,
   MatDialogActions,
 } from '@angular/material/dialog';
-import { MatButton } from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
@@ -30,7 +30,7 @@ interface UploadDialogResult {
   standalone: true,
   imports: [
     CommonModule,
-    MatButton,
+    MatButtonModule,
     MatIcon,
     MatProgressSpinner,
     MatDialogTitle,

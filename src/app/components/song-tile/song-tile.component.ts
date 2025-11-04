@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, input, output, computed } from '@an
 import { CommonModule } from '@angular/common';
 import { MatCard, MatCardContent, MatCardFooter } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
-import { MatIconButton } from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 import type { PublicSongListItemDto, UserLibraryItemDto } from '@/types';
@@ -37,7 +37,7 @@ export interface SongTileConfig {
     MatCardContent,
     MatCardFooter,
     MatIcon,
-    MatIconButton,
+    MatButtonModule,
     MatProgressSpinner,
   ],
   templateUrl: './song-tile.component.html',

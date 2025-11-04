@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogRef } from '@angular/material/dialog';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatStepper, MatStep, MatStepperNext, MatStepperPrevious } from '@angular/material/stepper';
 
@@ -12,8 +12,8 @@ import { ProfileService } from '@/app/services/profile.service';
   standalone: true,
   imports: [
     CommonModule,
-    MatButton,
-    MatIconButton,
+    MatButtonModule,
+    MatButtonModule,
     MatIcon,
     MatStepper,
     MatStep,

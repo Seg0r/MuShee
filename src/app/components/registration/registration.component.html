@@ -65,7 +65,7 @@
         />
         <button
           type="button"
-          matIconButton
+          mat-icon-button
           matSuffix
           (click)="togglePasswordVisibility()"
           [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
@@ -161,7 +161,7 @@
       <div class="button-container">
         <button
           type="submit"
-          matButton="filled"
+          mat-flat-button
           class="submit-button"
           [disabled]="isFormValid()"
           aria-label="Create account button"

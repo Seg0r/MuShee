@@ -8,7 +8,7 @@ import {
   MatDialogActions,
   MAT_DIALOG_DATA,
 } from '@angular/material/dialog';
-import { MatButton } from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 
 interface ConfirmDialogData {
@@ -25,7 +25,7 @@ interface ConfirmDialogData {
   standalone: true,
   imports: [
     CommonModule,
-    MatButton,
+    MatButtonModule,
     MatIcon,
     MatDialogContainer,
     MatDialogTitle,

@@ -17,11 +17,11 @@
         <div class="empty-state-wrapper">
           <app-empty-state [message]="'Your library is empty'" [iconName]="'queue_music'">
             <div class="empty-state-actions">
-              <button matButton="filled" (click)="onUploadClick()">
+              <button mat-flat-button (click)="onUploadClick()">
                 <mat-icon>cloud_upload</mat-icon>
                 Upload Your Music
               </button>
-              <button matButton [routerLink]="['/app/discover']">
+              <button mat-button [routerLink]="['/app/discover']">
                 <mat-icon>explore</mat-icon>
                 Browse Public Library
               </button>
@@ -52,7 +52,7 @@
   @if (errorMessage()) {
     <div class="error-banner">
       <p>{{ errorMessage() }}</p>
-      <button matIconButton (click)="onRetryLoadLibrary()" aria-label="Retry loading library">
+      <button mat-icon-button (click)="onRetryLoadLibrary()" aria-label="Retry loading library">
         <mat-icon>refresh</mat-icon>
       </button>
     </div>
@@ -62,7 +62,7 @@
   <div class="fab-container">
     <!-- Upload FAB - only show after loading and when library has content -->
     @if (!isLoading() && !isEmptyState()) {
-      <button matFab class="upload-fab" (click)="onUploadClick()" aria-label="Upload a new song">
+      <button mat-fab class="upload-fab" (click)="onUploadClick()" aria-label="Upload a new song">
         <mat-icon>cloud_upload</mat-icon>
       </button>
     }
@@ -70,7 +70,7 @@
     <!-- Find Similar Music FAB - only show after loading and when library has content -->
     @if (!isLoading() && canFindSimilar()) {
       <button
-        matFab
+        mat-fab
         class="find-similar-fab"
         (click)="onFindSimilarClick()"
         aria-label="Find similar music"

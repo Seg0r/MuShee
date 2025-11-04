@@ -6,7 +6,7 @@ import {
   MatDialogActions,
   MAT_DIALOG_DATA,
 } from '@angular/material/dialog';
-import { MatButton } from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
 import { MatList, MatListItem } from '@angular/material/list';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatIcon } from '@angular/material/icon';
@@ -24,7 +24,7 @@ export interface SuggestionsDialogData {
   standalone: true,
   imports: [
     CommonModule,
-    MatButton,
+    MatButtonModule,
     MatList,
     MatListItem,
     MatProgressSpinner,

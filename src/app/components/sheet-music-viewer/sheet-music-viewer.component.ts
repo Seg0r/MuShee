@@ -14,7 +14,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
-import { MatIconButton } from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -33,7 +33,7 @@ import type { SongAccessDto } from '../../../types';
 @Component({
   selector: 'app-sheet-music-viewer',
   standalone: true,
-  imports: [CommonModule, MatIcon, MatIconButton, MatProgressSpinner],
+  imports: [CommonModule, MatIcon, MatButtonModule, MatProgressSpinner],
   templateUrl: './sheet-music-viewer.component.html',
   styleUrl: './sheet-music-viewer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

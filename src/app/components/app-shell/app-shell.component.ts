@@ -15,7 +15,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatMenu, MatMenuTrigger, MatMenuItem } from '@angular/material/menu';
 import { MatDivider } from '@angular/material/divider';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
@@ -56,8 +56,8 @@ interface NavItem {
     MatMenuItem,
     MatDivider,
     MatSlideToggle,
-    MatButton,
-    MatIconButton,
+    MatButtonModule,
+    MatButtonModule,
   ],
   templateUrl: './app-shell.component.html',
   styleUrl: './app-shell.component.scss',

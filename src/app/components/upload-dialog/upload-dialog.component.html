@@ -54,7 +54,7 @@
               <p class="drop-title">Drag and drop your MusicXML file here</p>
               <p class="drop-subtitle">or</p>
               <button
-                matButton="filled"
+                mat-flat-button
                 (click)="onClickFileInput()"
                 [disabled]="uploadLoading()"
                 class="select-button"
@@ -71,7 +71,7 @@
               <p class="file-name">{{ fileName() }}</p>
               <p class="file-size">{{ fileSize() }}</p>
               <button
-                matButton="text"
+                mat-button
                 (click)="onClearFile()"
                 [disabled]="uploadLoading()"
                 class="clear-button"
@@ -122,12 +122,7 @@
     </button>
 
     @if (!uploadSuccess() || uploadError()) {
-      <button
-        matButton="filled"
-        (click)="onUpload()"
-        [disabled]="!canUpload()"
-        class="upload-button"
-      >
+      <button mat-flat-button (click)="onUpload()" [disabled]="!canUpload()" class="upload-button">
         @if (uploadLoading()) {
           Uploading...
         } @else {

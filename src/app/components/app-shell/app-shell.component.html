@@ -3,7 +3,7 @@
   <!-- Mobile Menu Toggle (show only on mobile) -->
   @if (isMobileView()) {
     <button
-      matIconButton
+      mat-icon-button
       (click)="toggleDrawer()"
       class="menu-toggle"
       [attr.aria-label]="'Toggle navigation menu'"
@@ -32,7 +32,7 @@
   <!-- Help/Tour Button (only for authenticated users) -->
   @if (isAuthenticated()) {
     <button
-      matIconButton
+      mat-icon-button
       (click)="onHelpClick()"
       [attr.aria-label]="'Help and tour'"
       class="toolbar-control help-button"
@@ -44,7 +44,7 @@
   <!-- Authenticated User Menu -->
   @if (isAuthenticated()) {
     <button
-      matIconButton
+      mat-icon-button
       [matMenuTriggerFor]="userMenu"
       class="toolbar-control user-menu-trigger"
       [attr.aria-label]="'User menu'"
@@ -77,7 +77,7 @@
     </button>
 
     <button
-      matButton="filled"
+      mat-flat-button
       (click)="
         onNavigationClick({
           icon: 'person_add',
@@ -105,7 +105,7 @@
       <!-- Icon buttons for each navigation item -->
       @for (item of navItems(); track item.path) {
         <button
-          matIconButton
+          mat-icon-button
           (click)="onNavigationClick(item)"
           [class.active]="isRouteActive(item.path)"
           [class.disabled]="isNavItemDisabled(item)"

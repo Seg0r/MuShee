@@ -11,10 +11,8 @@ import {
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { MatToolbar } from '@angular/material/toolbar';
 
 import { LoadingSkeletonComponent } from '../loading-skeleton/loading-skeleton.component';
 import { SongListComponent } from '../song-list/song-list.component';
@@ -31,16 +29,7 @@ const pageSongLimit = 50;
 @Component({
   selector: 'app-discover',
   standalone: true,
-  imports: [
-    CommonModule,
-    LoadingSkeletonComponent,
-    SongListComponent,
-    MatButton,
-    MatIconButton,
-    MatIcon,
-    MatProgressSpinner,
-    MatToolbar,
-  ],
+  imports: [CommonModule, LoadingSkeletonComponent, SongListComponent, MatIcon, MatProgressSpinner],
   templateUrl: './discover.component.html',
   styleUrl: './discover.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
