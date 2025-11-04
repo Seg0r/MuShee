@@ -1,40 +1,47 @@
-<h2 mat-dialog-title>AI Suggestions</h2>
+<div mat-dialog-container class="suggestions-dialog">
+  <!-- Header -->
+  <div mat-dialog-title class="dialog-header">
+    <h2>AI Suggestions</h2>
+  </div>
 
-<mat-dialog-content class="suggestions-dialog-content">
-  @if (isLoading()) {
-    <div class="loading-state">
-      <mat-spinner diameter="50"></mat-spinner>
-      <p>Generating suggestions...</p>
-    </div>
-  } @else if (error()) {
-    <div class="error-state">
-      <mat-icon>error_outline</mat-icon>
-      <p>{{ error() }}</p>
-    </div>
-  } @else if (suggestions() && suggestions()!.suggestions.length > 0) {
-    <div class="suggestions-header">
-      <p class="suggestions-description">
-        Based on your music collection, we recommend these pieces that complement your taste:
-      </p>
-    </div>
-    <mat-list>
-      @for (suggestion of suggestions()!.suggestions; track suggestion.song_details.title) {
-        <mat-list-item>
-          <div class="suggestion-item">
-            <span class="suggestion-title">{{ suggestion.song_details.title }}</span>
-            <span class="suggestion-composer">{{ suggestion.song_details.composer }}</span>
-          </div>
-        </mat-list-item>
-      }
-    </mat-list>
-  } @else {
-    <div class="empty-state">
-      <mat-icon>sentiment_dissatisfied</mat-icon>
-      <p>No suggestions could be generated at this time.</p>
-    </div>
-  }
-</mat-dialog-content>
+  <!-- Content -->
+  <div mat-dialog-content class="dialog-content">
+    @if (isLoading()) {
+      <div class="loading-state">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Generating suggestions...</p>
+      </div>
+    } @else if (error()) {
+      <div class="error-state">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ error() }}</p>
+      </div>
+    } @else if (suggestions() && suggestions()!.suggestions.length > 0) {
+      <div class="suggestions-header">
+        <p class="suggestions-description">
+          Based on your music collection, we recommend these pieces that complement your taste:
+        </p>
+      </div>
+      <mat-list>
+        @for (suggestion of suggestions()!.suggestions; track suggestion.song_details.title) {
+          <mat-list-item>
+            <div class="suggestion-item">
+              <span class="suggestion-title">{{ suggestion.song_details.title }}</span>
+              <span class="suggestion-composer">{{ suggestion.song_details.composer }}</span>
+            </div>
+          </mat-list-item>
+        }
+      </mat-list>
+    } @else {
+      <div class="empty-state">
+        <mat-icon>sentiment_dissatisfied</mat-icon>
+        <p>No suggestions could be generated at this time.</p>
+      </div>
+    }
+  </div>
 
-<mat-dialog-actions align="end">
-  <button mat-button (click)="onClose()">Close</button>
-</mat-dialog-actions>
+  <!-- Actions -->
+  <div mat-dialog-actions class="dialog-actions">
+    <button mat-button (click)="onClose()" class="cancel-button">Close</button>
+  </div>
+</div>

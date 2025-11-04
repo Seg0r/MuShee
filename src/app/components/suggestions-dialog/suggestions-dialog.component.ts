@@ -7,9 +7,9 @@ import {
   MAT_DIALOG_DATA,
 } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatList, MatListItem } from '@angular/material/list';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { MatIcon } from '@angular/material/icon';
 
 import type { GenerateAiSuggestionsResponseDto } from '@/types';
 
@@ -25,10 +25,10 @@ export interface SuggestionsDialogData {
   imports: [
     CommonModule,
     MatButtonModule,
+    MatIconModule,
     MatList,
     MatListItem,
     MatProgressSpinner,
-    MatIcon,
     MatDialogContent,
     MatDialogActions,
   ],

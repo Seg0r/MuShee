@@ -1,3 +1,51 @@
+@use '@angular/material' as mat;
+
+:host {
+  display: block;
+}
+
+// ============================================================================
+// Dialog Container
+// ============================================================================
+
+.suggestions-dialog {
+  min-width: 500px;
+
+  @media (max-width: 600px) {
+    min-width: 100%;
+  }
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+  h2 {
+    margin: 0;
+    font-size: var(--mat-sys-headline-large);
+    font-weight: 500;
+    color: var(--mat-sys-on-surface);
+  }
+
+  .close-button {
+    flex-shrink: 0;
+  }
+}
+
+// ============================================================================
+// Dialog Content
+// ============================================================================
+
+.dialog-content {
+  position: relative;
+  min-height: 300px;
+  padding: 2rem;
+}
+
 .suggestions-dialog-content {
   min-height: 200px;
   max-height: 60vh;
@@ -98,4 +146,24 @@ mat-list-item {
   min-width: 0;
   max-width: 100%;
   white-space: normal;
+}
+
+// ============================================================================
+// Dialog Actions
+// ============================================================================
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+
+  button {
+    min-width: 100px;
+  }
+
+  .cancel-button {
+    color: var(--mat-sys-on-surface-variant);
+  }
 }
