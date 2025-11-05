@@ -1,0 +1,15 @@
+# Build directories
+/dist/
+
+# Dependencies
+/node_modules/
+
+# Environment variables and secrets
+.env
+.env.*
+*.pem
+*.key
+id_rsa
+*.cert
+*.p12
+*_private*

@@ -39,6 +39,7 @@ testem.log
 
 # Environment variables
 .env
+.env.*
 
 # System files
 .DS_Store

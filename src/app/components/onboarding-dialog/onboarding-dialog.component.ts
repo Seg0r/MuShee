@@ -1,11 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  MatDialogRef,
-  MatDialogTitle,
-  MatDialogContent,
-  MatDialogActions,
-} from '@angular/material/dialog';
+import { MatDialogRef, MatDialogTitle, MatDialogContent } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatStepper, MatStep, MatStepperNext, MatStepperPrevious } from '@angular/material/stepper';
@@ -18,7 +13,6 @@ import { ProfileService } from '@/app/services/profile.service';
   imports: [
     CommonModule,
     MatButtonModule,
-    MatButtonModule,
     MatIcon,
     MatStepper,
     MatStep,
@@ -26,7 +20,6 @@ import { ProfileService } from '@/app/services/profile.service';
     MatStepperPrevious,
     MatDialogTitle,
     MatDialogContent,
-    MatDialogActions,
   ],
   templateUrl: './onboarding-dialog.component.html',
   styleUrl: './onboarding-dialog.component.scss',
