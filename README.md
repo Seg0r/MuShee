@@ -8,6 +8,7 @@ A web-based sheet music library management application that helps musicians orga
 - [Tech Stack](#tech-stack)
 - [Getting Started Locally](#getting-started-locally)
 - [Available Scripts](#available-scripts)
+- [Testing](#testing)
 - [Project Scope](#project-scope)
 - [Project Status](#project-status)
 - [License](#license)
@@ -166,6 +167,51 @@ For automated seeding in production, use the provided GitHub Actions workflow:
 | `npm run format:check` | Checks if code is properly formatted                     |
 | `npm run prepare`      | Sets up Husky git hooks                                  |
 | `npm run seed:scores`  | Seeds public domain scores into the database             |
+
+## Testing
+
+MuShee implements a comprehensive testing strategy to ensure code quality, functionality, and security across all features.
+
+### Unit Testing
+
+Unit tests are performed on individual Angular components, services, and guards using **Karma** and **Jasmine**.
+
+- **Test Framework**: Angular CLI with Karma and Jasmine
+- **Command**: `npm test`
+- **Code Coverage Target**: >80%
+- **Responsibility**: Developers must write unit tests for all new code
+- **Pre-commit Enforcement**: Husky pre-commit hooks enforce test execution before commits
+
+### End-to-End (E2E) Testing
+
+End-to-end tests simulate real user workflows from start to finish, testing complete features like user registration, file upload, and library management.
+
+- **Test Framework**: Playwright
+- **Scope**: Complete user workflows and critical business features
+- **Environment**: Executed in Development, Staging, and Pre-Production environments
+- **Test Types Covered**:
+  - User authentication and authorization flows
+  - Library and song management operations
+  - Security and RLS policy enforcement
+  - Sheet music viewer and discovery features
+  - Feedback system functionality
+
+### Other Test Types
+
+- **Integration Testing**: Testing interactions between Angular components and Supabase backend services (Auth, Database, Storage)
+- **Security Testing**: Verifying Supabase Row Level Security (RLS) policies prevent unauthorized cross-user data access
+- **UI & UX Testing**: Validating responsive design and UI consistency across Chrome, Firefox, and Safari browsers
+- **Compatibility Testing**: Ensuring functionality across modern desktop web browsers
+
+### Test Acceptance Criteria
+
+- All new code must include unit tests with >80% code coverage
+- Application must build successfully without errors (`npm run build`)
+- No critical/blocker bugs in release candidates
+- All E2E test scenarios pass in Staging environment
+- Security review passes with no identified RLS policy vulnerabilities
+
+For detailed testing procedures and scenarios, see [.ai/test-plan.md](.ai/test-plan.md).
 
 ## Project Scope
 

@@ -18,6 +18,15 @@ AI - Communication with models via the OpenRouter.ai service:
 - Access to a wide range of models (OpenAI, Anthropic, Google, and many others) that will allow us to find a solution that ensures high efficiency and low costs
 - Allows you to set financial limits on API keys
 
+Testing - Comprehensive testing strategy with multiple test types:
+
+- Unit Testing: Angular CLI with Karma and Jasmine framework for testing individual components, services, and guards. Target code coverage >80%.
+- End-to-End (E2E) Testing: Playwright framework for automating browser-based user workflows and testing complete features.
+- Integration Testing: Testing interactions between Angular components and Supabase backend services (Auth, Database, Storage).
+- Security Testing: Verifying Supabase Row Level Security (RLS) policies to prevent unauthorized cross-user data access.
+- UI & UX Testing: Validating responsive design and UI consistency across modern browsers (Chrome, Firefox, Safari).
+- Compatibility Testing: Ensuring functionality across latest versions of major desktop web browsers.
+
 CI/CD and Hosting:
 
 - Github Actions for creating CI/CD pipelines
