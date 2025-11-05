@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import {
   MatDialogRef,
+  MatDialogTitle,
   MatDialogContent,
   MatDialogActions,
   MAT_DIALOG_DATA,
@@ -29,6 +30,7 @@ export interface SuggestionsDialogData {
     MatList,
     MatListItem,
     MatProgressSpinner,
+    MatDialogTitle,
     MatDialogContent,
     MatDialogActions,
   ],
