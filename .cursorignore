@@ -13,3 +13,4 @@ id_rsa
 *.cert
 *.p12
 *_private*
+/src/environments/
