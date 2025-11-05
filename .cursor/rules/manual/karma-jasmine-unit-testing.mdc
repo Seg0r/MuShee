@@ -1,0 +1,19 @@
+---
+alwaysApply: false
+---
+
+## TESTING### Guidelines for UNIT#### KARMA + JASMINE (ANGULAR)
+
+---
+
+- **Master Jasmine spies for test doubles** - Use `spyOn(object, 'method')` to track existing methods and `jasmine.createSpy('name')` to create standalone mock functions. Use `.and.returnValue()` or `.and.callFake()` to control their behavior.
+- **Leverage `TestBed` for Dependency Injection (DI)** - The core of Angular testing is `TestBed.configureTestingModule()`. Use it in `beforeEach` to provide mock services (`useValue`, `useClass`, `useFactory`) and configure the component's test environment.
+- **Centralize configuration and mocks** - Configure Karma in `karma.conf.js` (e.g., plugins, reporters). Keep global mocks or complex setups (like `TestBed` for the router) in dedicated helper files (`*-testing.module.ts` or `mock-providers.ts`) and import them in your tests.
+- **Use `fixture` and `nativeElement` for DOM assertions** - Instead of snapshots, rely on `ComponentFixture`. Use `fixture.detectChanges()` to trigger the lifecycle, then use `fixture.nativeElement` (HTML) or `fixture.debugElement` (Angular API) to check the DOM state (e.g., `expect(el.textContent).toContain(...)`).
+- **Monitor code coverage with purpose** - Run `ng test --coverage` to generate a report. Configure coverage thresholds in `karma.conf.js` (under the `coverageReporter` section), but focus on testing critical paths and business logic rather than hitting 100%.
+- **Use `ng test` and `fdescribe` / `fit` in your workflow** - `ng test` runs in watch mode by default. To focus on a specific test or suite during development, use `fit` (focused `it`) or `fdescribe` (focused `describe`). Remember to remove the `f` before committing.
+- **Actively use the Karma browser (UI Mode)** - `ng test` opens a browser window. Use it for visual inspection of results, clicking on tests (to run only them), and debugging (`console.log` output and DevTools breakpoints).
+- **Manage asynchronous operations with `fakeAsync` and `async`** - Use `fakeAsync` with `tick()` or `flush()` for synchronous control over time (e.g., `setTimeout`, `debounceTime`). For real Promises or async operations, use `async(async () => ...)` with `await fixture.whenStable()`.
+- **Understand tests run in a real browser (not jsdom)** - Karma runs tests in a browser environment by default (e.g., ChromeHeadless). `TestBed` and `ComponentFixture` give you access to the _real_ DOM API, which is crucial for component testing.
+- **Structure tests (AAA) for readability** - Always follow the Arrange-Act-Assert pattern. Use `describe` for grouping (component, method), `beforeEach` for the "Arrange" section (setting up `TestBed`, creating spies), and `it` blocks for "Act" and "Assert".
+- **Leverage the full power of TypeScript in tests** - Angular is built on TS. Ensure your mocks and test data are strongly typed. Use `spyOn` on methods to get typed spies, and make sure mock providers (`useValue`) implement the correct interface or class.
