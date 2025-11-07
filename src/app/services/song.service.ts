@@ -368,7 +368,7 @@ export class SongService {
     // Check file extension (only for File objects that have names)
     if (file instanceof File && !this.fileUtilsService.validateFileExtension(file.name)) {
       throw new ValidationError(
-        `Only MusicXML files (.xml, .musicxml) are supported. Got: ${file.name}`,
+        `Only MusicXML files (.xml, .musicxml, .mxl) are supported. Got: ${file.name}`,
         'INVALID_FILE_FORMAT'
       );
     }
@@ -382,10 +382,10 @@ export class SongService {
       );
     }
 
-    // Check MIME type (only for File objects)
-    if (file instanceof File && !this.fileUtilsService.validateMimeType(file.type)) {
+    // Check MIME type (only for File objects, pass filename for fallback validation)
+    if (file instanceof File && !this.fileUtilsService.validateMimeType(file.type, file.name)) {
       throw new ValidationError(
-        `Invalid file type: ${file.type}. Expected XML content.`,
+        `Invalid file type: ${file.type || 'unknown'}. Expected MusicXML (XML/ZIP) content.`,
         'INVALID_FILE_FORMAT'
       );
     }

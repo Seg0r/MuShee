@@ -39,9 +39,9 @@
             #fileInput
             type="file"
             hidden
-            accept=".xml,.musicxml"
+            accept=".xml,.musicxml,.mxl"
             (change)="onFileSelected($event)"
-            aria-label="Select MusicXML file"
+            aria-label="Select MusicXML file (.xml, .musicxml, .mxl)"
           />
 
           <!-- Empty State -->
@@ -91,7 +91,7 @@
         <div class="file-requirements">
           <p class="requirements-title">Supported Formats:</p>
           <ul>
-            <li>MusicXML files (.xml, .musicxml)</li>
+            <li>MusicXML files (.xml, .musicxml, .mxl)</li>
             <li>Maximum file size: {{ maxFileSize() }}</li>
             <li>Valid XML structure required</li>
           </ul>

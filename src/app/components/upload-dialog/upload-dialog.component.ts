@@ -5,6 +5,7 @@ import {
   signal,
   computed,
   viewChild,
+  ElementRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -46,7 +47,7 @@ export class UploadDialogComponent {
   private readonly fileUtilsService = inject(FileUtilsService);
   private readonly dialogRef = inject(MatDialogRef<UploadDialogComponent>);
 
-  private readonly fileInput = viewChild<HTMLInputElement>('fileInput');
+  private readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
 
   // ============================================================================
   // State Signals
@@ -93,7 +94,7 @@ export class UploadDialogComponent {
    * Open native file selector
    */
   onClickFileInput(): void {
-    this.fileInput()?.click();
+    this.fileInput()?.nativeElement.click();
   }
 
   /**
@@ -177,7 +178,7 @@ export class UploadDialogComponent {
     // Reset file input
     const input = this.fileInput();
     if (input) {
-      input.value = '';
+      input.nativeElement.value = '';
     }
   }
 
@@ -226,9 +227,9 @@ export class UploadDialogComponent {
       return `File size exceeds maximum allowed size of ${this.maxFileSize()}`;
     }
 
-    // Check MIME type
-    if (!this.fileUtilsService.validateMimeType(file.type)) {
-      return `Invalid file type: ${file.type}. Expected XML content.`;
+    // Check MIME type (pass filename for fallback validation if MIME type is empty)
+    if (!this.fileUtilsService.validateMimeType(file.type, file.name)) {
+      return `Invalid file type: ${file.type || 'unknown'}. Expected MusicXML (XML/ZIP) content.`;
     }
 
     return null;
@@ -244,7 +245,7 @@ export class UploadDialogComponent {
         const errorCode = (error as Record<string, unknown>)['code'];
         switch (errorCode) {
           case 'INVALID_FILE_FORMAT':
-            return 'Invalid file format. Only MusicXML files (.xml, .musicxml) are supported.';
+            return 'Invalid file format. Only MusicXML files (.xml, .musicxml, .mxl) are supported.';
           case 'FILE_TOO_LARGE':
             return `File size exceeds maximum allowed size of ${this.maxFileSize()}`;
           case 'INVALID_MUSICXML':

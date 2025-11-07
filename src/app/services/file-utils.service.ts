@@ -17,8 +17,9 @@ export class FileUtilsService {
 
   /**
    * Allowed file extensions for MusicXML files.
+   * Supports both uncompressed (.xml, .musicxml) and compressed (.mxl) formats.
    */
-  private readonly ALLOWED_EXTENSIONS = ['.xml', '.musicxml'];
+  private readonly ALLOWED_EXTENSIONS = ['.xml', '.musicxml', '.mxl'];
 
   /**
    * Calculates MD5 hash of file content for deduplication.
@@ -152,24 +153,44 @@ export class FileUtilsService {
 
   /**
    * Validates MIME type for MusicXML files.
-   * Accepts common XML and text MIME types that may be used for MusicXML files.
+   * Accepts common XML, text, and ZIP MIME types that may be used for MusicXML and MXL (compressed) files.
+   * Also allows empty MIME types since browsers may not recognize .mxl extension.
    *
    * @param mimeType - The MIME type to validate
-   * @returns true if MIME type is acceptable for MusicXML, false otherwise
+   * @param filename - Optional filename to check extension if MIME type is empty
+   * @returns true if MIME type is acceptable for MusicXML/MXL, false otherwise
    */
-  validateMimeType(mimeType: string): boolean {
+  validateMimeType(mimeType: string, filename?: string): boolean {
     try {
-      if (!mimeType || typeof mimeType !== 'string') {
+      if (typeof mimeType !== 'string') {
         console.log('Invalid MIME type provided for validation');
         return false;
       }
 
-      // Acceptable MIME types for MusicXML files
+      // If MIME type is empty, check the file extension as fallback
+      if (!mimeType) {
+        console.log('Empty MIME type detected. Checking file extension instead...');
+        if (filename) {
+          const isValidExtension = this.validateFileExtension(filename);
+          console.log(
+            `Fallback validation using extension: ${isValidExtension ? 'valid' : 'invalid'}`
+          );
+          return isValidExtension;
+        }
+        // Allow empty MIME type for valid file extensions (browsers may not recognize .mxl)
+        console.log('Empty MIME type allowed (file extension will be validated separately)');
+        return true;
+      }
+
+      // Acceptable MIME types for MusicXML files (uncompressed and compressed)
       const validMimeTypes = [
         'application/xml',
         'text/xml',
         'application/vnd.recordare.musicxml+xml',
         'application/vnd.recordare.musicxml',
+        'application/zip', // For MXL (compressed MusicXML)
+        'application/x-zip-compressed', // Alternative ZIP MIME type
+        'application/octet-stream', // Common fallback for unknown types
       ];
 
       const isValid = validMimeTypes.includes(mimeType.toLowerCase());

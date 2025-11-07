@@ -656,7 +656,8 @@ export class SupabaseService {
 
   /**
    * Uploads a MusicXML file to Supabase Storage using the file hash as filename.
-   * Files are stored in the 'musicxml-files' bucket with .musicxml extension.
+   * Files are stored in the 'musicxml-files' bucket with .mxl extension (standardized).
+   * Supports both uncompressed (.xml, .musicxml) and compressed (.mxl) formats.
    *
    * @param hash - MD5 hash of the file content (used as filename)
    * @param fileBuffer - The file content as ArrayBuffer
@@ -666,11 +667,12 @@ export class SupabaseService {
     try {
       console.log('Uploading MusicXML file to storage:', hash);
 
-      const fileName = `${hash}.musicxml`;
-      const file = new File([fileBuffer], fileName, { type: 'application/xml' });
+      // Store all files with .mxl extension for consistency (supports both formats)
+      const fileName = `${hash}.mxl`;
+      const file = new File([fileBuffer], fileName, { type: 'application/vnd.recordare.musicxml' });
 
       const { error } = await this.client.storage.from('musicxml-files').upload(fileName, file, {
-        contentType: 'application/xml',
+        contentType: 'application/vnd.recordare.musicxml',
         upsert: false, // Don't overwrite existing files
       });
 
@@ -689,6 +691,7 @@ export class SupabaseService {
   /**
    * Checks if a MusicXML file exists in Supabase Storage.
    * Used to verify file existence before database operations.
+   * Supports both .xml/.musicxml and .mxl files.
    *
    * @param hash - MD5 hash of the file content (used as filename)
    * @returns Promise resolving to true if file exists, false otherwise
@@ -697,7 +700,8 @@ export class SupabaseService {
     try {
       console.log('Checking if MusicXML file exists in storage:', hash);
 
-      const fileName = `${hash}.musicxml`;
+      // Check for .mxl file (standardized format)
+      const fileName = `${hash}.mxl`;
 
       const { data, error } = await this.client.storage.from('musicxml-files').list('', {
         limit: 1,
