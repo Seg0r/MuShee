@@ -54,8 +54,19 @@ export class MusicXMLParserService {
         throw new Error('Failed to extract MusicXML from MXL file');
       }
 
-      // Step 2: Create OSMD instance with minimal rendering options for faster parsing
-      const osmd = new OpenSheetMusicDisplay('osmd-container', {
+      // Step 2: Create a temporary container for OSMD parsing
+      // Use an off-screen div to avoid UI side effects during metadata extraction
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.top = '-9999px';
+      tempContainer.style.width = '1px';
+      tempContainer.style.height = '1px';
+      tempContainer.style.visibility = 'hidden';
+      document.body.appendChild(tempContainer);
+
+      // Step 2a: Create OSMD instance with minimal rendering options for faster parsing
+      const osmd = new OpenSheetMusicDisplay(tempContainer, {
         autoResize: false,
         drawingParameters: 'compact', // Faster rendering, minimal visual output
         drawTitle: false, // Skip title rendering for parsing
@@ -67,20 +78,28 @@ export class MusicXMLParserService {
         drawLyrics: false, // Skip lyrics for parsing
       } as IOSMDOptions);
 
-      // Step 3: Set up timeout for parsing operation (5 seconds as per plan)
-      const parsePromise = this.performParsing(osmd, xmlString);
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('MusicXML parsing timeout')), 5000);
-      });
+      try {
+        // Step 3: Set up timeout for parsing operation (5 seconds as per plan)
+        const parsePromise = this.performParsing(osmd, xmlString);
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('MusicXML parsing timeout')), 5000);
+        });
 
-      // Step 4: Race between parsing and timeout
-      const score = await Promise.race([parsePromise, timeoutPromise]);
+        // Step 4: Race between parsing and timeout
+        const score = await Promise.race([parsePromise, timeoutPromise]);
 
-      // Step 5: Extract metadata from parsed score
-      const metadata = this.extractMetadata(score);
+        // Step 5: Extract metadata from parsed score
+        const metadata = this.extractMetadata(score);
 
-      console.log('MusicXML parsing completed successfully');
-      return metadata;
+        console.log('MusicXML parsing completed successfully');
+        return metadata;
+      } finally {
+        // Always clean up the temporary container
+        if (tempContainer.parentNode) {
+          tempContainer.parentNode.removeChild(tempContainer);
+        }
+        osmd.clear();
+      }
     } catch (error) {
       console.error('MusicXML parsing failed:', error);
 

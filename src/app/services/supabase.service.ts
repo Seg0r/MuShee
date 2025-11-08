@@ -354,11 +354,27 @@ export class SupabaseService {
    * @param isPublic - Whether the song is from the public domain (uploader_id IS NULL)
    * @returns Promise resolving to the appropriate URL (public or signed)
    */
-  async generateMusicXMLUrl(fileHash: string, isPublic: boolean): Promise<string> {
+  async generateMusicXMLUrl(
+    fileHash: string,
+    isPublic: boolean,
+    uploaderId?: string
+  ): Promise<string> {
     try {
-      console.log('Generating MusicXML URL:', { fileHash, isPublic });
+      console.log('Generating MusicXML URL:', { fileHash, isPublic, uploaderId });
 
-      const fileName = `public-domain/${fileHash}.mxl`;
+      // Construct file path based on song type
+      let fileName: string;
+      if (isPublic) {
+        // Public domain songs are stored in public-domain/ directory
+        fileName = `public-domain/${fileHash}.mxl`;
+      } else if (uploaderId) {
+        // User-uploaded songs are stored in user-uploads/{userId}/ directory
+        fileName = `user-uploads/${uploaderId}/${fileHash}.mxl`;
+      } else {
+        // Fallback: treat as public domain if uploaderId is missing
+        console.warn('uploaderId missing for private song, treating as public');
+        fileName = `public-domain/${fileHash}.mxl`;
+      }
 
       // For public domain songs, use direct public URL without signing attempt
       if (isPublic) {
@@ -378,8 +394,8 @@ export class SupabaseService {
         return publicUrl;
       }
 
-      // For private songs, generate a signed URL with time-limited access
-      console.log('Generating signed URL for private file:', fileHash);
+      // For user-uploaded songs, generate a signed URL with time-limited access
+      console.log('Generating signed URL for user-uploaded file:', fileHash);
       const { data, error } = await this.client.storage
         .from('musicxml-files')
         .createSignedUrl(fileName, 3600); // 1 hour expiration
@@ -389,7 +405,7 @@ export class SupabaseService {
         return data.signedUrl;
       }
 
-      // Fallback: if signed URL creation fails, construct public URL
+      // Fallback: if signed URL creation fails, try public URL (may fail if file is private)
       console.log('Signed URL generation failed, falling back to public URL for file:', fileHash);
       const supabaseUrl = environment.supabase.url;
       const publicUrl = `${supabaseUrl}/storage/v1/object/public/musicxml-files/${fileName}`;
@@ -656,19 +672,22 @@ export class SupabaseService {
 
   /**
    * Uploads a MusicXML file to Supabase Storage using the file hash as filename.
-   * Files are stored in the 'musicxml-files' bucket with .mxl extension (standardized).
-   * Supports both uncompressed (.xml, .musicxml) and compressed (.mxl) formats.
+   * Files are stored in the 'musicxml-files' bucket under user-uploads/{userId}/ path.
+   * Stores files with .mxl extension (standardized) for both uncompressed and compressed formats.
+   * Uses user-specific storage path to comply with storage RLS policies.
    *
    * @param hash - MD5 hash of the file content (used as filename)
    * @param fileBuffer - The file content as ArrayBuffer
+   * @param userId - The authenticated user's ID (used for storage path organization)
    * @throws Error if upload fails
    */
-  async uploadMusicXMLFile(hash: string, fileBuffer: ArrayBuffer): Promise<void> {
+  async uploadMusicXMLFile(hash: string, fileBuffer: ArrayBuffer, userId: string): Promise<void> {
     try {
-      console.log('Uploading MusicXML file to storage:', hash);
+      console.log('Uploading MusicXML file to storage:', { hash, userId });
 
-      // Store all files with .mxl extension for consistency (supports both formats)
-      const fileName = `${hash}.mxl`;
+      // Store files in user-specific directory with .mxl extension for consistency
+      // Path: user-uploads/{userId}/{hash}.mxl
+      const fileName = `user-uploads/${userId}/${hash}.mxl`;
       const file = new File([fileBuffer], fileName, { type: 'application/vnd.recordare.musicxml' });
 
       const { error } = await this.client.storage.from('musicxml-files').upload(fileName, file, {
@@ -677,11 +696,11 @@ export class SupabaseService {
       });
 
       if (error) {
-        console.error('Storage upload error:', { hash }, error);
+        console.error('Storage upload error:', { hash, userId }, error);
         throw error;
       }
 
-      console.log('MusicXML file uploaded successfully:', hash);
+      console.log('MusicXML file uploaded successfully:', { hash, userId });
     } catch (error) {
       console.error('Unexpected error in uploadMusicXMLFile:', error);
       throw error;

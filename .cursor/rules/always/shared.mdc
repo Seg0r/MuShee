@@ -65,3 +65,7 @@ When modifying the directory structure, always update this section.
 ## Reference
 
 - Refer to official documentation for components, services, and modules to ensure best practices and maintain code quality and maintainability.
+
+## Docs
+
+- NEVER create additional documentation files (_.md, _.txt, \*.doc, etc.) unless explicitly requested by the user.

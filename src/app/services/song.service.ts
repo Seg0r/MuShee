@@ -253,10 +253,11 @@ export class SongService {
           // Determine if song is public domain (uploader_id IS NULL)
           const isPublic = songWithAccess.uploader_id === null;
 
-          // Generate appropriate URL based on song ownership
+          // Generate appropriate URL based on song ownership (pass uploaderId for user songs)
           const musicxmlUrl = await this.supabaseService.generateMusicXMLUrl(
             songWithAccess.file_hash,
-            isPublic
+            isPublic,
+            songWithAccess.uploader_id ?? undefined
           );
 
           // Build response DTO
@@ -479,8 +480,8 @@ export class SongService {
     console.log('Handling new song creation:', { userId, hash: fileHash });
 
     try {
-      // Step 1: Upload file to Supabase Storage
-      await this.supabaseService.uploadMusicXMLFile(fileHash, fileBuffer);
+      // Step 1: Upload file to Supabase Storage with user-specific path
+      await this.supabaseService.uploadMusicXMLFile(fileHash, fileBuffer, userId);
       console.log('File uploaded to storage successfully');
 
       // Step 2: Create song record in database
