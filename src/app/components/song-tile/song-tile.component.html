@@ -5,8 +5,8 @@
       <p class="song-composer">{{ song().song_details.composer || 'Unknown Composer' }}</p>
     </div>
 
-    <div class="song-actions">
-      @if (config().action === 'add') {
+    @if (config().action === 'add') {
+      <div class="song-actions">
         <button
           mat-button
           [disabled]="buttonState()?.disabled"
@@ -22,29 +22,26 @@
             {{ buttonState()?.text }}
           }
         </button>
-      }
-
-      @if (config().action === 'delete') {
-        <button
-          mat-icon-button
-          class="delete-button"
-          [disabled]="buttonState()?.disabled"
-          (click)="onDeleteClick($event)"
-          aria-label="Delete song"
-        >
-          @if (buttonState()?.showSpinner) {
-            <mat-spinner diameter="16"></mat-spinner>
-          } @else {
-            <mat-icon>delete</mat-icon>
-          }
-        </button>
-      }
-    </div>
+      </div>
+    }
   </mat-card-content>
 
-  @if (config().showFooter && addedDate()) {
+  @if (config().action === 'delete' && config().showFooter && addedDate()) {
     <mat-card-footer class="song-tile-footer">
-      <small class="song-added-date"> Added {{ addedDate() | date: 'short' }} </small>
+      <small class="song-added-date">Added {{ addedDate() | date: 'short' }}</small>
+      <button
+        mat-icon-button
+        class="delete-button"
+        [disabled]="buttonState()?.disabled"
+        (click)="onDeleteClick($event)"
+        aria-label="Delete song"
+      >
+        @if (buttonState()?.showSpinner) {
+          <mat-spinner diameter="16"></mat-spinner>
+        } @else {
+          <mat-icon>delete</mat-icon>
+        }
+      </button>
     </mat-card-footer>
   }
 </mat-card>

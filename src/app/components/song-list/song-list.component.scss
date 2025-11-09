@@ -1,12 +1,13 @@
 .songs-grid {
   display: grid;
   gap: 1.5rem;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, 280px);
   grid-auto-rows: max-content;
+  justify-content: start;
 
-  // Responsive breakpoints - consistent with library component
+  // Responsive breakpoints - fixed tile sizes
   @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, 240px);
     gap: 1rem;
   }
 
