@@ -1,21 +1,77 @@
 @use '@angular/material' as mat;
 
-/* Light Theme - Azure & Blue */
-:root {
+/* Light Theme */
+:root,
+host {
   color-scheme: light;
   @include mat.theme(
     (
-      color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
-      ),
       typography: Roboto,
       density: 0,
     )
   );
+  @include mat.theme-overrides(
+    (
+      primary: #725c00,
+      on-primary: #ffffff,
+      primary-container: #ffe080,
+      on-primary-container: #231b00,
+      inverse-primary: #e4c45a,
+      primary-fixed: #ffe080,
+      primary-fixed-dim: #e4c45a,
+      on-primary-fixed: #231b00,
+      on-primary-fixed-variant: #564500,
+      secondary: #6b5d35,
+      on-secondary: #ffffff,
+      secondary-container: #f5e1ae,
+      on-secondary-container: #241a00,
+      secondary-fixed: #f5e1ae,
+      secondary-fixed-dim: #d8c594,
+      on-secondary-fixed: #241a00,
+      on-secondary-fixed-variant: #524620,
+      tertiary: #4a671d,
+      on-tertiary: #ffffff,
+      tertiary-container: #cbef94,
+      on-tertiary-container: #121f00,
+      tertiary-fixed: #cbef94,
+      tertiary-fixed-dim: #afd27b,
+      on-tertiary-fixed: #121f00,
+      on-tertiary-fixed-variant: #334e04,
+      background: #fdf8f6,
+      on-background: #1c1b1b,
+      surface: #fdf8f6,
+      surface-dim: #ddd9d7,
+      surface-bright: #fdf8f6,
+      surface-container-lowest: #ffffff,
+      surface-container-low: #f7f3f1,
+      surface-container: #f1edeb,
+      surface-container-high: #ece7e5,
+      surface-container-highest: #e6e2e0,
+      on-surface: #1c1b1b,
+      shadow: #000000,
+      scrim: #000000,
+      surface-tint: #625e55,
+      inverse-surface: #31302f,
+      inverse-on-surface: #f4f0ee,
+      outline: #7b776e,
+      outline-variant: #cdc6ba,
+      neutral: #797675,
+      neutral10: #1c1b1b,
+      error: #ba1a1a,
+      error-container: #ffdad6,
+      on-error: #ffffff,
+      on-error-container: #410002,
+      surface-variant: #e9e1d6,
+      on-surface-variant: #4a463e,
+      neutral-variant: #7b766d,
+      neutral-variant20: #343028,
+      inverse-secondary: #d8c594,
+      inverse-tertiary: #afd27b,
+    )
+  );
 }
 
-/* Dark Theme - Cyan & Orange */
+/* Dark Theme */
 .dark {
   color-scheme: dark;
   @include mat.theme(

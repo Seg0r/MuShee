@@ -15,13 +15,14 @@
   align-items: center;
   padding: 0 16px;
   flex-shrink: 0;
+  background-color: var(--mat-sys-primary-container);
   box-shadow: var(--mat-sys-level1);
 
   .toolbar-brand {
     font-size: 18px;
     font-weight: 500;
     letter-spacing: 0.5px;
-    color: var(--mat-sys-on-primary);
+    color: var(--mat-sys-on-primary-container);
   }
 
   .spacer {
@@ -35,10 +36,10 @@
   .menu-toggle,
   .user-menu-trigger,
   .help-button {
-    color: var(--mat-sys-on-primary);
+    color: var(--mat-sys-on-primary-container);
 
     &:hover {
-      background-color: rgba(255, 255, 255, 0.12);
+      background-color: rgba(0, 0, 0, 0.12);
     }
   }
 
@@ -47,8 +48,8 @@
       (
         handle-height: 20px,
         track-outline-color: transparent,
-        selected-handle-color: var(--mat-sys-on-primary),
-        selected-track-color: rgba(255, 255, 255, 0.12),
+        selected-handle-color: var(--mat-sys-on-primary-container),
+        selected-track-color: rgba(0, 0, 0, 0.12),
       )
     );
 
@@ -56,7 +57,7 @@
       margin-left: 8px;
       font-size: 14px;
       font-weight: 500;
-      color: var(--mat-sys-on-primary);
+      color: var(--mat-sys-on-primary-container);
     }
   }
 }

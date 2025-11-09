@@ -266,7 +266,7 @@
     position: relative;
     overflow: hidden;
     background-color: var(--mat-sys-primary);
-    color: var(--mat-sys-on-primary);
+    color: var(--mat-sys-on-primary-container);
 
     &:not(:disabled) {
       &:hover {
