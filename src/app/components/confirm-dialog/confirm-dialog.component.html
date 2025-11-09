@@ -7,11 +7,13 @@
 
   <!-- Message Content -->
   <div mat-dialog-content class="dialog-content">
-    <p class="dialog-message">{{ data.message }}</p>
+    <span>{{ data.message }}</span>
 
-    <div class="item-details">
-      <strong>{{ data.itemDetails }}</strong>
-    </div>
+    @if (data.itemDetails) {
+      <div class="item-details">
+        <strong>{{ data.itemDetails }}</strong>
+      </div>
+    }
   </div>
 
   <!-- Action Buttons -->

@@ -6,6 +6,9 @@
 
 .confirm-dialog {
   min-width: 400px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
 
   @media (max-width: 500px) {
     min-width: 100%;
@@ -44,27 +47,28 @@
 // ============================================================================
 
 .dialog-content {
-  padding: 2rem 1.5rem;
+  padding: 1.5rem !important;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  flex: 1 1 auto;
 }
 
 .dialog-message {
-  margin: 0;
   font-size: var(--mat-sys-body-large);
   color: var(--mat-sys-on-surface);
-  line-height: 1.6;
+  flex: 0 0 auto;
 }
 
 .item-details {
-  padding: 1rem;
+  padding: 0.75rem;
   background: var(--mat-sys-surface-container);
   border-radius: var(--mat-sys-corner-small);
   border-left: 4px solid var(--mat-sys-primary);
   font-size: var(--mat-sys-body-medium);
   color: var(--mat-sys-on-surface);
   word-break: break-word;
+  flex: 0 0 auto;
 
   strong {
     font-weight: 500;
