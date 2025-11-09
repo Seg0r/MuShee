@@ -53,13 +53,13 @@
     </button>
 
     <!-- User Dropdown Menu -->
-    <mat-menu #userMenu="matMenu" class="user-dropdown">
-      <button matMenuItem disabled>
+    <mat-menu #userMenu="matMenu">
+      <button mat-menu-item disabled>
         <mat-icon>person</mat-icon>
         <span>{{ userEmail() }}</span>
       </button>
       <mat-divider></mat-divider>
-      <button matMenuItem (click)="onLogoutClick()">
+      <button mat-menu-item (click)="onLogoutClick()">
         <mat-icon>logout</mat-icon>
         <span>Logout</span>
       </button>
@@ -74,21 +74,6 @@
       class="auth-button"
     >
       Login
-    </button>
-
-    <button
-      mat-flat-button
-      (click)="
-        onNavigationClick({
-          icon: 'person_add',
-          label: 'Create Account',
-          path: '/register',
-          requiresAuth: false,
-        })
-      "
-      class="auth-button"
-    >
-      Create Account
     </button>
   }
 </mat-toolbar>
