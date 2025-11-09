@@ -1,9 +1,5 @@
 @use '@angular/material' as mat;
 
-:host {
-  display: block;
-}
-
 .song-tile {
   display: flex;
   flex-direction: column;

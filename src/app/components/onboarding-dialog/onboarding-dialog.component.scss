@@ -1,9 +1,5 @@
 @use '@angular/material' as mat;
 
-:host {
-  display: block;
-}
-
 .onboarding-dialog {
   min-width: 600px;
   max-width: 800px;
