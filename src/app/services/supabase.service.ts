@@ -347,8 +347,12 @@ export class SupabaseService {
 
   /**
    * Generates the appropriate URL for accessing a MusicXML file based on ownership status.
-   * For public domain songs (uploader_id IS NULL), uses a direct public URL.
-   * For private songs (user-uploaded), generates a temporary signed URL for secure access.
+   * File storage locations:
+   * - Public domain songs (uploader_id IS NULL): stored in public-domain/{hash}.mxl
+   * - User-uploaded songs: stored in files/{hash}.mxl (content-addressed for deduplication)
+   *
+   * For public domain songs, uses a direct public URL.
+   * For user-uploaded songs, generates a temporary signed URL for secure access.
    *
    * @param fileHash - Hash of the MusicXML file (used as filename)
    * @param isPublic - Whether the song is from the public domain (uploader_id IS NULL)
@@ -363,17 +367,13 @@ export class SupabaseService {
       console.log('Generating MusicXML URL:', { fileHash, isPublic, uploaderId });
 
       // Construct file path based on song type
+      // Public domain songs are stored in public-domain/ directory (seeded from assets)
+      // User-uploaded songs are stored in files/ directory (content-addressed for deduplication)
       let fileName: string;
       if (isPublic) {
-        // Public domain songs are stored in public-domain/ directory
         fileName = `public-domain/${fileHash}.mxl`;
-      } else if (uploaderId) {
-        // User-uploaded songs are stored in user-uploads/{userId}/ directory
-        fileName = `user-uploads/${uploaderId}/${fileHash}.mxl`;
       } else {
-        // Fallback: treat as public domain if uploaderId is missing
-        console.warn('uploaderId missing for private song, treating as public');
-        fileName = `public-domain/${fileHash}.mxl`;
+        fileName = `files/${fileHash}.mxl`;
       }
 
       // For public domain songs, use direct public URL without signing attempt
