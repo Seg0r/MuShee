@@ -1,8 +1,8 @@
 <mat-card class="song-tile" (click)="onTileClick()">
   <mat-card-content class="song-tile-content">
     <div class="song-details">
-      <h3 class="song-title">{{ song().song_details.title }}</h3>
-      <p class="song-composer">{{ song().song_details.composer }}</p>
+      <h3 class="song-title">{{ song().song_details.title || 'Unknown Title' }}</h3>
+      <p class="song-composer">{{ song().song_details.composer || 'Unknown Composer' }}</p>
     </div>
 
     <div class="song-actions">

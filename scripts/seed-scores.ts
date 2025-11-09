@@ -27,15 +27,13 @@ import { Readable } from 'stream';
 import { config as dotenvConfig } from 'dotenv';
 import { Entry, fromBuffer as yauzlFromBuffer, ZipFile } from 'yauzl';
 import type { Database } from '../src/db/database.types.js';
+import {
+  extractMetadataFromParsedXML,
+  type MusicXMLMetadata,
+} from '../src/utils/musicxml-metadata.js';
 
 // Load environment variables from .env file
 dotenvConfig();
-
-// Type for xml2js parsed creator element
-interface ParsedCreator {
-  $?: { type?: string };
-  _: string;
-}
 
 // =============================================================================
 // Configuration
@@ -48,11 +46,6 @@ const STORAGE_PREFIX = 'public-domain';
 // =============================================================================
 // Types
 // =============================================================================
-
-interface MusicXMLMetadata {
-  title: string;
-  composer: string;
-}
 
 interface SeedResult {
   success: boolean;
@@ -202,7 +195,7 @@ async function extractXMLFromMXL(mxlBuffer: ArrayBuffer): Promise<string> {
 
 /**
  * Parses MusicXML content to extract metadata (title and composer).
- * Uses xml2js for direct XML parsing without requiring DOM or rendering.
+ * Uses shared utility for consistent extraction logic with the browser service.
  */
 async function parseMusicXMLMetadata(xmlContent: string): Promise<MusicXMLMetadata> {
   try {
@@ -214,67 +207,14 @@ async function parseMusicXMLMetadata(xmlContent: string): Promise<MusicXMLMetada
       trim: true,
     });
 
-    let title = '';
-    let composer = '';
-
-    // Extract title from various possible locations in MusicXML
-    if (parsed?.['score-partwise']?.['work']?.['work-title']) {
-      title = parsed['score-partwise']['work']['work-title'];
-    } else if (parsed?.['score-partwise']?.['movement-title']) {
-      title = parsed['score-partwise']['movement-title'];
-    } else if (parsed?.['score-timewise']?.['work']?.['work-title']) {
-      title = parsed['score-timewise']['work']['work-title'];
-    } else if (parsed?.['score-timewise']?.['movement-title']) {
-      title = parsed['score-timewise']['movement-title'];
-    }
-
-    // Extract composer from identification section
-    const identification =
-      parsed?.['score-partwise']?.['identification'] ||
-      parsed?.['score-timewise']?.['identification'];
-
-    if (identification?.['creator']) {
-      // Handle both single creator and array of creators
-      const creators = Array.isArray(identification.creator)
-        ? identification.creator
-        : [identification.creator];
-
-      const composerCreator = creators.find(
-        (creator: ParsedCreator) =>
-          creator?.$?.type === 'composer' || creator?.['$']?.type === 'composer'
-      );
-
-      if (composerCreator && typeof composerCreator === 'string') {
-        composer = composerCreator;
-      } else if (composerCreator && typeof composerCreator === 'object' && composerCreator._) {
-        composer = composerCreator._;
-      }
-    }
-
-    // Clean and truncate metadata (following database constraints)
-    title = cleanAndTruncate(title, 200);
-    composer = cleanAndTruncate(composer, 200);
-
-    return { title, composer };
+    // Use shared utility for consistent extraction logic
+    return extractMetadataFromParsedXML(parsed);
   } catch (error) {
     console.warn(
       `XML parsing failed, returning empty metadata: ${error instanceof Error ? error.message : 'Unknown error'}`
     );
     return { title: '', composer: '' };
   }
-}
-
-/**
- * Cleans and truncates a string value for metadata storage.
- */
-function cleanAndTruncate(value: string, maxLength: number): string {
-  if (!value) return '';
-
-  // Trim whitespace and normalize internal spaces
-  const cleaned = value.trim().replace(/\s+/g, ' ');
-
-  // Truncate if too long
-  return cleaned.length > maxLength ? cleaned.substring(0, maxLength) : cleaned;
 }
 
 // =============================================================================

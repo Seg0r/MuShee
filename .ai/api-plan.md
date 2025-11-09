@@ -167,12 +167,17 @@ Upload a MusicXML file, parse metadata, check for duplicates, and add to the use
 
 1. Validate file format (must be .xml or .musicxml)
 2. Calculate MD5 hash of file content
-3. Check if song with same hash already exists
-4. If exists, add existing song to user's library
-5. If new, parse MusicXML to extract composer and title (truncate to 200 chars)
-6. Upload file to Supabase Storage (filename = file_hash)
-7. Create song record in database
-8. Add song to user's library (user_songs table)
+3. Check if song with same hash already exists in database
+4. **If song exists**:
+   - Check if user already has it in their library
+   - If yes: return 409 Conflict error
+   - If no: add existing song to user's library (skip file upload - content-addressed deduplication)
+5. **If song is new**:
+   - Parse MusicXML to extract composer and title (truncate to 200 chars)
+   - Check if file already exists in storage (by hash) - skip upload if found
+   - Upload file to Supabase Storage using content-addressed path: `files/{hash}.mxl`
+   - Create song record in database with uploader_id
+   - Add song to user's library (user_songs table)
 
 **Response Payload** (201 Created):
 
@@ -1017,3 +1022,14 @@ External API integrations requiring private keys use Supabase Edge Functions:
 - Use crypto library for MD5 hash generation
 - Stream large file uploads to avoid memory issues
 - Validate XML structure before processing
+
+### Storage Deduplication (Content-Addressed Storage)
+
+- **Implementation**: Files are stored in content-addressed storage at `files/{hash}.mxl`
+- **Deduplication**: If two users upload identical file content (same hash), storage contains only ONE copy
+- **Database**: Each user gets a unique song record with their `uploader_id`, even if file hash is identical
+- **Reference Counting**: File is deleted from storage only when NO song records reference it (count = 0)
+- **Benefits**: 
+  - Reduces storage costs (identical files stored once)
+  - Improves upload performance (skip upload if hash exists)
+  - Enables analytics (track who uploaded what via uploader_id)

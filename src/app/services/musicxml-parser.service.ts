@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { OpenSheetMusicDisplay, IOSMDOptions } from 'opensheetmusicdisplay';
 import JSZip from 'jszip';
+import { cleanAndTruncate } from '../../utils/musicxml-metadata';
 
 /**
  * Metadata extracted from a parsed MusicXML file.
@@ -86,10 +87,10 @@ export class MusicXMLParserService {
         });
 
         // Step 4: Race between parsing and timeout
-        const score = await Promise.race([parsePromise, timeoutPromise]);
+        await Promise.race([parsePromise, timeoutPromise]);
 
-        // Step 5: Extract metadata from parsed score
-        const metadata = this.extractMetadata(score);
+        // Step 5: Extract metadata from XML string using proven seed script approach
+        const metadata = this.extractMetadataFromXML(xmlString);
 
         console.log('MusicXML parsing completed successfully');
         return metadata;
@@ -321,93 +322,88 @@ export class MusicXMLParserService {
   }
 
   /**
-   * Extracts metadata from the parsed OSMD score object.
-   * Tries multiple sources for title and composer information.
+   * Legacy method for OSMD metadata extraction.
+   * OSMD doesn't reliably expose metadata, so we return empty.
+   * The actual extraction happens via direct XML parsing instead.
    *
    * @private
-   * @param sheet - The parsed OSMD sheet object
-   * @returns Extracted metadata with fallback values
+   * @returns Empty metadata (actual extraction happens via XML)
    */
-  private extractMetadata(sheet: unknown): MusicXMLMetadata {
-    let title = '';
-    let composer = '';
-
-    try {
-      const sheetObj = sheet as Record<string, unknown>;
-
-      // Extract title - try multiple sources
-      if (sheetObj['Title'] && typeof sheetObj['Title'] === 'string') {
-        title = sheetObj['Title'];
-      } else if (
-        sheetObj['MusicParts'] &&
-        Array.isArray(sheetObj['MusicParts']) &&
-        sheetObj['MusicParts'].length > 0
-      ) {
-        // Try to get title from first music part
-        const firstPart = sheetObj['MusicParts'][0] as Record<string, unknown>;
-        if (firstPart['Title'] && typeof firstPart['Title'] === 'string') {
-          title = firstPart['Title'];
-        }
-      }
-
-      // Extract composer - try multiple sources
-      if (sheetObj['Composer'] && typeof sheetObj['Composer'] === 'string') {
-        composer = sheetObj['Composer'];
-      } else if (
-        sheetObj['Credits'] &&
-        Array.isArray(sheetObj['Credits']) &&
-        sheetObj['Credits'].length > 0
-      ) {
-        // Look for composer in credits
-        for (const credit of sheetObj['Credits']) {
-          const creditObj = credit as Record<string, unknown>;
-          if (
-            creditObj['CreditType'] === 'composer' &&
-            creditObj['CreditWords'] &&
-            typeof creditObj['CreditWords'] === 'string'
-          ) {
-            composer = creditObj['CreditWords'];
-            break;
-          }
-        }
-      }
-
-      // Fallback: try to extract from work-title and creator elements if available
-      // This would require additional XML parsing if OSMD doesn't extract these
-      if (!title || !composer) {
-        // Additional metadata extraction could be added here if needed
-        console.log('Using fallback metadata extraction');
-      }
-
-      // Clean and truncate metadata
-      title = this.cleanAndTruncate(title, 200);
-      composer = this.cleanAndTruncate(composer, 200);
-
-      console.log('Extracted metadata:', { title, composer });
-      return { title, composer };
-    } catch (error) {
-      console.warn('Error extracting metadata from parsed score:', error);
-      // Return empty metadata rather than failing completely
-      return { title: '', composer: '' };
-    }
+  private extractMetadata(): MusicXMLMetadata {
+    // OSMD doesn't reliably expose metadata, so we return empty
+    // The actual extraction will happen via XML parsing
+    return { title: '', composer: '' };
   }
 
   /**
-   * Cleans and truncates a string value for metadata storage.
-   * Removes extra whitespace and limits length.
+   * Extracts metadata directly from MusicXML string.
+   * Follows the exact same extraction logic as the seed script's extractMetadataFromParsedXML,
+   * but adapted for browser DOMParser (which cannot use xml2js Node.js library).
    *
    * @private
-   * @param value - The string value to clean
-   * @param maxLength - Maximum allowed length
-   * @returns Cleaned and truncated string
+   * @param xmlString - The XML content as string
+   * @returns Extracted metadata
    */
-  private cleanAndTruncate(value: string, maxLength: number): string {
-    if (!value) return '';
+  private extractMetadataFromXML(xmlString: string): MusicXMLMetadata {
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(xmlString, 'text/xml');
 
-    // Trim whitespace and normalize internal spaces
-    const cleaned = value.trim().replace(/\s+/g, ' ');
+      // Check for parser errors
+      const parserError = doc.querySelector('parsererror');
+      if (parserError) {
+        console.warn('XML parsing error:', parserError.textContent);
+        return { title: '', composer: '' };
+      }
 
-    // Truncate if too long
-    return cleaned.length > maxLength ? cleaned.substring(0, maxLength) : cleaned;
+      let title = '';
+      let composer = '';
+
+      // Extract title - try work-title first (mirrors seed script logic)
+      const workTitleEl = doc.getElementsByTagName('work-title')[0];
+      if (workTitleEl?.textContent) {
+        title = workTitleEl.textContent;
+      }
+
+      // Try movement-title as fallback (mirrors seed script logic)
+      if (!title) {
+        const movementTitleEl = doc.getElementsByTagName('movement-title')[0];
+        if (movementTitleEl?.textContent) {
+          title = movementTitleEl.textContent;
+        }
+      }
+
+      // Extract composer - look for creator with type="composer" (mirrors seed script logic)
+      const creatorElements = doc.getElementsByTagName('creator');
+      let foundComposer: Element | null = null;
+
+      for (const creator of creatorElements) {
+        if (creator.getAttribute('type') === 'composer') {
+          foundComposer = creator;
+          break;
+        }
+      }
+
+      // If no typed creator found, use first creator as fallback (mirrors seed script logic)
+      if (!foundComposer && creatorElements.length > 0) {
+        foundComposer = creatorElements[0];
+      }
+
+      if (foundComposer?.textContent) {
+        composer = foundComposer.textContent;
+      }
+
+      // Clean and truncate metadata using shared utility
+      title = cleanAndTruncate(title, 200);
+      composer = cleanAndTruncate(composer, 200);
+
+      console.log('XML metadata extraction result:', { title, composer });
+      return { title, composer };
+    } catch (error) {
+      console.warn(
+        `XML parsing failed, returning empty metadata: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+      return { title: '', composer: '' };
+    }
   }
 }

@@ -671,23 +671,30 @@ export class SupabaseService {
   // =============================================================================
 
   /**
-   * Uploads a MusicXML file to Supabase Storage using the file hash as filename.
-   * Files are stored in the 'musicxml-files' bucket under user-uploads/{userId}/ path.
-   * Stores files with .mxl extension (standardized) for both uncompressed and compressed formats.
-   * Uses user-specific storage path to comply with storage RLS policies.
+   * Uploads a MusicXML file to Supabase Storage using content-addressed storage pattern.
+   * Files are stored in the 'musicxml-files' bucket under files/ directory.
+   * The file hash is used as the filename, enabling deduplication across all users.
+   * If the file already exists in storage (same hash), upload is skipped.
    *
-   * @param hash - MD5 hash of the file content (used as filename)
+   * @param hash - MD5 hash of the file content (used as filename for content-addressing)
    * @param fileBuffer - The file content as ArrayBuffer
-   * @param userId - The authenticated user's ID (used for storage path organization)
    * @throws Error if upload fails
    */
-  async uploadMusicXMLFile(hash: string, fileBuffer: ArrayBuffer, userId: string): Promise<void> {
+  async uploadMusicXMLFile(hash: string, fileBuffer: ArrayBuffer): Promise<void> {
     try {
-      console.log('Uploading MusicXML file to storage:', { hash, userId });
+      console.log('Uploading MusicXML file to storage (content-addressed):', { hash });
 
-      // Store files in user-specific directory with .mxl extension for consistency
-      // Path: user-uploads/{userId}/{hash}.mxl
-      const fileName = `user-uploads/${userId}/${hash}.mxl`;
+      // Check if file already exists in storage (by hash)
+      const exists = await this.musicXMLFileExistsInStorage(hash);
+      if (exists) {
+        console.log('File already exists in storage, skipping upload:', { hash });
+        return;
+      }
+
+      // Store files in content-addressed directory with .mxl extension for consistency
+      // Path: files/{hash}.mxl
+      // This allows all users to share the same file if they upload identical content
+      const fileName = `files/${hash}.mxl`;
       const file = new File([fileBuffer], fileName, { type: 'application/vnd.recordare.musicxml' });
 
       const { error } = await this.client.storage.from('musicxml-files').upload(fileName, file, {
@@ -696,14 +703,44 @@ export class SupabaseService {
       });
 
       if (error) {
-        console.error('Storage upload error:', { hash, userId }, error);
+        console.error('Storage upload error:', { hash }, error);
         throw error;
       }
 
-      console.log('MusicXML file uploaded successfully:', { hash, userId });
+      console.log('MusicXML file uploaded successfully:', { hash });
     } catch (error) {
       console.error('Unexpected error in uploadMusicXMLFile:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Checks if a MusicXML file exists in content-addressed storage by hash.
+   * Used to implement storage deduplication - skip upload if file already exists.
+   *
+   * @param hash - MD5 hash of the file content
+   * @returns Promise resolving to true if file exists, false otherwise
+   */
+  private async musicXMLFileExistsInStorage(hash: string): Promise<boolean> {
+    try {
+      // Try to get file metadata - if successful, file exists
+      const { data, error } = await this.client.storage.from('musicxml-files').list('files', {
+        limit: 1,
+        search: `${hash}.mxl`,
+      });
+
+      if (error) {
+        console.warn('Error checking file existence in storage:', { hash }, error);
+        // If we can't check, assume file doesn't exist to allow retry
+        return false;
+      }
+
+      const fileExists = data && data.length > 0;
+      console.log('File existence check:', { hash, exists: fileExists });
+      return fileExists;
+    } catch (error) {
+      console.warn('Unexpected error checking file existence:', { hash }, error);
+      return false;
     }
   }
 
@@ -810,7 +847,14 @@ export class SupabaseService {
         throw error;
       }
 
-      console.log('Song created successfully:', { songId: song.id, hash: data.file_hash });
+      console.log('Song created successfully:', {
+        songId: song.id,
+        hash: data.file_hash,
+        returnedTitle: song.title,
+        returnedComposer: song.composer,
+        sentTitle: data.title,
+        sentComposer: data.composer,
+      });
       return song;
     } catch (error) {
       console.error('Unexpected error in createSong:', error);
@@ -819,8 +863,8 @@ export class SupabaseService {
   }
 
   /**
-   * Checks if a song exists in a user's library using a single optimized query.
-   * Returns detailed information about the song and library association status.
+   * Checks if a song exists in a user's library using a two-step approach.
+   * First retrieves the song by hash, then checks if user has it in their library.
    *
    * @param hash - MD5 hash of the file content
    * @param userId - UUID of the user to check
@@ -836,55 +880,51 @@ export class SupabaseService {
     try {
       console.log('Checking song by hash with library status:', { hash, userId });
 
-      // Single query with LEFT JOIN to check both song existence and library status
-      const { data, error } = await this.client
+      // Step 1: Find song by hash
+      const { data: songData, error: songError } = await this.client
         .from('songs')
-        .select(
-          `
-          id,
-          title,
-          composer,
-          file_hash,
-          uploader_id,
-          created_at,
-          user_songs!left(
-            user_id
-          )
-        `
-        )
+        .select('id, title, composer, file_hash, uploader_id, created_at')
         .eq('file_hash', hash)
-        .eq('user_songs.user_id', userId)
         .single();
 
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // No song found with this hash for this user
-          console.log('No song found with hash for user:', { hash, userId });
+      if (songError) {
+        if (songError.code === 'PGRST116') {
+          // No song found with this hash
+          console.log('No song found with hash:', { hash });
           return { song: null, isInLibrary: false };
         }
-        console.error(
-          'Database error in checkSongByHashWithLibraryStatus:',
-          { hash, userId },
-          error
-        );
-        throw error;
+        console.error('Database error finding song by hash:', { hash }, songError);
+        throw songError;
       }
 
-      // Extract song data (without the joined user_songs)
-      const { user_songs, ...songData } = data as Record<string, unknown>;
-      const song = songData as Tables<'songs'>;
+      // Step 2: Check if user has this song in their library
+      const { data: userSongData, error: userSongError } = await this.client
+        .from('user_songs')
+        .select('user_id')
+        .eq('song_id', songData.id)
+        .eq('user_id', userId)
+        .maybeSingle();
 
-      // Check if user_songs join returned data (indicates song is in library)
-      const isInLibrary = user_songs && Array.isArray(user_songs) && user_songs.length > 0;
+      if (userSongError) {
+        console.error(
+          'Database error checking user song:',
+          { songId: songData.id, userId },
+          userSongError
+        );
+        throw userSongError;
+      }
+
+      // Check if user has this song in library
+      const isInLibrary = userSongData !== null;
 
       console.log('Song check result:', {
         hash,
         userId,
-        songId: song.id,
+        songId: songData.id,
         isInLibrary,
       });
 
-      return { song, isInLibrary: Boolean(isInLibrary) };
+      return { song: songData, isInLibrary };
     } catch (error) {
       console.error('Unexpected error in checkSongByHashWithLibraryStatus:', error);
       throw error;

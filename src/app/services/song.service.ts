@@ -130,6 +130,12 @@ export class SongService {
       // Step 5: Parse metadata
       const metadata = await this.musicXMLParserService.parseMusicXML(fileBuffer);
       console.log('Extracted metadata:', metadata);
+      console.log('Metadata type check:', {
+        titleExists: !!metadata.title,
+        titleLength: metadata.title?.length,
+        composerExists: !!metadata.composer,
+        composerLength: metadata.composer?.length,
+      });
 
       // Step 6: Check for duplicates and handle accordingly
       const duplicateCheck = await this.supabaseService.checkSongByHashWithLibraryStatus(
@@ -434,7 +440,12 @@ export class SongService {
     userId: string,
     metadata: { title: string; composer: string }
   ): Promise<UploadSongResponseDto> {
-    console.log('Handling duplicate song:', { songId: existingSong.id, userId });
+    console.log('Handling duplicate song (file already in system):', {
+      songId: existingSong.id,
+      userId,
+      fileHash: existingSong.file_hash,
+      note: 'File already in storage (content-addressed) - no new upload needed',
+    });
 
     // Check if user already has this song in their library
     if (existingSong.isInLibrary) {
@@ -443,7 +454,8 @@ export class SongService {
     }
 
     // Song exists but user doesn't have it - add to library
-    console.log('Adding existing song to user library');
+    // File is already in storage (deduplication), no re-upload needed
+    console.log('Adding existing song to user library (file already deduplicated)');
     const userSongRecord = await this.supabaseService.addSongToUserLibrary(userId, existingSong.id);
 
     const songDetails: SongDetailsDto = {
@@ -480,18 +492,29 @@ export class SongService {
     console.log('Handling new song creation:', { userId, hash: fileHash });
 
     try {
-      // Step 1: Upload file to Supabase Storage with user-specific path
-      await this.supabaseService.uploadMusicXMLFile(fileHash, fileBuffer, userId);
-      console.log('File uploaded to storage successfully');
+      // Step 1: Upload file to content-addressed storage (or skip if already exists)
+      // Storage deduplication: if identical file uploaded by another user, file is reused
+      await this.supabaseService.uploadMusicXMLFile(fileHash, fileBuffer);
+      console.log('File upload/verification completed (content-addressed storage)');
 
       // Step 2: Create song record in database
+      // Each uploader gets their own song record with their uploader_id
+      console.log('About to call createSong with:', {
+        title: metadata.title,
+        composer: metadata.composer,
+        file_hash: fileHash,
+      });
       const songRecord = await this.supabaseService.createSong({
         title: metadata.title,
         composer: metadata.composer,
         file_hash: fileHash,
         uploader_id: userId,
       });
-      console.log('Song record created:', songRecord.id);
+      console.log('Song record created:', {
+        id: songRecord.id,
+        title: songRecord.title,
+        composer: songRecord.composer,
+      });
 
       // Step 3: Add to user's library (this also creates the user_songs record)
       const userSongRecord = await this.supabaseService.addSongToUserLibrary(userId, songRecord.id);
@@ -508,15 +531,10 @@ export class SongService {
         added_to_library_at: userSongRecord.created_at,
       };
     } catch (error) {
-      // If anything fails after file upload, we should clean up the uploaded file
-      console.error('Error during new song creation, attempting cleanup:', error);
-      try {
-        // Note: In a real implementation, you might want to implement a cleanup mechanism
-        // For now, we'll just log the error and re-throw
-        console.warn('File uploaded but database operations failed - manual cleanup may be needed');
-      } catch (cleanupError) {
-        console.error('Cleanup also failed:', cleanupError);
-      }
+      // If anything fails, log it
+      // Note: With content-addressed storage, files are only uploaded once
+      // If upload succeeds but DB fails, file remains in storage (not duplicated)
+      console.error('Error during new song creation:', error);
       throw error;
     }
   }
