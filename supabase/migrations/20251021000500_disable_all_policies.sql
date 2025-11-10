@@ -1,2 +1,0 @@
--- this migration has been replaced by improved rls policies in subsequent migrations
--- rls remains enabled on all tables for security
