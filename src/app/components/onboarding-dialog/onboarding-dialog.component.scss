@@ -2,10 +2,14 @@
 
 .onboarding-dialog {
   min-width: 600px;
-  max-width: 800px;
+  max-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
 
   @media (max-width: 768px) {
     min-width: 100%;
+    max-width: 100%;
   }
 }
 
@@ -20,6 +24,7 @@
   gap: 1rem;
   padding: 1.5rem;
   border-bottom: 1px solid var(--mat-sys-outline-variant);
+  flex-shrink: 0;
 
   h2 {
     margin: 0;
@@ -34,12 +39,29 @@
 }
 
 // ============================================================================
+// Dialog Content
+// ============================================================================
+
+.dialog-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0;
+}
+
+// ============================================================================
 // Stepper
 // ============================================================================
 
 .onboarding-stepper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
   .mat-mdc-stepper-header {
     background: var(--mat-sys-surface-container-low);
+    flex-shrink: 0;
   }
 
   .mat-step-label {
@@ -49,6 +71,11 @@
     font-size: var(--mat-sys-label-large);
     font-weight: 500;
   }
+
+  .mat-horizontal-content-container {
+    flex: 1;
+    min-height: 0;
+  }
 }
 
 // ============================================================================
@@ -56,14 +83,17 @@
 // ============================================================================
 
 .step-content {
-  padding: 3rem 2rem;
+  padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 
   @media (max-width: 600px) {
-    padding: 2rem 1.5rem;
-    gap: 1.5rem;
+    padding: 1.5rem 1rem;
+    gap: 1rem;
   }
 }
 
@@ -72,12 +102,12 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 1rem;
+  gap: 0.75rem;
 
   .large-icon {
-    font-size: 64px;
-    width: 64px;
-    height: 64px;
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
     color: var(--mat-sys-primary);
     opacity: 0.9;
   }
@@ -104,15 +134,15 @@
 
   ul {
     margin: 0;
-    padding-left: 1.5rem;
-    max-width: 400px;
-    font-size: var(--mat-sys-body-medium);
+    padding-left: 1.25rem;
+    max-width: 100%;
+    font-size: var(--mat-sys-body-small);
     color: var(--mat-sys-on-surface);
-    line-height: 1.8;
+    line-height: 1.6;
 
     li {
-      margin: 0.5rem 0;
-      padding-left: 0.5rem;
+      margin: 0.375rem 0;
+      padding-left: 0.375rem;
 
       &::marker {
         color: var(--mat-sys-primary);
@@ -125,11 +155,13 @@
 .step-actions {
   display: flex;
   justify-content: center;
-  gap: 1rem;
-  margin-top: 1rem;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  flex-shrink: 0;
 
   button {
-    min-width: 100px;
+    min-width: 90px;
+    font-size: var(--mat-sys-label-large);
   }
 }
 
