@@ -103,7 +103,7 @@ export class AuthService {
 
   /**
    * Signs out the current user
-   * Clears user state and redirects to login
+   * Clears user state and redirects to public library
    */
   async logout(): Promise<void> {
     try {
@@ -120,7 +120,7 @@ export class AuthService {
       this.isAuthenticated.set(false);
 
       console.log('Logout successful');
-      await this.router.navigate(['/login']);
+      await this.router.navigate(['/app/discover']);
     } catch (error) {
       console.error('Unexpected error during logout:', error);
       throw error;
