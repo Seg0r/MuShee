@@ -23,6 +23,7 @@ import { OpenSheetMusicDisplay, IOSMDOptions } from 'opensheetmusicdisplay';
 import { SongService } from '../../services/song.service';
 import { FeedbackService } from '../../services/feedback.service';
 import { AuthService } from '../../services/auth.service';
+import { ThemeService } from '../../services/theme.service';
 import type { SongAccessDto } from '../../../types';
 
 /**
@@ -47,6 +48,7 @@ export class SheetMusicViewerComponent implements OnInit, OnDestroy, AfterViewIn
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly themeService = inject(ThemeService);
 
   // View children references
   readonly osmdContainer = viewChild<ElementRef<HTMLDivElement>>('osmdContainer');
@@ -86,6 +88,14 @@ export class SheetMusicViewerComponent implements OnInit, OnDestroy, AfterViewIn
       // Only load if we have an ID and OSMD is initialized
       if (id && ready) {
         this.loadSong(id);
+      }
+    });
+
+    // Effect to update OSMD dark mode when theme changes
+    effect(() => {
+      const isDarkMode = this.themeService.isDarkMode();
+      if (this.osmd) {
+        this.updateOSMDTheme(isDarkMode);
       }
     });
   }
@@ -248,6 +258,7 @@ export class SheetMusicViewerComponent implements OnInit, OnDestroy, AfterViewIn
 
     try {
       // Create OSMD instance with full rendering options
+      const isDarkMode = this.themeService.isDarkMode();
       this.osmd = new OpenSheetMusicDisplay(container, {
         autoResize: true,
         drawingParameters: 'default', // Full quality rendering
@@ -259,6 +270,7 @@ export class SheetMusicViewerComponent implements OnInit, OnDestroy, AfterViewIn
         drawFingerings: true,
         drawLyrics: true,
         backend: 'svg', // Use SVG for better quality
+        darkMode: isDarkMode,
       } as IOSMDOptions);
 
       console.log('OSMD initialized successfully');
@@ -334,5 +346,15 @@ export class SheetMusicViewerComponent implements OnInit, OnDestroy, AfterViewIn
     this.snackBar.open(message, 'Close', {
       duration: 5000,
     });
+  }
+
+  /**
+   * Updates OSMD dark mode setting when theme changes
+   */
+  private updateOSMDTheme(isDarkMode: boolean): void {
+    if (!this.osmd) return;
+
+    this.osmd.setOptions({ darkMode: isDarkMode });
+    this.osmd.render(); // Re-render with new theme
   }
 }
