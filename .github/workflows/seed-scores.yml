@@ -4,8 +4,6 @@ on:
   workflow_dispatch: # Manual trigger
   workflow_call: # Can be called from other workflows
     secrets:
-      SUPABASE_URL:
-        required: true
       SUPABASE_SERVICE_ROLE_KEY:
         required: true
 
@@ -29,6 +27,6 @@ jobs:
 
       - name: Seed scores to database
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: npm run seed:scores
