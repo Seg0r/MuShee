@@ -106,9 +106,33 @@ Musicians who want to centralize their sheet music collection and discover new p
 ### Database Setup
 
 1. Create a new project on [Supabase](https://supabase.com)
-2. Set up authentication tables and storage buckets
-3. Configure Row Level Security (RLS) policies for user data isolation
-4. Run database migrations if any are provided in the project
+2. Run database migrations to set up tables, RLS policies, and storage buckets:
+
+   **Option A: Using Supabase CLI (Recommended)**
+   
+   ```bash
+   # Install Supabase CLI if not already installed
+   npm install -g supabase
+   
+   # Link to your Supabase project
+   supabase link --project-ref your-project-ref
+   
+   # Run all migrations
+   supabase db push
+   ```
+
+   **Option B: Manual Migration via SQL Editor**
+   
+   1. Navigate to your Supabase project dashboard
+   2. Go to SQL Editor
+   3. Run each migration file in order:
+      - `supabase/migrations/20251110000000_complete_database_schema.sql`
+      - `supabase/migrations/20251111000000_create_storage_bucket.sql`
+
+3. Verify the setup:
+   - Check that all tables exist: `profiles`, `songs`, `user_songs`, `rendering_feedback`, `ai_suggestion_feedback`
+   - Verify RLS policies are enabled on all tables
+   - Confirm the `musicxml-files` storage bucket exists
 
 ### Seeding Public Domain Scores
 

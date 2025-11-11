@@ -370,22 +370,19 @@ async function main() {
     const supabase = createSupabaseClient();
     console.log('✅ Connected to Supabase');
 
-    // Ensure storage bucket exists
+    // Verify storage bucket exists
+    // Note: The bucket should be created via SQL migration (20251111000000_create_storage_bucket.sql)
+    // to avoid RLS policy violations when running in production
     const { data: buckets } = await supabase.storage.listBuckets();
     const bucketExists = buckets?.some(bucket => bucket.name === STORAGE_BUCKET);
 
     if (!bucketExists) {
-      const { error: createError } = await supabase.storage.createBucket(STORAGE_BUCKET, {
-        public: true,
-        allowedMimeTypes: ['application/vnd.recordare.musicxml'],
-        fileSizeLimit: 52428800, // 50MB
-      });
-
-      if (createError) {
-        throw new Error(`Failed to create bucket: ${createError.message}`);
-      }
-      console.log('📦 Created storage bucket');
+      throw new Error(
+        `Storage bucket '${STORAGE_BUCKET}' does not exist. ` +
+          `Please apply the migration: supabase/migrations/20251111000000_create_storage_bucket.sql`
+      );
     }
+    console.log('✅ Storage bucket exists');
 
     // Get all score files
     const scoreFiles = getScoreFiles();
