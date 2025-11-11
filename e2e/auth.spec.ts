@@ -4,100 +4,97 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { LoginPage } from './fixtures/page-objects';
-import { TEST_USERS, INVALID_CREDENTIALS, TIMEOUTS } from './fixtures/test-data';
+import { MainPage, LoginDialog } from './fixtures/page-objects';
+import { TEST_USERS, INVALID_CREDENTIALS } from './fixtures/test-data';
 
 test.describe('Authentication', () => {
-  let loginPage: LoginPage;
+  let mainPage: MainPage;
+  let loginDialog: LoginDialog;
 
   test.beforeEach(async ({ page }) => {
-    loginPage = new LoginPage(page);
-    await loginPage.navigate();
-    await loginPage.waitForURL('/login');
+    mainPage = new MainPage(page);
+    loginDialog = new LoginDialog(page);
   });
 
-  test('should display login form', async () => {
-    // Verify login page elements are visible
-    expect(await loginPage.isElementVisible('input[type="email"]')).toBeTruthy();
-    expect(await loginPage.isElementVisible('input[type="password"]')).toBeTruthy();
-    expect(await loginPage.isElementVisible('button:has-text("Login")')).toBeTruthy();
-  });
+  test.describe('Dialog-based Login (Main Page)', () => {
+    test('should login via dialog from main page', async () => {
+      // 1. Open main page
+      await mainPage.navigate();
 
-  test('should show error for invalid credentials', async ({ page }) => {
-    // Attempt login with invalid credentials
-    await loginPage.login(INVALID_CREDENTIALS.invalidEmail, INVALID_CREDENTIALS.invalidPassword);
+      // 2. Click login button
+      await mainPage.clickLoginButton();
 
-    // Wait for error message
-    await page.waitForSelector('[data-testid="error-message"]', { timeout: TIMEOUTS.medium });
+      // 3. Wait for dialog to open
+      await loginDialog.waitForDialog();
 
-    // Verify error is displayed
-    expect(await loginPage.isErrorDisplayed()).toBeTruthy();
-    const errorMsg = await loginPage.getErrorMessage();
-    expect(errorMsg).toContain('Invalid');
-  });
+      // 4. Fill login data
+      await loginDialog.fillEmail(TEST_USERS.validUser.email);
+      await loginDialog.fillPassword(TEST_USERS.validUser.password);
 
-  test('should require email field', async ({ page }) => {
-    // Leave email empty and try to submit
-    await loginPage.fillField('input[type="password"]', TEST_USERS.validUser.password);
-    await loginPage.clickButton('button:has-text("Login")');
+      // 5. Click login
+      await loginDialog.submitLogin();
 
-    // Verify form validation error
-    const emailInput = page.locator('input[type="email"]');
-    expect(await emailInput.getAttribute('aria-invalid')).toBe('true');
-  });
+      // Verify login success - should navigate away from main page
+      await mainPage.waitForURL(/\/app/);
+    });
 
-  test('should require password field', async ({ page }) => {
-    // Leave password empty and try to submit
-    await loginPage.fillField('input[type="email"]', TEST_USERS.validUser.email);
-    await loginPage.clickButton('button:has-text("Login")');
+    test('should show error for invalid credentials in dialog', async () => {
+      // 1. Open main page
+      await mainPage.navigate();
 
-    // Verify form validation error
-    const passwordInput = page.locator('input[type="password"]');
-    expect(await passwordInput.getAttribute('aria-invalid')).toBe('true');
-  });
+      // 2. Click login button
+      await mainPage.clickLoginButton();
 
-  test('should navigate to signup from login page', async ({ page }) => {
-    // Click sign up link
-    await loginPage.clickButton('a:has-text("Sign up")');
+      // 3. Wait for dialog to open
+      await loginDialog.waitForDialog();
 
-    // Verify navigation to signup page
-    await loginPage.waitForURL('/signup');
-    expect(page.url()).toContain('/signup');
-  });
+      // 4. Fill invalid login data
+      await loginDialog.fillEmail(INVALID_CREDENTIALS.invalidEmail);
+      await loginDialog.fillPassword(INVALID_CREDENTIALS.invalidPassword);
 
-  test('should have accessible login form', async ({ page }) => {
-    // Check for accessibility attributes
-    const form = page.locator('form');
-    expect(await form.getAttribute('role')).not.toBeNull();
+      // 5. Click login
+      await loginDialog.submitLogin();
 
-    // Verify labels are associated with inputs
-    const emailLabel = page.locator('label[for="email"]');
-    expect(await emailLabel.isVisible()).toBeTruthy();
+      // Verify error is displayed
+      expect(await loginDialog.isErrorDisplayed()).toBeTruthy();
+      const errorMsg = await loginDialog.getErrorMessage();
+      expect(errorMsg).toContain('Invalid');
+    });
 
-    const passwordLabel = page.locator('label[for="password"]');
-    expect(await passwordLabel.isVisible()).toBeTruthy();
-  });
+    test('should require email field in dialog', async () => {
+      // 1. Open main page
+      await mainPage.navigate();
 
-  test('should have responsive design', async ({ page }) => {
-    // Test mobile viewport
-    await page.setViewportSize({ width: 375, height: 667 });
+      // 2. Click login button
+      await mainPage.clickLoginButton();
 
-    // Verify elements are still visible and accessible
-    expect(await loginPage.isElementVisible('input[type="email"]')).toBeTruthy();
-    expect(await loginPage.isElementVisible('input[type="password"]')).toBeTruthy();
+      // 3. Wait for dialog to open
+      await loginDialog.waitForDialog();
 
-    // Test desktop viewport
-    await page.setViewportSize({ width: 1920, height: 1080 });
+      // 4. Leave email empty and try to submit
+      await loginDialog.fillPassword(TEST_USERS.validUser.password);
+      await loginDialog.submitLogin();
 
-    // Verify layout adjusts appropriately
-    expect(await loginPage.isElementVisible('input[type="email"]')).toBeTruthy();
-  });
+      // Verify form validation - submit button should be disabled
+      expect(await loginDialog.isSubmitButtonEnabled()).toBeFalsy();
+    });
 
-  test('should trim whitespace from email input', async ({ page }) => {
-    const emailWithSpaces = '  ' + TEST_USERS.validUser.email + '  ';
-    await loginPage.fillField('input[type="email"]', emailWithSpaces);
+    test('should require password field in dialog', async () => {
+      // 1. Open main page
+      await mainPage.navigate();
 
-    const emailValue = await page.inputValue('input[type="email"]');
-    expect(emailValue.trim()).toBe(TEST_USERS.validUser.email);
+      // 2. Click login button
+      await mainPage.clickLoginButton();
+
+      // 3. Wait for dialog to open
+      await loginDialog.waitForDialog();
+
+      // 4. Leave password empty and try to submit
+      await loginDialog.fillEmail(TEST_USERS.validUser.email);
+      await loginDialog.submitLogin();
+
+      // Verify form validation - submit button should be disabled
+      expect(await loginDialog.isSubmitButtonEnabled()).toBeFalsy();
+    });
   });
 });

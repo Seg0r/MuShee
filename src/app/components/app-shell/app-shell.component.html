@@ -68,6 +68,7 @@
     <!-- Unauthenticated User Actions -->
     <button
       mat-button
+      data-testid="login-button"
       (click)="
         onNavigationClick({ icon: 'login', label: 'Login', path: '/login', requiresAuth: false })
       "
