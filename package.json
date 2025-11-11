@@ -11,7 +11,7 @@
     "test": "ng test",
     "test:ci": "ng test --watch=false --code-coverage --browsers=ChromeHeadlessCI",
     "test:coverage": "ng test --coverage --watch=false",
-    "e2e": "playwright test",
+    "e2e:test": "playwright test",
     "e2e:ui": "playwright test --ui",
     "e2e:debug": "playwright test --debug",
     "e2e:codegen": "playwright codegen http://localhost:4200",

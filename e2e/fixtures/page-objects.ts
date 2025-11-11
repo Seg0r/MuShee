@@ -121,6 +121,7 @@ export class LoginDialog extends BasePage {
   readonly passwordInput = () => this.page.locator('[data-testid="password-input"]');
   readonly loginSubmitButton = () => this.page.locator('[data-testid="login-submit-button"]');
   readonly errorMessage = () => this.page.locator('.error-message');
+  readonly createAccountLink = () => this.page.locator('[data-testid="create-account-link"]');
 
   /**
    * Wait for login dialog to be visible
@@ -185,6 +186,13 @@ export class LoginDialog extends BasePage {
   }
 
   /**
+   * Click the "Create one" link to navigate to registration page
+   */
+  async clickCreateAccountLink(): Promise<void> {
+    await this.createAccountLink().click();
+  }
+
+  /**
    * Check if login dialog is visible
    */
   async isDialogVisible(): Promise<boolean> {
@@ -214,6 +222,124 @@ export class LoginDialog extends BasePage {
 
   /**
    * Wait for error message to appear after failed login
+   */
+  async waitForErrorMessage(): Promise<void> {
+    await this.errorMessage().waitFor({ state: 'visible' });
+  }
+}
+
+/**
+ * Registration page object - represents the registration page
+ */
+export class RegistrationPage extends BasePage {
+  readonly pageContainer = () => this.page.locator('[data-testid="registration-page"]');
+  readonly registrationForm = () => this.page.locator('[data-testid="registration-form"]');
+  readonly emailInput = () => this.page.locator('[data-testid="registration-email-input"]');
+  readonly passwordInput = () => this.page.locator('[data-testid="registration-password-input"]');
+  readonly submitButton = () => this.page.locator('[data-testid="registration-submit-button"]');
+  readonly errorMessage = () => this.page.locator('[data-testid="registration-error-message"]');
+
+  /**
+   * Navigate to registration page
+   */
+  async navigate(): Promise<void> {
+    await this.goto('/register');
+  }
+
+  /**
+   * Wait for registration page to load
+   */
+  async waitForPage(): Promise<void> {
+    await this.page.waitForSelector('[data-testid="registration-page"]');
+  }
+
+  /**
+   * Fill registration form with email and password
+   */
+  async fillRegistrationForm(email: string, password: string): Promise<void> {
+    await this.emailInput().fill(email);
+    await this.passwordInput().fill(password);
+  }
+
+  /**
+   * Fill email input field
+   */
+  async fillEmail(email: string): Promise<void> {
+    await this.emailInput().fill(email);
+  }
+
+  /**
+   * Fill password input field
+   */
+  async fillPassword(password: string): Promise<void> {
+    await this.passwordInput().fill(password);
+  }
+
+  /**
+   * Click submit button to create account and wait for API response
+   */
+  async submitRegistrationAndWait(): Promise<void> {
+    // Start listening for the auth API response before clicking
+    const responsePromise = this.page.waitForResponse(response => {
+      const url = response.url();
+      // Wait for auth/registration API endpoints (Supabase or custom auth)
+      return (
+        (url.includes('/auth') || url.includes('supabase') || url.includes('signup')) &&
+        (response.status() === 200 ||
+          response.status() === 201 ||
+          response.status() === 400 ||
+          response.status() === 409)
+      );
+    });
+
+    // Click the submit button
+    await this.submitButton().click();
+
+    // Wait for the API response to complete
+    await responsePromise;
+
+    // Wait for the page to reach a stable state after the response
+    await this.page.waitForLoadState('networkidle');
+  }
+
+  /**
+   * Perform complete registration flow
+   */
+  async register(email: string, password: string): Promise<void> {
+    await this.fillRegistrationForm(email, password);
+    await this.submitRegistrationAndWait();
+  }
+
+  /**
+   * Check if registration page is visible
+   */
+  async isPageVisible(): Promise<boolean> {
+    return this.isElementVisible('[data-testid="registration-page"]');
+  }
+
+  /**
+   * Check if error message is displayed
+   */
+  async isErrorDisplayed(): Promise<boolean> {
+    return this.isElementVisible('[data-testid="registration-error-message"]');
+  }
+
+  /**
+   * Check if submit button is enabled
+   */
+  async isSubmitButtonEnabled(): Promise<boolean> {
+    return this.isElementEnabled('[data-testid="registration-submit-button"]');
+  }
+
+  /**
+   * Get the error message text
+   */
+  async getErrorMessage(): Promise<string | null> {
+    return this.errorMessage().textContent();
+  }
+
+  /**
+   * Wait for error message to appear after failed registration
    */
   async waitForErrorMessage(): Promise<void> {
     await this.errorMessage().waitFor({ state: 'visible' });

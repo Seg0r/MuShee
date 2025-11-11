@@ -1,4 +1,4 @@
-<div class="registration-container">
+<div class="registration-container" data-testid="registration-page">
   <div class="form-wrapper">
     <!-- Page Header -->
     <div class="page-header">
@@ -13,10 +13,17 @@
       (keydown)="onKeyDown($event)"
       class="registration-form"
       novalidate
+      data-testid="registration-form"
     >
       <!-- Server Error Display -->
       @if (serverError()) {
-        <div class="error-container" role="alert" aria-live="polite" aria-atomic="true">
+        <div
+          class="error-container"
+          role="alert"
+          aria-live="polite"
+          aria-atomic="true"
+          data-testid="registration-error-message"
+        >
           <mat-icon class="error-icon" aria-hidden="true">error</mat-icon>
           <div class="error-content">
             <p class="error-message">{{ serverError()!.message }}</p>
@@ -42,6 +49,7 @@
           aria-describedby="email-error"
           (blur)="onEmailBlur()"
           required
+          data-testid="registration-email-input"
         />
         @if (emailErrorMessage) {
           <mat-error id="email-error">{{ emailErrorMessage }}</mat-error>
@@ -62,6 +70,7 @@
           (blur)="onPasswordBlur()"
           (keydown)="onKeyDown($event)"
           required
+          data-testid="registration-password-input"
         />
         <button
           type="button"
@@ -166,6 +175,7 @@
           [disabled]="isFormValid()"
           aria-label="Create account button"
           [attr.aria-busy]="isLoading()"
+          data-testid="registration-submit-button"
         >
           @if (isLoading()) {
             <mat-spinner diameter="20" class="spinner" aria-hidden="true"></mat-spinner>

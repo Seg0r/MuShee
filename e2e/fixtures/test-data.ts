@@ -14,6 +14,10 @@ export const TEST_USERS = {
     email: 'another@example.com',
     password: 'AnotherPassword123!',
   },
+  newRegistrationUser: {
+    email: 'newuser@example.com',
+    password: 'NewUserPassword123!',
+  },
 };
 
 /**
@@ -25,6 +29,25 @@ export const INVALID_CREDENTIALS = {
   emptyEmail: '',
   emptyPassword: '',
   malformedEmail: 'not-an-email',
+};
+
+/**
+ * Registration test data
+ */
+export const REGISTRATION_DATA = {
+  weakPasswords: {
+    tooShort: 'Short1!',
+    noUppercase: 'weakpassword123!',
+    noLowercase: 'WEAKPASSWORD123!',
+    noNumber: 'WeakPassword!',
+    noSpecialChar: 'WeakPassword123',
+  },
+  invalidEmails: {
+    missingAt: 'invalidemail.com',
+    missingDomain: 'invalid@',
+    spaces: 'invalid @example.com',
+    specialChars: 'invalid+test@example.com',
+  },
 };
 
 /**
