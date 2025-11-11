@@ -68,9 +68,13 @@ function createSupabaseClient(): SupabaseClient<Database> {
   const supabaseUrl = process.env['SUPABASE_URL'];
   const serviceRoleKey = process.env['SUPABASE_SERVICE_ROLE_KEY'];
 
-  if (!supabaseUrl || !serviceRoleKey) {
+  if (!supabaseUrl) {
+    throw new Error('Missing required environment variables. Please ensure SUPABASE_URL is set.');
+  }
+
+  if (!serviceRoleKey) {
     throw new Error(
-      'Missing required environment variables. Please ensure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set.'
+      'Missing required environment variables. Please ensure SUPABASE_SERVICE_ROLE_KEY is set.'
     );
   }
 
