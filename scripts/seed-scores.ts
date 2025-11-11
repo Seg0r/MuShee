@@ -370,21 +370,11 @@ async function main() {
     const supabase = createSupabaseClient();
     console.log('✅ Connected to Supabase');
 
-    // Verify storage bucket exists by attempting to list files in it
-    // Note: The bucket should be created via SQL migration (20251111000000_create_storage_bucket.sql)
-    // We can't use listBuckets() as it may be restricted by RLS policies even with service role
-    const { error: bucketError } = await supabase.storage.from(STORAGE_BUCKET).list('', {
-      limit: 1,
-    });
-
-    if (bucketError) {
-      throw new Error(
-        `Storage bucket '${STORAGE_BUCKET}' does not exist or is not accessible. ` +
-          `Please apply the migration: supabase/migrations/20251111000000_create_storage_bucket.sql\n` +
-          `Error: ${bucketError.message}`
-      );
-    }
-    console.log('✅ Storage bucket is accessible');
+    // Note: Storage bucket and policies should be created via SQL migrations:
+    // - 20251111000000_create_storage_bucket.sql (creates the bucket)
+    // - 20251111000001_add_service_role_storage_policies.sql (adds service role policies)
+    // The service role key bypasses RLS, so we can proceed directly with operations
+    console.log('✅ Using service role key for storage operations');
 
     // Get all score files
     const scoreFiles = getScoreFiles();

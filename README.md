@@ -128,6 +128,7 @@ Musicians who want to centralize their sheet music collection and discover new p
    3. Run each migration file in order:
       - `supabase/migrations/20251110000000_complete_database_schema.sql`
       - `supabase/migrations/20251111000000_create_storage_bucket.sql`
+      - `supabase/migrations/20251111000001_add_service_role_storage_policies.sql`
 
 3. Verify the setup:
    - Check that all tables exist: `profiles`, `songs`, `user_songs`, `rendering_feedback`, `ai_suggestion_feedback`
