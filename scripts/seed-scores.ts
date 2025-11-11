@@ -32,8 +32,10 @@ import {
   type MusicXMLMetadata,
 } from '../src/utils/musicxml-metadata.js';
 
-// Load environment variables from .env file
-dotenvConfig();
+// Load environment variables from .env file (for local development only)
+// In production (GitHub Actions), environment variables are set directly
+// dotenv will NOT override existing environment variables by default
+dotenvConfig({ override: false });
 
 // =============================================================================
 // Configuration
