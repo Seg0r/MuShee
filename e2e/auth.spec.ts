@@ -16,43 +16,37 @@ test.describe('Authentication', () => {
     loginDialog = new LoginDialog(page);
   });
 
-  test.describe('Dialog-based Login (Main Page)', () => {
-    test('should login via dialog from main page', async () => {
-      // 1. Open main page
-      await mainPage.navigate();
+  test.describe('Login Page Authentication', () => {
+    test('should login via login page', async () => {
+      // 1. Navigate directly to login page
+      await loginDialog.page.goto('/login');
 
-      // 2. Click login button
-      await mainPage.clickLoginButton();
-
-      // 3. Wait for dialog to open
+      // 2. Wait for login page to load
       await loginDialog.waitForDialog();
 
-      // 4. Fill login data
+      // 3. Fill login data
       await loginDialog.fillEmail(TEST_USERS.validUser.email);
       await loginDialog.fillPassword(TEST_USERS.validUser.password);
 
-      // 5. Click login
+      // 4. Click login
       await loginDialog.submitLogin();
 
-      // Verify login success - should navigate away from main page
-      await mainPage.waitForURL(/\/app/);
+      // Verify login success - should navigate to library
+      await mainPage.waitForURL(/\/app\/library/);
     });
 
-    test('should show error for invalid credentials in dialog', async () => {
-      // 1. Open main page
-      await mainPage.navigate();
+    test('should show error for invalid credentials on login page', async () => {
+      // 1. Navigate directly to login page
+      await loginDialog.page.goto('/login');
 
-      // 2. Click login button
-      await mainPage.clickLoginButton();
-
-      // 3. Wait for dialog to open
+      // 2. Wait for login page to load
       await loginDialog.waitForDialog();
 
-      // 4. Fill invalid login data
+      // 3. Fill invalid login data
       await loginDialog.fillEmail(INVALID_CREDENTIALS.invalidEmail);
       await loginDialog.fillPassword(INVALID_CREDENTIALS.invalidPassword);
 
-      // 5. Click login
+      // 4. Click login
       await loginDialog.submitLogin();
 
       // Verify error is displayed
@@ -61,39 +55,31 @@ test.describe('Authentication', () => {
       expect(errorMsg).toContain('Invalid');
     });
 
-    test('should require email field in dialog', async () => {
-      // 1. Open main page
-      await mainPage.navigate();
+    test('should require email field on login page', async () => {
+      // 1. Navigate directly to login page
+      await loginDialog.page.goto('/login');
 
-      // 2. Click login button
-      await mainPage.clickLoginButton();
-
-      // 3. Wait for dialog to open
+      // 2. Wait for login page to load
       await loginDialog.waitForDialog();
 
-      // 4. Leave email empty and try to submit
+      // 3. Leave email empty, fill password
       await loginDialog.fillPassword(TEST_USERS.validUser.password);
-      await loginDialog.submitLogin();
 
-      // Verify form validation - submit button should be disabled
+      // Verify form validation - submit button should be disabled when email is empty
       expect(await loginDialog.isSubmitButtonEnabled()).toBeFalsy();
     });
 
-    test('should require password field in dialog', async () => {
-      // 1. Open main page
-      await mainPage.navigate();
+    test('should require password field on login page', async () => {
+      // 1. Navigate directly to login page
+      await loginDialog.page.goto('/login');
 
-      // 2. Click login button
-      await mainPage.clickLoginButton();
-
-      // 3. Wait for dialog to open
+      // 2. Wait for login page to load
       await loginDialog.waitForDialog();
 
-      // 4. Leave password empty and try to submit
+      // 3. Leave password empty, fill email
       await loginDialog.fillEmail(TEST_USERS.validUser.email);
-      await loginDialog.submitLogin();
 
-      // Verify form validation - submit button should be disabled
+      // Verify form validation - submit button should be disabled when password is empty
       expect(await loginDialog.isSubmitButtonEnabled()).toBeFalsy();
     });
   });
