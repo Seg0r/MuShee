@@ -24,14 +24,12 @@ test.describe('Authentication', () => {
       // 2. Wait for login page to load
       await loginDialog.waitForDialog();
 
-      // 3. Fill login data
+      // 3. Fill login data and submit, waiting for API response
       await loginDialog.fillEmail(TEST_USERS.validUser.email);
       await loginDialog.fillPassword(TEST_USERS.validUser.password);
+      await loginDialog.submitLoginAndWait();
 
-      // 4. Click login
-      await loginDialog.submitLogin();
-
-      // Verify login success - should navigate to library
+      // 4. Verify login success - should navigate to library after API response
       await mainPage.waitForURL(/\/app\/library/);
     });
 
@@ -46,8 +44,11 @@ test.describe('Authentication', () => {
       await loginDialog.fillEmail(INVALID_CREDENTIALS.invalidEmail);
       await loginDialog.fillPassword(INVALID_CREDENTIALS.invalidPassword);
 
-      // 4. Click login
-      await loginDialog.submitLogin();
+      // 4. Submit login and wait for API response (expects 401/400)
+      await loginDialog.submitLoginAndWait();
+
+      // 5. Wait for error message to appear
+      await loginDialog.waitForErrorMessage();
 
       // Verify error is displayed
       expect(await loginDialog.isErrorDisplayed()).toBeTruthy();
@@ -62,10 +63,10 @@ test.describe('Authentication', () => {
       // 2. Wait for login page to load
       await loginDialog.waitForDialog();
 
-      // 3. Leave email empty, fill password
+      // 3. Leave email empty, fill password only
       await loginDialog.fillPassword(TEST_USERS.validUser.password);
 
-      // Verify form validation - submit button should be disabled when email is empty
+      // 4. Verify form validation - submit button should be disabled when email is empty
       expect(await loginDialog.isSubmitButtonEnabled()).toBeFalsy();
     });
 
@@ -76,10 +77,10 @@ test.describe('Authentication', () => {
       // 2. Wait for login page to load
       await loginDialog.waitForDialog();
 
-      // 3. Leave password empty, fill email
+      // 3. Leave password empty, fill email only
       await loginDialog.fillEmail(TEST_USERS.validUser.email);
 
-      // Verify form validation - submit button should be disabled when password is empty
+      // 4. Verify form validation - submit button should be disabled when password is empty
       expect(await loginDialog.isSubmitButtonEnabled()).toBeFalsy();
     });
   });

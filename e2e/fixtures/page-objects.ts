@@ -130,12 +130,12 @@ export class LoginDialog extends BasePage {
   }
 
   /**
-   * Perform login with email and password
+   * Perform login with email and password and wait for response
    */
   async login(email: string, password: string): Promise<void> {
     await this.fillEmail(email);
     await this.fillPassword(password);
-    await this.submitLogin();
+    await this.submitLoginAndWait();
   }
 
   /**
@@ -153,10 +153,35 @@ export class LoginDialog extends BasePage {
   }
 
   /**
-   * Click login submit button
+   * Click login submit button without waiting
    */
   async submitLogin(): Promise<void> {
     await this.loginSubmitButton().click();
+  }
+
+  /**
+   * Click login submit button and wait for API response
+   * This handles both successful and failed authentication responses
+   */
+  async submitLoginAndWait(): Promise<void> {
+    // Start listening for the auth API response before clicking
+    const responsePromise = this.page.waitForResponse(response => {
+      const url = response.url();
+      // Wait for auth/login API endpoints (Supabase or custom auth)
+      return (
+        (url.includes('/auth') || url.includes('supabase') || url.includes('login')) &&
+        (response.status() === 200 || response.status() === 401 || response.status() === 400)
+      );
+    });
+
+    // Click the submit button
+    await this.loginSubmitButton().click();
+
+    // Wait for the API response to complete
+    await responsePromise;
+
+    // Wait for the page to reach a stable state after the response
+    await this.page.waitForLoadState('networkidle');
   }
 
   /**
@@ -185,5 +210,12 @@ export class LoginDialog extends BasePage {
    */
   async getErrorMessage(): Promise<string | null> {
     return this.errorMessage().textContent();
+  }
+
+  /**
+   * Wait for error message to appear after failed login
+   */
+  async waitForErrorMessage(): Promise<void> {
+    await this.errorMessage().waitFor({ state: 'visible' });
   }
 }
