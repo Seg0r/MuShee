@@ -78,10 +78,17 @@ function createSupabaseClient(): SupabaseClient<Database> {
     );
   }
 
+  // Create client with service role key
+  // The service role key bypasses RLS when no user session is active
+  // IMPORTANT: Do not call auth.signIn() or set any user context - this would
+  // cause RLS policies to be enforced even with the service role key
   return createClient<Database>(supabaseUrl, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
+    },
+    db: {
+      schema: 'public',
     },
   });
 }
