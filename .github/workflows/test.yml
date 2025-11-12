@@ -56,7 +56,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        run: npm run setup:env
+        run: npx tsx scripts/setup-env.ts
 
       - name: Run unit tests
         env:
@@ -93,7 +93,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        run: npm run setup:env
+        run: npx tsx scripts/setup-env.ts
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
@@ -142,7 +142,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        run: npm run setup:env
+        run: npx tsx scripts/setup-env.ts
 
       - name: Build application
         run: npm run build
