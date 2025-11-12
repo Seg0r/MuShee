@@ -9,7 +9,7 @@
     "watch": "ng build --watch --configuration development",
     "build:test": "ng build --configuration test",
     "test": "ng test",
-    "test:ci": "ng test --watch=false --code-coverage --browsers=ChromeHeadlessCI",
+    "test:ci": "ng test --watch=false --code-coverage",
     "test:coverage": "ng test --coverage --watch=false",
     "e2e:test": "playwright test",
     "e2e:ui": "playwright test --ui",
@@ -22,7 +22,8 @@
     "format": "prettier --write \"src/**/*.{ts,html,scss,css,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,html,scss,css,json}\"",
     "prepare": "husky",
-    "seed:scores": "tsx scripts/seed-scores.ts"
+    "seed:scores": "tsx scripts/seed-scores.ts",
+    "setup:env": "tsx scripts/setup-env.ts"
   },
   "private": true,
   "dependencies": {
