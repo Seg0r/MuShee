@@ -4,6 +4,7 @@ import { SupabaseService } from '../../services/supabase.service';
 import { ProfileService } from '../../services/profile.service';
 import { ErrorHandlingService } from '../../services/error-handling.service';
 import { Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 import type { ProfileDto } from '../../../types';
 
 describe('RegistrationComponent', () => {
@@ -12,7 +13,7 @@ describe('RegistrationComponent', () => {
   let mockSupabaseService: jasmine.SpyObj<SupabaseService>;
   let mockProfileService: jasmine.SpyObj<ProfileService>;
   let mockErrorHandlingService: jasmine.SpyObj<ErrorHandlingService>;
-  let mockRouter: jasmine.SpyObj<Router>;
+  let router: Router;
 
   beforeEach(async () => {
     // Create mock services
@@ -26,17 +27,18 @@ describe('RegistrationComponent', () => {
       'mapNetworkError',
       'logError',
     ]);
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
-      imports: [RegistrationComponent],
+      imports: [RegistrationComponent, RouterTestingModule.withRoutes([])],
       providers: [
         { provide: SupabaseService, useValue: mockSupabaseService },
         { provide: ProfileService, useValue: mockProfileService },
         { provide: ErrorHandlingService, useValue: mockErrorHandlingService },
-        { provide: Router, useValue: mockRouter },
       ],
     }).compileComponents();
+
+    router = TestBed.inject(Router);
+    spyOn(router, 'navigate');
 
     fixture = TestBed.createComponent(RegistrationComponent);
     component = fixture.componentInstance;
@@ -161,6 +163,7 @@ describe('RegistrationComponent', () => {
       password,
     });
     expect(mockProfileService.getCurrentUserProfile).toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalled();
   });
 
   it('should handle registration error', async () => {
