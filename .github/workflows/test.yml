@@ -56,7 +56,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        run: npx tsx scripts/setup-env.ts
+        run: npm run setup:env
 
       - name: Run unit tests
         env:
@@ -93,7 +93,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        run: npx tsx scripts/setup-env.ts
+        run: npm run setup:env
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
@@ -140,18 +140,9 @@ jobs:
 
       - name: Setup environment files
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        run: |
-          echo "Checking environment variables..."
-          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "::error::SUPABASE_URL and SUPABASE_ANON_KEY secrets must be configured in GitHub repository settings"
-            echo "SUPABASE_URL length: ${#SUPABASE_URL}"
-            echo "SUPABASE_ANON_KEY length: ${#SUPABASE_ANON_KEY}"
-            exit 1
-          fi
-          echo "Environment variables are set, running setup script..."
-          SUPABASE_URL="$SUPABASE_URL" SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" npx tsx scripts/setup-env.ts
+        run: npm run setup:env
 
       - name: Build application
         run: npm run build

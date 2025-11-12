@@ -22,7 +22,8 @@
     "format": "prettier --write \"src/**/*.{ts,html,scss,css,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,html,scss,css,json}\"",
     "prepare": "husky",
-    "seed:scores": "tsx scripts/seed-scores.ts"
+    "seed:scores": "tsx scripts/seed-scores.ts",
+    "setup:env": "tsx scripts/setup-env.ts"
   },
   "private": true,
   "dependencies": {
