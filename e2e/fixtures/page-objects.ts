@@ -288,7 +288,8 @@ export class RegistrationPage extends BasePage {
         (response.status() === 200 ||
           response.status() === 201 ||
           response.status() === 400 ||
-          response.status() === 409)
+          response.status() === 409 ||
+          response.status() === 422)
       );
     });
 

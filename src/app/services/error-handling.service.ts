@@ -55,6 +55,9 @@ export class ErrorHandlingService {
     } else if (message.includes('Password should be at least 6 characters')) {
       userMessage = 'Password must be at least 6 characters long';
       code = 'PASSWORD_TOO_SHORT';
+    } else if (status === 422) {
+      userMessage = 'Invalid registration data. Please check your input and try again.';
+      code = 'INVALID_REQUEST_DATA';
     } else if (status === 429) {
       userMessage = 'Too many login attempts. Please try again in a few minutes.';
       code = 'RATE_LIMITED';
