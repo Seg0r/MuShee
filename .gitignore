@@ -40,7 +40,7 @@ testem.log
 # Environment variables
 .env
 .env.*
-/src/environments/*
+/src/environments/*.ts
 
 # System files
 .DS_Store

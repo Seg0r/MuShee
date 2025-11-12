@@ -49,6 +49,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Create environment files
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          mkdir -p src/environments
+          # Copy environment.example and replace placeholders for environment.prod.ts
+          sed "s|'your-production-url'|'${SUPABASE_URL}'|g; s|'your-production-anon-key-here'|'${SUPABASE_ANON_KEY}'|g" src/environments/environment.example > src/environments/environment.prod.ts
+          # Copy environment.example and replace placeholders + set production to false for environment.ts
+          sed "s|'your-production-url'|'${SUPABASE_URL}'|g; s|'your-production-anon-key-here'|'${SUPABASE_ANON_KEY}'|g; s|production: true|production: false|g" src/environments/environment.example > src/environments/environment.ts
+
       - name: Run unit tests
         run: npm run test:ci
 
@@ -77,6 +88,17 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Create environment files
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          mkdir -p src/environments
+          # Copy environment.example and replace placeholders for environment.prod.ts
+          sed "s|'your-production-url'|'${SUPABASE_URL}'|g; s|'your-production-anon-key-here'|'${SUPABASE_ANON_KEY}'|g" src/environments/environment.example > src/environments/environment.prod.ts
+          # Copy environment.example and replace placeholders + set production to false for environment.ts
+          sed "s|'your-production-url'|'${SUPABASE_URL}'|g; s|'your-production-anon-key-here'|'${SUPABASE_ANON_KEY}'|g; s|production: true|production: false|g" src/environments/environment.example > src/environments/environment.ts
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
@@ -120,6 +142,17 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Create environment files
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          mkdir -p src/environments
+          # Copy environment.example and replace placeholders for environment.prod.ts
+          sed "s|'your-production-url'|'${SUPABASE_URL}'|g; s|'your-production-anon-key-here'|'${SUPABASE_ANON_KEY}'|g" src/environments/environment.example > src/environments/environment.prod.ts
+          # Copy environment.example and replace placeholders + set production to false for environment.ts
+          sed "s|'your-production-url'|'${SUPABASE_URL}'|g; s|'your-production-anon-key-here'|'${SUPABASE_ANON_KEY}'|g; s|production: true|production: false|g" src/environments/environment.example > src/environments/environment.ts
 
       - name: Build application
         run: npm run build
