@@ -8,7 +8,7 @@ on:
     types:
       - completed
 jobs:
-  build_and_deploy:
+  deploy:
     runs-on: ubuntu-latest
     if: |
       github.event.workflow_run.conclusion == 'success' &&
@@ -19,6 +19,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-dist
+          run-id: ${{ github.event.workflow_run.id }}
+          path: dist/
+
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
