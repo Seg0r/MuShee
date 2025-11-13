@@ -20,8 +20,12 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
+      - name: Get run ID of "Test" workflow
+        id: get-run-id
+        run: echo "Detected latest run id of ${{ github.event.workflow_run.id }}"
+
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: build-dist
           run-id: ${{ github.event.workflow_run.id }}
