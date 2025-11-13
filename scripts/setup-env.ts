@@ -53,10 +53,22 @@ const environmentProdTs = `export const environment = {
 };
 `;
 
+// Generate environment.test.ts (testing)
+const environmentTestTs = `export const environment = {
+  production: false,
+  supabase: {
+    url: '${SUPABASE_URL}',
+    anonKey: '${SUPABASE_ANON_KEY}',
+  },
+};
+`;
+
 // Write files
 writeFileSync(join(environmentsDir, 'environment.ts'), environmentTs);
 writeFileSync(join(environmentsDir, 'environment.prod.ts'), environmentProdTs);
+writeFileSync(join(environmentsDir, 'environment.test.ts'), environmentTestTs);
 
 console.log('✓ Environment files created successfully');
 console.log(`  - ${join(environmentsDir, 'environment.ts')}`);
 console.log(`  - ${join(environmentsDir, 'environment.prod.ts')}`);
+console.log(`  - ${join(environmentsDir, 'environment.test.ts')}`);
