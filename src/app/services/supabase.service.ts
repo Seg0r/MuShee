@@ -94,18 +94,7 @@ export class SupabaseService {
       );
     }
 
-    // Create Supabase client with option to disable LockManager if browser doesn't support it
-    // This prevents NavigatorLockAcquireTimeoutError in private/incognito mode and some legacy browsers
-    this.client = createClient<Database>(supabaseUrl, supabaseKey, {
-      auth: {
-        // Attempt to detect if LockManager is available before using it
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        flowType: 'pkce' as any, // Use PKCE flow for better security
-      },
-    });
+    this.client = createClient<Database>(supabaseUrl, supabaseKey);
   }
 
   /**

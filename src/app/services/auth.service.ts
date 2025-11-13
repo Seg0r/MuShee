@@ -33,42 +33,23 @@ export class AuthService {
    */
   readonly isAuthenticated = signal<boolean>(false);
 
-  /**
-   * Flag to track if initialization is in progress to prevent race conditions
-   */
-  private isInitializing = false;
-
   constructor() {
-    // Defer initialization with a microtask to avoid race conditions with Navigator LockManager
-    // This prevents NavigatorLockAcquireTimeoutError that occurs when multiple initialization calls happen simultaneously
-    queueMicrotask(() => {
-      this.initializeSession().catch(error => {
-        console.error('Fatal error during auth initialization:', error);
-        // Ensure loading state is set to false even if initialization fails catastrophically
-        this.isLoading.set(false);
-      });
-    });
+    this.initializeSession();
   }
 
   /**
-   * Initializes user session on app startup with retry logic.
+   * Initializes user session on app startup.
    * Checks for existing Supabase session and restores user state.
    * Sets isLoading to false once check is complete.
-   * Implements exponential backoff retry for transient failures.
    */
   private async initializeSession(): Promise<void> {
-    // Prevent concurrent initialization attempts
-    if (this.isInitializing) {
-      console.log('Auth initialization already in progress, skipping duplicate attempt');
-      return;
-    }
-
-    this.isInitializing = true;
-
     try {
       console.log('Initializing authentication session');
 
-      const { user, error } = await this.getSessionWithRetry();
+      const {
+        data: { user },
+        error,
+      } = await this.supabaseService.client.auth.getUser();
 
       if (error) {
         console.error('Error checking session:', error);
@@ -89,75 +70,10 @@ export class AuthService {
       this.isAuthenticated.set(false);
     } finally {
       this.isLoading.set(false);
-      this.isInitializing = false;
-
-      // Subscribe to auth changes for real-time updates
-      this.subscribeToAuthChanges();
-    }
-  }
-
-  /**
-   * Attempts to get the current session with exponential backoff retry.
-   * Handles NavigatorLockAcquireTimeoutError and other transient failures.
-   *
-   * @param maxRetries - Maximum number of retry attempts (default: 3)
-   * @param delay - Initial delay in ms (default: 100, doubles on each retry)
-   * @returns Promise resolving to { user, error } tuple
-   */
-  private async getSessionWithRetry(
-    maxRetries = 3,
-    delay = 100
-  ): Promise<{ user: User | null; error: unknown | null }> {
-    let lastError: unknown = null;
-
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      try {
-        const { data, error } = await this.supabaseService.client.auth.getUser();
-
-        if (!error) {
-          return { user: data.user, error: null };
-        }
-
-        // If error is not a lock timeout, return immediately
-        const errorStr = String(error).toLowerCase();
-        if (!errorStr.includes('lock') && !errorStr.includes('timeout')) {
-          return { user: null, error };
-        }
-
-        lastError = error;
-      } catch (err) {
-        lastError = err;
-        const errStr = String(err).toLowerCase();
-
-        // If not a lock-related error, rethrow immediately
-        if (!errStr.includes('lock') && !errStr.includes('timeout')) {
-          throw err;
-        }
-      }
-
-      // Wait before retrying (exponential backoff)
-      if (attempt < maxRetries - 1) {
-        const waitTime = delay * Math.pow(2, attempt);
-        console.warn(
-          `Auth session retrieval failed (attempt ${attempt + 1}/${maxRetries}), retrying in ${waitTime}ms...`
-        );
-        await this.sleep(waitTime);
-      }
     }
 
-    // If all retries failed, log and return error
-    console.error('Auth session retrieval failed after all retry attempts:', lastError);
-    return { user: null, error: lastError };
-  }
-
-  /**
-   * Utility function to sleep for a specified duration.
-   *
-   * @param ms - Duration in milliseconds
-   * @returns Promise that resolves after the specified duration
-   */
-  private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    // Subscribe to auth changes for real-time updates
+    this.subscribeToAuthChanges();
   }
 
   /**

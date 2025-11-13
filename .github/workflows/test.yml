@@ -63,14 +63,6 @@ jobs:
           CI: true
         run: npm run test:ci
 
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v5
-        with:
-          directory: ./coverage
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: true
-
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
