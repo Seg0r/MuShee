@@ -68,4 +68,4 @@ When modifying the directory structure, always update this section.
 
 ## Docs
 
-- NEVER create additional documentation files (_.md, _.txt, \*.doc, etc.) unless explicitly requested by the user.
+- NEVER create additional documentation files (_.md, _.txt, \*.doc, etc.) unless explicitly requested by the user. If you need to provide additional information, use the standard response window instead of new files.
