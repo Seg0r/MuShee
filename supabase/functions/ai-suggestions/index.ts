@@ -16,27 +16,49 @@ const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const AI_MODEL = 'openai/gpt-4o-mini'; // Cost-effective model for this use case
 
 // =============================================================================
-// CORS Headers
+// CORS Helpers
 // =============================================================================
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+const allowedOrigins = new Set([
+  'https://mushee.web.app',
+  'https://mushee.firebaseapp.com',
+  'http://localhost:4200',
+]);
+
+const defaultOrigin = 'https://mushee.web.app';
+
+function resolveOrigin(origin?: string): string {
+  if (!origin) return defaultOrigin;
+  return allowedOrigins.has(origin) ? origin : defaultOrigin;
+}
+
+function createCorsHeaders(origin?: string) {
+  return {
+    'Access-Control-Allow-Origin': resolveOrigin(origin),
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    Vary: 'Origin',
+  };
+}
 
 // =============================================================================
 // Error Response Helpers
 // =============================================================================
 
-function createErrorResponse(code: string, message: string, status = 400): Response {
+function createErrorResponse(
+  code: string,
+  message: string,
+  status = 400,
+  origin?: string
+): Response {
   const errorResponse: ErrorResponseDto = {
     error: { code, message },
   };
 
   return new Response(JSON.stringify(errorResponse), {
     status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    headers: { ...createCorsHeaders(origin), 'Content-Type': 'application/json' },
   });
 }
 
@@ -125,8 +147,21 @@ Requirements:
     throw new Error('AI_SERVICE_UNAVAILABLE');
   }
 
+  function normalizeAiContent(content: string): string {
+    let trimmed = content.trim();
+
+    const fenceMatch = trimmed.match(/^```(?:json)?\s*([\s\S]+?)\s*```$/i);
+    if (fenceMatch?.[1]) {
+      trimmed = fenceMatch[1].trim();
+    }
+
+    return trimmed;
+  }
+
   try {
-    const suggestions: AiSuggestionItemDto[] = JSON.parse(data.choices[0].message.content);
+    const suggestions: AiSuggestionItemDto[] = JSON.parse(
+      normalizeAiContent(data.choices[0].message.content)
+    );
 
     // Validate response structure
     if (!Array.isArray(suggestions) || suggestions.length !== 3) {
@@ -223,14 +258,16 @@ async function createFeedbackRecord(
 // =============================================================================
 
 Deno.serve(async (req: Request) => {
+  const origin = req.headers.get('origin') ?? undefined;
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 200, headers: corsHeaders });
+    return new Response(null, { status: 200, headers: createCorsHeaders(origin) });
   }
 
   // Only allow POST requests
   if (req.method !== 'POST') {
-    return createErrorResponse('INVALID_REQUEST', 'Method not allowed', 405);
+    return createErrorResponse('INVALID_REQUEST', 'Method not allowed', 405, origin);
   }
 
   try {
@@ -242,7 +279,7 @@ Deno.serve(async (req: Request) => {
     // Get authenticated user from request
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return createErrorResponse('UNAUTHORIZED', 'Authentication required', 401);
+      return createErrorResponse('UNAUTHORIZED', 'Authentication required', 401, origin);
     }
 
     const {
@@ -252,7 +289,7 @@ Deno.serve(async (req: Request) => {
 
     if (authError || !user) {
       console.error('Authentication error:', authError);
-      return createErrorResponse('UNAUTHORIZED', 'Invalid authentication token', 401);
+      return createErrorResponse('UNAUTHORIZED', 'Invalid authentication token', 401, origin);
     }
 
     const userId = user.id;
@@ -268,7 +305,7 @@ Deno.serve(async (req: Request) => {
       }
     } catch (parseError) {
       console.error('Request body parse error:', parseError);
-      return createErrorResponse('INVALID_REQUEST', 'Invalid JSON in request body', 400);
+      return createErrorResponse('INVALID_REQUEST', 'Invalid JSON in request body', 400, origin);
     }
 
     // Determine which songs to use for analysis
@@ -287,7 +324,8 @@ Deno.serve(async (req: Request) => {
         return createErrorResponse(
           'INVALID_REQUEST',
           'At least one song is required to generate suggestions. Add songs to your library or provide them in the request.',
-          400
+          400,
+          origin
         );
       }
     }
@@ -298,7 +336,8 @@ Deno.serve(async (req: Request) => {
         return createErrorResponse(
           'INVALID_REQUEST',
           'All songs must have title and composer information',
-          400
+          400,
+          origin
         );
       }
     }
@@ -325,7 +364,7 @@ Deno.serve(async (req: Request) => {
 
     return new Response(JSON.stringify(response), {
       status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...createCorsHeaders(origin), 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Unexpected error in Edge Function:', error);
@@ -337,19 +376,22 @@ Deno.serve(async (req: Request) => {
           return createErrorResponse(
             'AI_SERVICE_UNAVAILABLE',
             "Sorry, we couldn't fetch suggestions at this time. Please try again later.",
-            503
+            503,
+            origin
           );
         case 'INTERNAL_ERROR':
           return createErrorResponse(
             'INTERNAL_ERROR',
             'An unexpected error occurred while generating suggestions',
-            500
+            500,
+            origin
           );
         default:
           return createErrorResponse(
             'INTERNAL_ERROR',
             'An unexpected error occurred while generating suggestions',
-            500
+            500,
+            origin
           );
       }
     }
@@ -357,7 +399,8 @@ Deno.serve(async (req: Request) => {
     return createErrorResponse(
       'INTERNAL_ERROR',
       'An unexpected error occurred while generating suggestions',
-      500
+      500,
+      origin
     );
   }
 });
