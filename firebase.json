@@ -1,6 +1,7 @@
 {
   "hosting": {
-    "public": "mushee",
+    "target": "app",
+    "public": "mushee/browser",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {

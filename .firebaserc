@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "mushee-338bf"
-  }
+  },
+  "targets": {
+    "mushee-338bf": {
+      "hosting": {
+        "app": [
+          "mushee"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
