@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { navigatorLock } from '@supabase/auth-js';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import type { Database, Json } from '../../db/database.types';
 import { environment } from '../../environments/environment';
@@ -69,6 +70,45 @@ interface CreateAiFeedbackDto {
   suggestions: AiSuggestionItemDto[];
 }
 
+type LockFunction = typeof navigatorLock;
+
+interface LockRetryConfig {
+  fallbackAcquireTimeoutMs: number;
+  retryIntervalMs: number;
+  maxAttempts: number;
+}
+
+const createNavigatorLockWithRetry = (config: LockRetryConfig): LockFunction => {
+  const { fallbackAcquireTimeoutMs, retryIntervalMs, maxAttempts } = config;
+
+  const delay = (ms: number): Promise<void> =>
+    new Promise(resolve => {
+      setTimeout(resolve, ms);
+    });
+
+  const isAcquireTimeoutError = (error: unknown): boolean =>
+    Boolean(error && typeof error === 'object' && 'isAcquireTimeout' in error);
+
+  return async (name, acquireTimeout, fn) => {
+    let attempt = 0;
+
+    const effectiveAcquireTimeout =
+      acquireTimeout === 0 ? fallbackAcquireTimeoutMs : acquireTimeout;
+
+    while (true) {
+      try {
+        return await navigatorLock(name, effectiveAcquireTimeout, fn);
+      } catch (error) {
+        if (!isAcquireTimeoutError(error) || attempt >= maxAttempts) {
+          throw error;
+        }
+        attempt += 1;
+        await delay(retryIntervalMs);
+      }
+    }
+  };
+};
+
 /**
  * Service for managing Supabase client and database operations.
  * Provides centralized access to Supabase functionality with proper typing.
@@ -94,7 +134,26 @@ export class SupabaseService {
       );
     }
 
-    this.client = createClient<Database>(supabaseUrl, supabaseKey);
+    const supportsNavigatorLocks = typeof navigator !== 'undefined' && 'locks' in navigator;
+
+    const lockFunction = supportsNavigatorLocks
+      ? createNavigatorLockWithRetry({
+          fallbackAcquireTimeoutMs: 5000,
+          retryIntervalMs: 200,
+          maxAttempts: 25,
+        })
+      : undefined;
+
+    this.client = createClient<Database>(supabaseUrl, supabaseKey, {
+      auth: {
+        // Keep sessions persisted and refreshed automatically
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        // Configure navigator lock retries to avoid immediate acquire failures
+        ...(lockFunction ? { lock: lockFunction } : {}),
+      },
+    });
   }
 
   /**
