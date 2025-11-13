@@ -25,14 +25,14 @@ Create the file `/.env.example` with the following content (this should be commi
 
 ```env
 SUPABASE_URL=your-supabase-url
-SUPABASE_KEY=your-supabase-anon-key
+SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
 Create the file `/.env` with the following content (this should NOT be committed - add it to .gitignore):
 
 ```env
 SUPABASE_URL=your-actual-supabase-url
-SUPABASE_KEY=your-actual-supabase-anon-key
+SUPABASE_ANON_KEY=your-actual-supabase-anon-key
 ```
 
 Replace the placeholder values with your actual Supabase project URL and anonymous key.
@@ -58,7 +58,7 @@ export class SupabaseService {
 
   constructor() {
     const supabaseUrl = process.env['SUPABASE_URL'];
-    const supabaseAnonKey = process.env['SUPABASE_KEY'];
+    const supabaseAnonKey = process.env['SUPABASE_ANON_KEY'];
 
     if (!supabaseUrl || !supabaseAnonKey) {
       throw new Error('Missing Supabase environment variables. Please check your .env file.');
@@ -84,7 +84,7 @@ declare global {
   namespace NodeJS {
     interface ProcessEnv {
       SUPABASE_URL: string;
-      SUPABASE_KEY: string;
+      SUPABASE_ANON_KEY: string;
     }
   }
 }

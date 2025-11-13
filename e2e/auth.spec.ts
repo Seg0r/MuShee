@@ -19,20 +19,45 @@ test.describe('Authentication', () => {
   });
 
   test.describe('Login Page Authentication', () => {
-    test('should login via login page', async () => {
-      // 1. Navigate directly to login page
-      await loginDialog.page.goto('/login');
+    // Serial execution ensures the account exists before login test runs
+    // This creates the account first, then tests login with it
+    test.describe.serial('Login Flow', () => {
+      test('should create account for login test', async () => {
+        // 1. Navigate directly to registration page
+        await registrationPage.page.goto('/register');
 
-      // 2. Wait for login page to load
-      await loginDialog.waitForDialog();
+        // 2. Wait for registration page to load
+        await registrationPage.waitForPage();
 
-      // 3. Fill login data and submit, waiting for API response
-      await loginDialog.fillEmail(TEST_USERS.validUser.email);
-      await loginDialog.fillPassword(TEST_USERS.validUser.password);
-      await loginDialog.submitLoginAndWait();
+        // 3. Create the account that will be used for login testing
+        await registrationPage.fillRegistrationForm(
+          TEST_USERS.validUser.email,
+          TEST_USERS.validUser.password
+        );
 
-      // 4. Verify login success - should navigate to library after API response
-      await mainPage.waitForURL(/\/app\/library/);
+        // 4. Submit registration and wait for API response
+        await registrationPage.submitRegistrationAndWait();
+
+        // 5. Verify successful registration - should navigate to library after API response
+        await mainPage.waitForURL(/\/app\/library/);
+      });
+
+      test('should login via login page', async () => {
+        // This test depends on the previous test creating the account
+        // 1. Navigate directly to login page
+        await loginDialog.page.goto('/login');
+
+        // 2. Wait for login page to load
+        await loginDialog.waitForDialog();
+
+        // 3. Fill login data and submit, waiting for API response
+        await loginDialog.fillEmail(TEST_USERS.validUser.email);
+        await loginDialog.fillPassword(TEST_USERS.validUser.password);
+        await loginDialog.submitLoginAndWait();
+
+        // 4. Verify login success - should navigate to library after API response
+        await mainPage.waitForURL(/\/app\/library/);
+      });
     });
 
     test('should show error for invalid credentials on login page', async () => {
@@ -106,49 +131,57 @@ test.describe('Authentication', () => {
       await mainPage.waitForURL(/\/register/);
     });
 
-    test('should successfully create account', async () => {
-      // 1. Navigate directly to registration page
-      await registrationPage.page.goto('/register');
+    // Serial execution ensures tests run in order
+    // This allows the "existing email" test to depend on the "create account" test
+    test.describe.serial('Account Creation and Validation', () => {
+      test('should successfully create account', async () => {
+        // 1. Navigate directly to registration page
+        await registrationPage.page.goto('/register');
 
-      // 2. Wait for registration page to load
-      await registrationPage.waitForPage();
+        // 2. Wait for registration page to load
+        await registrationPage.waitForPage();
 
-      // 3. Fill registration form with valid data
-      await registrationPage.fillRegistrationForm(
-        TEST_USERS.newRegistrationUser.email,
-        TEST_USERS.newRegistrationUser.password
-      );
+        // 3. Fill registration form with valid data
+        await registrationPage.fillRegistrationForm(
+          TEST_USERS.newRegistrationUser.email,
+          TEST_USERS.newRegistrationUser.password
+        );
 
-      // 4. Submit registration and wait for API response
-      await registrationPage.submitRegistrationAndWait();
+        // 4. Submit registration and wait for API response
+        await registrationPage.submitRegistrationAndWait();
 
-      // 5. Verify successful registration - should navigate to library after API response
-      await mainPage.waitForURL(/\/app\/library/);
-    });
+        // 5. Verify successful registration - should navigate to library after API response
+        await mainPage.waitForURL(/\/app\/library/);
+      });
 
-    test('should show error for existing email during registration', async () => {
-      // 1. Navigate directly to registration page
-      await registrationPage.page.goto('/register');
+      test('should show error for existing email during registration', async () => {
+        // This test depends on the previous test creating an account
+        // It uses the same email to verify duplicate registration is rejected
 
-      // 2. Wait for registration page to load
-      await registrationPage.waitForPage();
+        // 1. Navigate directly to registration page
+        await registrationPage.page.goto('/register');
 
-      // 3. Fill registration form with existing email
-      await registrationPage.fillRegistrationForm(
-        TEST_USERS.validUser.email,
-        TEST_USERS.validUser.password
-      );
+        // 2. Wait for registration page to load
+        await registrationPage.waitForPage();
 
-      // 4. Submit registration and wait for API response (expects 409 conflict)
-      await registrationPage.submitRegistrationAndWait();
+        // 3. Fill registration form with the same email from the previous test
+        // This ensures the account exists (created by the previous test)
+        await registrationPage.fillRegistrationForm(
+          TEST_USERS.newRegistrationUser.email,
+          TEST_USERS.newRegistrationUser.password
+        );
 
-      // 5. Wait for error message to appear
-      await registrationPage.waitForErrorMessage();
+        // 4. Submit registration and wait for API response (expects 409 conflict)
+        await registrationPage.submitRegistrationAndWait();
 
-      // 6. Verify error is displayed
-      expect(await registrationPage.isErrorDisplayed()).toBeTruthy();
-      const errorMsg = await registrationPage.getErrorMessage();
-      expect(errorMsg).toContain('already');
+        // 5. Wait for error message to appear
+        await registrationPage.waitForErrorMessage();
+
+        // 6. Verify error is displayed
+        expect(await registrationPage.isErrorDisplayed()).toBeTruthy();
+        const errorMsg = await registrationPage.getErrorMessage();
+        expect(errorMsg).toContain('already');
+      });
     });
 
     test('should require valid email format during registration', async () => {

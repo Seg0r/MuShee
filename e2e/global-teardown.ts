@@ -8,7 +8,7 @@
  *
  * Environment Variables:
  * - SUPABASE_URL: Supabase API URL (default: http://127.0.0.1:54321 for local dev)
- * - SUPABASE_ANON_KEY: Supabase anonymous key for API access
+ * - SUPABASE_SERVICE_ROLE_KEY: Supabase service role key for admin API access
  *
  * Usage:
  * The teardown is automatically executed by Playwright after all tests complete.
@@ -22,18 +22,42 @@ import { chromium } from '@playwright/test';
  * Targets users with @example.com email domain
  */
 async function globalTeardown() {
+  // Log to both stdout and stderr to ensure visibility
+  const log = (message: string) => {
+    console.log(message);
+    process.stderr.write(`[TEARDOWN] ${message}\n`);
+  };
+
+  const warn = (message: string) => {
+    console.warn(message);
+    process.stderr.write(`[TEARDOWN] ⚠️ ${message}\n`);
+  };
+
+  const error = (message: string) => {
+    console.error(message);
+    process.stderr.write(`[TEARDOWN] ❌ ${message}\n`);
+  };
+
+  // Log that teardown has started
+  log('🚀 Global teardown started');
+
   // Get Supabase configuration from environment
   const supabaseUrl = process.env['SUPABASE_URL'];
-  const supabaseAnonKey = process.env['SUPABASE_ANON_KEY'];
+  const supabaseServiceRoleKey = process.env['SUPABASE_SERVICE_ROLE_KEY'];
+
+  log(`Environment check - SUPABASE_URL: ${supabaseUrl ? 'SET' : 'NOT SET'}`);
+  log(
+    `Environment check - SUPABASE_SERVICE_ROLE_KEY: ${supabaseServiceRoleKey ? 'SET' : 'NOT SET'}`
+  );
 
   // Skip cleanup if credentials are not configured
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn('⚠️ Skipping database cleanup: SUPABASE_URL or SUPABASE_ANON_KEY not configured');
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    warn('Skipping database cleanup: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not configured');
     return;
   }
 
   try {
-    console.log('🧹 Starting database cleanup...');
+    log('🧹 Starting database cleanup...');
 
     // Launch browser for API requests
     const browser = await chromium.launch();
@@ -41,23 +65,35 @@ async function globalTeardown() {
     const page = await context.newPage();
 
     // Fetch all users from Supabase Auth
-    // The admin API requires service role key, but we try with anon key as fallback
-    console.log(`📋 Fetching users from ${supabaseUrl}`);
+    // The admin API requires service role key for authentication
+    log(`📋 Fetching users from ${supabaseUrl}`);
 
     const authResponse = await page.request.get(`${supabaseUrl}/auth/v1/admin/users`, {
       headers: {
-        Authorization: `Bearer ${supabaseAnonKey}`,
-        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${supabaseServiceRoleKey}`,
+        apikey: supabaseServiceRoleKey,
       },
     });
 
     if (authResponse.ok()) {
-      const users = (await authResponse.json()) as { id: string; email: string }[];
+      const responseData = await authResponse.json();
+
+      // Supabase Admin API returns { users: [...] } format
+      // Handle both possible response structures
+      let users: { id: string; email: string }[] = [];
+      if (Array.isArray(responseData)) {
+        users = responseData;
+      } else if (responseData && typeof responseData === 'object' && 'users' in responseData) {
+        users = Array.isArray(responseData.users) ? responseData.users : [];
+      } else {
+        warn(`Unexpected response format: ${JSON.stringify(responseData).substring(0, 200)}`);
+        users = [];
+      }
 
       // Filter for test users with @example.com domain
       const testUsers = users.filter(user => user.email?.endsWith('@example.com'));
 
-      console.log(`Found ${testUsers.length} test user(s) to delete`);
+      log(`Found ${testUsers.length} test user(s) to delete`);
 
       // Delete each test user
       let deletedCount = 0;
@@ -66,39 +102,44 @@ async function globalTeardown() {
           `${supabaseUrl}/auth/v1/admin/users/${user.id}`,
           {
             headers: {
-              Authorization: `Bearer ${supabaseAnonKey}`,
-              apikey: supabaseAnonKey,
+              Authorization: `Bearer ${supabaseServiceRoleKey}`,
+              apikey: supabaseServiceRoleKey,
             },
           }
         );
 
         if (deleteResponse.ok()) {
-          console.log(`✅ Deleted test user: ${user.email}`);
+          log(`✅ Deleted test user: ${user.email}`);
           deletedCount += 1;
         } else {
           const errorText = await deleteResponse.text();
-          console.warn(`⚠️ Failed to delete user ${user.email}: ${deleteResponse.status()}`);
+          warn(`Failed to delete user ${user.email}: ${deleteResponse.status()}`);
           if (errorText) {
-            console.warn(`   Error details: ${errorText}`);
+            warn(`   Error details: ${errorText}`);
           }
         }
       }
 
-      console.log(`\n✨ Cleanup completed: ${deletedCount}/${testUsers.length} users deleted`);
+      log(`\n✨ Cleanup completed: ${deletedCount}/${testUsers.length} users deleted`);
     } else {
       const statusText = `${authResponse.status()}`;
-      console.warn(`⚠️ Failed to fetch users: ${statusText}`);
-      console.warn('   Teardown may require proper Supabase auth configuration');
+      const errorText = await authResponse.text().catch(() => 'Unable to read error response');
+      warn(`Failed to fetch users: ${statusText}`);
+      if (errorText) {
+        warn(`   Error details: ${errorText}`);
+      }
+      warn('   Ensure SUPABASE_SERVICE_ROLE_KEY is set correctly for admin API access');
     }
 
     await context.close();
     await browser.close();
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error('❌ Error during teardown:', error.message);
-      console.error('   Stack:', error.stack);
+    log('✅ Global teardown completed successfully');
+  } catch (err) {
+    if (err instanceof Error) {
+      error(`Error during teardown: ${err.message}`);
+      error(`   Stack: ${err.stack}`);
     } else {
-      console.error('❌ Error during teardown:', error);
+      error(`Error during teardown: ${err}`);
     }
     // Note: We don't throw errors during teardown to prevent test suite failures
     // due to cleanup issues. Cleanup failures are logged but non-fatal.

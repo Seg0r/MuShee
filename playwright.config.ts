@@ -3,8 +3,11 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
+ * Only load .env file in local development, not in CI
  */
-// require('dotenv').config();
+if (!process.env['CI']) {
+  require('dotenv').config();
+}
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -20,7 +23,7 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env['CI'] ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: process.env['CI'] ? [['html'], ['list']] : 'html',
   /* Global teardown - cleanup test data after all tests */
   globalTeardown: require.resolve('./e2e/global-teardown.ts'),
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */

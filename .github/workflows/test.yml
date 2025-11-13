@@ -94,6 +94,9 @@ jobs:
         run: npm run build
 
       - name: Run E2E tests
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: npm run e2e:test
 
       - name: Upload Playwright report

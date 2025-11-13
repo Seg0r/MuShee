@@ -35,6 +35,7 @@
   "editor.formatOnSave": true,
   "eslint.validate": ["javascript", "typescript", "html"],
   "cSpell.words": [
+    "apikey",
     "Flexbox",
     "mushee",
     "musicxml",
