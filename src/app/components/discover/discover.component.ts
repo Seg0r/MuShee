@@ -13,9 +13,14 @@ import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatDialog } from '@angular/material/dialog';
 
 import { LoadingSkeletonComponent } from '../loading-skeleton/loading-skeleton.component';
 import { SongListComponent } from '../song-list/song-list.component';
+import {
+  OnboardingDialogComponent,
+  type OnboardingDialogData,
+} from '../onboarding-dialog/onboarding-dialog.component';
 
 import { SongService } from '../../services/song.service';
 import { UserLibraryService } from '../../services/user-library.service';
@@ -45,6 +50,7 @@ export class DiscoverComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
   private readonly errorHandlingService = inject(ErrorHandlingService);
+  private readonly dialog = inject(MatDialog);
 
   // ============================================================================
   // Template References
@@ -179,6 +185,7 @@ export class DiscoverComponent implements OnInit {
   ngOnInit(): void {
     this.initializeView();
     this.setupScrollListener();
+    this.checkAndShowOnboarding();
   }
 
   // ============================================================================
@@ -397,6 +404,54 @@ export class DiscoverComponent implements OnInit {
    */
   async retryInitialize(): Promise<void> {
     this.initializeView();
+  }
+
+  /**
+   * Check if anonymous user has seen onboarding and show it if not
+   */
+  private checkAndShowOnboarding(): void {
+    // Only show for anonymous users
+    if (this.authService.isAuthenticated()) {
+      return;
+    }
+
+    // Check if user has already seen onboarding
+    try {
+      const hasSeenOnboarding = localStorage.getItem('mushee-anonymous-onboarding-seen') === 'true';
+      if (!hasSeenOnboarding) {
+        // Small delay to ensure view is initialized
+        setTimeout(() => {
+          this.openOnboardingDialog();
+        }, 500);
+      }
+    } catch (error) {
+      console.warn('Failed to check onboarding state:', error);
+      // If localStorage fails, show onboarding anyway (better UX)
+      setTimeout(() => {
+        this.openOnboardingDialog();
+      }, 500);
+    }
+  }
+
+  /**
+   * Open onboarding dialog for anonymous users
+   */
+  openOnboardingDialog(): void {
+    const dialogRef = this.dialog.open<OnboardingDialogComponent, OnboardingDialogData>(
+      OnboardingDialogComponent,
+      {
+        width: '600px',
+        maxWidth: '90vw',
+        disableClose: false,
+        data: { mode: 'anonymous' },
+      }
+    );
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result?.navigateTo) {
+        this.router.navigate([result.navigateTo]);
+      }
+    });
   }
 
   // ============================================================================

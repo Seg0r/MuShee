@@ -29,17 +29,15 @@
     Dark mode
   </mat-slide-toggle>
 
-  <!-- Help/Tour Button (only for authenticated users) -->
-  @if (isAuthenticated()) {
-    <button
-      mat-icon-button
-      (click)="onHelpClick()"
-      [attr.aria-label]="'Help and tour'"
-      class="toolbar-control help-button"
-    >
-      <mat-icon>help</mat-icon>
-    </button>
-  }
+  <!-- Help/Tour Button (available for all users) -->
+  <button
+    mat-icon-button
+    (click)="onHelpClick()"
+    [attr.aria-label]="'Help and tour'"
+    class="toolbar-control help-button"
+  >
+    <mat-icon>help</mat-icon>
+  </button>
 
   <!-- Authenticated User Menu -->
   @if (isAuthenticated()) {

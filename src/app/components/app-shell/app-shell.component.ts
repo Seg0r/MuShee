@@ -20,7 +20,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
-import { OnboardingDialogComponent } from '../onboarding-dialog/onboarding-dialog.component';
+import {
+  OnboardingDialogComponent,
+  type OnboardingDialogData,
+} from '../onboarding-dialog/onboarding-dialog.component';
 import { ProfileService } from '../../services/profile.service';
 import type { ProfileDto } from '@/types';
 
@@ -232,10 +235,21 @@ export class AppShellComponent implements OnInit {
    * Opens onboarding dialog (re-accessible from help menu)
    */
   onHelpClick(): void {
-    this.dialog.open(OnboardingDialogComponent, {
-      width: '600px',
-      maxWidth: '90vw',
-      disableClose: false,
+    const isAuthenticated = this.authService.isAuthenticated();
+    const dialogRef = this.dialog.open<OnboardingDialogComponent, OnboardingDialogData>(
+      OnboardingDialogComponent,
+      {
+        width: '600px',
+        maxWidth: '90vw',
+        disableClose: false,
+        data: { mode: isAuthenticated ? 'authenticated' : 'anonymous' },
+      }
+    );
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result?.navigateTo) {
+        this.router.navigate([result.navigateTo]);
+      }
     });
   }
 

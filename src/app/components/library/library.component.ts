@@ -31,7 +31,10 @@ import { EmptyStateComponent } from '../empty-state/empty-state.component';
 import { LoadingSkeletonComponent } from '../loading-skeleton/loading-skeleton.component';
 import { UploadDialogComponent } from '../upload-dialog/upload-dialog.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
-import { OnboardingDialogComponent } from '../onboarding-dialog/onboarding-dialog.component';
+import {
+  OnboardingDialogComponent,
+  type OnboardingDialogData,
+} from '../onboarding-dialog/onboarding-dialog.component';
 import { SuggestionsDialogComponent } from '../suggestions-dialog/suggestions-dialog.component';
 import { SongListComponent } from '../song-list/song-list.component';
 
@@ -280,10 +283,20 @@ export class LibraryComponent implements OnInit, OnDestroy {
   }
 
   private openOnboardingDialog(): void {
-    this.dialog.open(OnboardingDialogComponent, {
-      width: '600px',
-      maxWidth: '90vw',
-      disableClose: true,
+    const dialogRef = this.dialog.open<OnboardingDialogComponent, OnboardingDialogData>(
+      OnboardingDialogComponent,
+      {
+        width: '600px',
+        maxWidth: '90vw',
+        disableClose: true,
+        data: { mode: 'authenticated' },
+      }
+    );
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result?.navigateTo) {
+        this.router.navigate([result.navigateTo]);
+      }
     });
   }
 
