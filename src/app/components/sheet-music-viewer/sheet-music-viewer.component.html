@@ -25,30 +25,27 @@
 
   <!-- Content visible only when not loading and no errors -->
   @if (!isLoading() && !error()) {
-    <!-- Header with back button and song info -->
+    <!-- Header with back button, song info, zoom controls, and rating -->
     <header class="viewer-header">
-      <button
-        mat-icon-button
-        (click)="onBackClick()"
-        class="back-button"
-        [attr.aria-label]="'Go back to previous page'"
-      >
-        <mat-icon>arrow_back</mat-icon>
-      </button>
+      <div class="header-left">
+        <button
+          mat-icon-button
+          (click)="onBackClick()"
+          class="back-button"
+          [attr.aria-label]="'Go back to previous page'"
+        >
+          <mat-icon>arrow_back</mat-icon>
+        </button>
 
-      <div class="song-info">
-        @if (song(); as songData) {
-          <h1 class="song-title">{{ songData.song_details.title || 'Untitled' }}</h1>
-          <p class="song-composer">{{ songData.song_details.composer || 'Unknown Composer' }}</p>
-        }
+        <div class="song-info">
+          @if (song(); as songData) {
+            <h1 class="song-title">{{ songData.song_details.title || 'Untitled' }}</h1>
+            <p class="song-composer">{{ songData.song_details.composer || 'Unknown Composer' }}</p>
+          }
+        </div>
       </div>
 
-      <div class="header-spacer"></div>
-    </header>
-
-    <!-- Control Panel - Bottom of screen -->
-    <div class="viewer-controls">
-      <!-- Zoom Controls -->
+      <!-- Zoom Controls - Centered -->
       <div class="zoom-controls">
         <button
           mat-icon-button
@@ -72,10 +69,10 @@
       </div>
 
       <!-- Feedback Controls -->
-      @if (isUserAuthenticated()) {
-        <div class="feedback-controls">
-          <p class="feedback-label">How's the rendering quality?</p>
-          <div class="feedback-buttons">
+      <div class="header-right">
+        @if (isUserAuthenticated()) {
+          <div class="feedback-controls">
+            <span class="feedback-label">Rate rendering:</span>
             <button
               mat-icon-button
               (click)="onThumbsUp()"
@@ -95,14 +92,11 @@
               <mat-icon>thumb_down</mat-icon>
             </button>
           </div>
-        </div>
-      } @else {
-        <div class="feedback-controls">
-          <p class="feedback-label">Sign in to rate rendering quality</p>
+        } @else {
           <button mat-button (click)="onThumbsUp()" class="sign-in-prompt">Sign In</button>
-        </div>
-      }
-    </div>
+        }
+      </div>
+    </header>
   }
 
   <!-- Sheet Music Canvas - Always present for OSMD initialization -->
