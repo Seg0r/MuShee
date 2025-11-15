@@ -103,7 +103,7 @@
   justify-content: center;
   gap: 0.5rem;
   background-color: var(--mat-sys-primary);
-  color: var(--mat-sys-on-primary-container);
+  color: var(--mat-sys-on-primary);
 
   &:hover:not(:disabled) {
     box-shadow: var(--mat-sys-level1);
