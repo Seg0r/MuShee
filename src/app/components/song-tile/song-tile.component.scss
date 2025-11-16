@@ -1,26 +1,5 @@
 @use '@angular/material' as mat;
 
-.song-tile {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  background: var(--mat-sys-surface-container-low);
-  border-radius: var(--mat-sys-corner-medium);
-  box-shadow: var(--mat-sys-level1);
-
-  &:hover {
-    box-shadow: var(--mat-sys-level2);
-    transform: translateY(-2px);
-  }
-
-  &:focus-within {
-    outline: 2px solid var(--mat-sys-primary);
-    outline-offset: 2px;
-  }
-}
-
 .song-tile-content {
   display: flex;
   flex-direction: column;
@@ -96,7 +75,6 @@
 .song-tile-footer {
   padding: 0.5rem 1rem;
   border-top: 1px solid var(--mat-sys-outline-variant);
-  background: var(--mat-sys-surface-container);
   border-bottom-left-radius: var(--mat-sys-corner-medium);
   border-bottom-right-radius: var(--mat-sys-corner-medium);
   display: flex;
@@ -122,5 +100,35 @@
 
   &:hover {
     opacity: 1;
+  }
+}
+
+.glass-card {
+  background: color-mix(in srgb, var(--mat-sys-surface), transparent 50%);
+
+  backdrop-filter: blur(16px);
+
+  border: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant), transparent 50%);
+
+  border-radius: var(--mat-sys-corner-medium);
+  box-shadow: var(--mat-sys-level1);
+
+  color: var(--mat-sys-on-surface);
+
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-4px);
+    background: color-mix(in srgb, var(--mat-sys-surface), transparent 20%);
+    box-shadow: var(--mat-sys-level2);
+    border-color: var(--mat-sys-primary);
+  }
+  mat-card-title {
+    color: var(--mat-sys-color-on-surface);
+    font-weight: 600;
+  }
+
+  mat-card-subtitle {
+    color: var(--mat-sys-secondary);
   }
 }
