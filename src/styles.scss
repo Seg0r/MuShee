@@ -79,4 +79,7 @@ body {
 .glass-dialog-container .mdc-dialog__surface {
   background-color: transparent !important;
   box-shadow: none !important;
+  padding: 0;
+  border-radius: var(--mat-sys-corner-medium);
+  overflow: visible;
 }
