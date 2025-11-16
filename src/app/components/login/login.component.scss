@@ -1,14 +1,12 @@
+@use '../../../styles/mixins/glassmorphism' as glass;
+
 :host {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(
-    135deg,
-    var(--mat-sys-surface) 0%,
-    var(--mat-sys-surface-container-low) 100%
-  );
+  background: transparent;
   padding: 1rem;
 }
 
@@ -37,17 +35,14 @@
   margin: 0;
 }
 
-/* Form Wrapper */
-.form-wrapper {
+.glass-shell {
+  @include glass.glassmorphism(65%, 50%, 24px);
   display: flex;
   flex-direction: column;
   gap: 2rem;
   width: 100%;
   max-width: 420px;
-  padding: 2rem;
-  background-color: var(--mat-sys-surface-container);
-  border-radius: var(--mat-sys-corner-large);
-  box-shadow: var(--mat-sys-level1);
+  padding: 2.5rem;
   animation: fadeInUp 0.4s ease-out;
 
   @media (prefers-reduced-motion: reduce) {
@@ -83,7 +78,7 @@
     padding: 0.5rem;
   }
 
-  .form-wrapper {
+  .glass-shell {
     max-width: 100%;
     padding: 1.5rem;
     gap: 1.5rem;
@@ -99,7 +94,7 @@
 }
 
 @media (max-width: 480px) {
-  .form-wrapper {
+  .glass-shell {
     padding: 1rem;
     gap: 1.25rem;
     border-radius: var(--mat-sys-corner-medium);
@@ -132,14 +127,14 @@
 
 /* Accessibility */
 @media (prefers-reduced-motion: reduce) {
-  .form-wrapper {
+  .glass-shell {
     animation: none;
   }
 }
 
 /* High Contrast Mode Support */
 @media (prefers-contrast: more) {
-  .form-wrapper {
+  .glass-shell {
     border: 2px solid var(--mat-sys-outline);
   }
 
