@@ -1,17 +1,17 @@
 import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  effect,
   inject,
   signal,
-  OnInit,
-  OnDestroy,
-  ElementRef,
   viewChild,
-  effect,
-  ChangeDetectionStrategy,
-  AfterViewInit,
-  ChangeDetectorRef,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -49,6 +49,7 @@ export class SheetMusicViewerComponent implements OnInit, OnDestroy, AfterViewIn
   private readonly dialog = inject(MatDialog);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly themeService = inject(ThemeService);
+  private readonly document = inject(DOCUMENT);
 
   // View children references
   readonly osmdContainer = viewChild<ElementRef<HTMLDivElement>>('osmdContainer');
@@ -273,6 +274,8 @@ export class SheetMusicViewerComponent implements OnInit, OnDestroy, AfterViewIn
         darkMode: isDarkMode,
       } as IOSMDOptions);
 
+      this.applyOSMDThemeColors();
+
       console.log('OSMD initialized successfully');
     } catch (error) {
       console.error('Failed to initialize OSMD:', error);
@@ -355,6 +358,28 @@ export class SheetMusicViewerComponent implements OnInit, OnDestroy, AfterViewIn
     if (!this.osmd) return;
 
     this.osmd.setOptions({ darkMode: isDarkMode });
+    this.applyOSMDThemeColors();
     this.osmd.render(); // Re-render with new theme
+  }
+
+  private applyOSMDThemeColors(): void {
+    if (!this.osmd) return;
+
+    const surfaceColor = this.getCssVariable('--mat-sys-surface') || '#ffffff';
+    const onSurfaceColor = this.getCssVariable('--mat-sys-on-surface') || '#000000';
+
+    this.osmd.setOptions({
+      defaultColorMusic: onSurfaceColor,
+      defaultColorLabel: onSurfaceColor,
+      defaultColorTitle: onSurfaceColor,
+    });
+
+    const engraving = this.osmd.EngravingRules;
+    engraving.PageBackgroundColor = surfaceColor;
+    engraving.UsePageBackgroundColorForTabNotes = true;
+  }
+
+  private getCssVariable(name: string): string {
+    return getComputedStyle(this.document.documentElement).getPropertyValue(name).trim();
   }
 }
