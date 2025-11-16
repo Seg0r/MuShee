@@ -1,4 +1,5 @@
 @use '@angular/material' as mat;
+@use '../../../styles/mixins/glassmorphism' as glass;
 
 .onboarding-dialog {
   min-width: 600px;
@@ -6,11 +7,21 @@
   max-height: 90vh;
   display: flex;
   flex-direction: column;
+  padding: 0;
+  background: transparent;
 
   @media (max-width: 768px) {
     min-width: 100%;
     max-width: 100%;
   }
+}
+
+.glass-shell {
+  @include glass.glassmorphism(65%, 50%, 24px);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
 // ============================================================================
@@ -55,12 +66,13 @@
 // ============================================================================
 
 .onboarding-stepper {
+  background: transparent;
   height: 100%;
   display: flex;
   flex-direction: column;
 
   .mat-mdc-stepper-header {
-    background: var(--mat-sys-surface-container-low);
+    background: color-mix(in srgb, var(--mat-sys-surface-container-low), transparent 50%);
     flex-shrink: 0;
   }
 
@@ -75,6 +87,7 @@
   .mat-horizontal-content-container {
     flex: 1;
     min-height: 0;
+    background: transparent;
   }
 }
 

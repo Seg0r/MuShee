@@ -243,6 +243,7 @@ export class AppShellComponent implements OnInit {
         maxWidth: '90vw',
         disableClose: false,
         data: { mode: isAuthenticated ? 'authenticated' : 'anonymous' },
+        panelClass: 'glass-dialog-container',
       }
     );
 
@@ -267,6 +268,7 @@ export class AppShellComponent implements OnInit {
         cancelText: 'Cancel',
         confirmColor: 'warn',
       },
+      panelClass: 'glass-dialog-container',
     });
 
     dialogRef.afterClosed().subscribe(result => {

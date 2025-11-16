@@ -1,35 +1,37 @@
 <div mat-dialog-container class="confirm-dialog">
-  <!-- Header with Title -->
-  <div mat-dialog-title class="dialog-header">
-    <mat-icon class="warning-icon">warning</mat-icon>
-    <h2>{{ data.title }}</h2>
-  </div>
+  <div class="glass-shell">
+    <!-- Header with Title -->
+    <div mat-dialog-title class="dialog-header">
+      <mat-icon class="warning-icon">warning</mat-icon>
+      <h2>{{ data.title }}</h2>
+    </div>
 
-  <!-- Message Content -->
-  <div mat-dialog-content class="dialog-content">
-    <span class="dialog-message">{{ data.message }}</span>
+    <!-- Message Content -->
+    <div mat-dialog-content class="dialog-content">
+      <span class="dialog-message">{{ data.message }}</span>
 
-    @if (data.itemDetails) {
-      <div class="item-details">
-        <strong>{{ data.itemDetails }}</strong>
-      </div>
-    }
-  </div>
+      @if (data.itemDetails) {
+        <div class="item-details">
+          <strong>{{ data.itemDetails }}</strong>
+        </div>
+      }
+    </div>
 
-  <!-- Action Buttons -->
-  <div mat-dialog-actions class="dialog-actions">
-    <button mat-button (click)="onCancel()" class="cancel-button" aria-label="Cancel">
-      {{ getCancelText() }}
-    </button>
+    <!-- Action Buttons -->
+    <div mat-dialog-actions class="dialog-actions">
+      <button mat-button (click)="onCancel()" class="cancel-button" aria-label="Cancel">
+        {{ getCancelText() }}
+      </button>
 
-    <button
-      mat-flat-button
-      (click)="onConfirm()"
-      [ngClass]="getButtonColorClass()"
-      class="confirm-button"
-      [attr.aria-label]="getConfirmText()"
-    >
-      {{ getConfirmText() }}
-    </button>
+      <button
+        mat-flat-button
+        (click)="onConfirm()"
+        [ngClass]="getButtonColorClass()"
+        class="confirm-button"
+        [attr.aria-label]="getConfirmText()"
+      >
+        {{ getConfirmText() }}
+      </button>
+    </div>
   </div>
 </div>

@@ -52,6 +52,7 @@
 .dialog-content {
   position: relative;
   min-height: 300px;
+  padding: 2rem;
 }
 
 // ============================================================================
@@ -59,7 +60,7 @@
 // ============================================================================
 
 .upload-area {
-  padding: 2rem;
+  padding: 0;
 }
 
 .drag-drop-zone {
@@ -69,7 +70,7 @@
   padding: 2rem;
   border: 2px dashed var(--mat-sys-outline-variant);
   border-radius: var(--mat-sys-corner-medium);
-  background: color-mix(in srgb, var(--mat-sys-surface), transparent 80%);
+  background: transparent;
   transition: all 0.2s ease-in-out;
   cursor: pointer;
   min-height: 200px;
@@ -82,7 +83,7 @@
 
   &.has-file {
     border-style: solid;
-    background: color-mix(in srgb, var(--mat-sys-surface-container), transparent 70%);
+    background: transparent;
   }
 
   &:focus-within {
@@ -174,7 +175,7 @@
   gap: 0.75rem;
   margin-top: 1rem;
   padding: 1rem;
-  background: color-mix(in srgb, var(--mat-sys-error-container), transparent 70%);
+  background: transparent;
   color: var(--mat-sys-on-error-container);
   border-radius: var(--mat-sys-corner-small);
   align-items: flex-start;
@@ -199,7 +200,7 @@
 .file-requirements {
   margin-top: 1.5rem;
   padding: 1rem;
-  background: color-mix(in srgb, var(--mat-sys-surface-container), transparent 80%);
+  background: transparent;
   border-radius: var(--mat-sys-corner-small);
 
   .requirements-title {
@@ -284,7 +285,7 @@
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  background: color-mix(in srgb, var(--mat-sys-surface), transparent 85%);
+  background: color-mix(in srgb, var(--mat-sys-surface), transparent 50%);
   border-radius: var(--mat-sys-corner-medium);
   backdrop-filter: blur(2px);
 

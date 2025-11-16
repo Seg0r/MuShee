@@ -188,6 +188,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
       width: this.getResponsiveDialogWidth(),
       height: this.getResponsiveDialogHeight(),
       data: { isLoading: true, suggestions: null, error: null },
+      panelClass: 'glass-dialog-container',
     });
 
     this.suggestionsLoading.set(true);
@@ -274,6 +275,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
         cancelText: 'Cancel',
         confirmColor: 'warn',
       },
+      panelClass: 'glass-dialog-container',
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -291,6 +293,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
         maxWidth: '90vw',
         disableClose: true,
         data: { mode: 'authenticated' },
+        panelClass: 'glass-dialog-container',
       }
     );
 

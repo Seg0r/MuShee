@@ -444,6 +444,7 @@ export class DiscoverComponent implements OnInit {
         maxWidth: '90vw',
         disableClose: false,
         data: { mode: 'anonymous' },
+        panelClass: 'glass-dialog-container',
       }
     );
 

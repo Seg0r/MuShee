@@ -1,204 +1,207 @@
 <div mat-dialog-container class="onboarding-dialog">
-  <!-- Header with Close Button -->
-  <div mat-dialog-title class="dialog-header">
-    <h2>Welcome to MuShee</h2>
-    <button
-      mat-icon-button
-      (click)="onClose()"
-      class="close-button"
-      aria-label="Close onboarding dialog"
-      [disabled]="isCompleting()"
-    >
-      <mat-icon>close</mat-icon>
-    </button>
-  </div>
+  <div class="glass-shell">
+    <!-- Header with Close Button -->
+    <div mat-dialog-title class="dialog-header">
+      <h2>Welcome to MuShee</h2>
+      <button
+        mat-icon-button
+        (click)="onClose()"
+        class="close-button"
+        aria-label="Close onboarding dialog"
+        [disabled]="isCompleting()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
 
-  <!-- Stepper -->
-  <div mat-dialog-content class="dialog-content">
-    <!-- Authenticated User Onboarding -->
-    @if (mode() === 'authenticated') {
-      <mat-stepper orientation="horizontal" class="onboarding-stepper">
-        <!-- Step 1: Upload Your Music -->
-        <mat-step label="Upload">
-          <div class="step-content">
-            <div class="step-header">
-              <mat-icon class="large-icon">cloud_upload</mat-icon>
-              <h3>Upload Your Music</h3>
+    <!-- Stepper -->
+    <div mat-dialog-content class="dialog-content">
+      <!-- Authenticated User Onboarding -->
+      @if (mode() === 'authenticated') {
+        <mat-stepper orientation="horizontal" class="onboarding-stepper">
+          <!-- Step 1: Upload Your Music -->
+          <mat-step label="Upload">
+            <div class="step-content">
+              <div class="step-header">
+                <mat-icon class="large-icon">cloud_upload</mat-icon>
+                <h3>Upload Your Music</h3>
+              </div>
+
+              <p class="step-description">
+                Upload your MusicXML files to build your personal sheet music library. Our platform
+                supports standard MusicXML format files (.xml, .musicxml, .mxl).
+              </p>
+
+              <div class="step-features">
+                <ul>
+                  <li>Drag and drop or select files</li>
+                  <li>Supports .xml, .musicxml, and .mxl formats</li>
+                  <li>Maximum file size: 10 MB</li>
+                  <li>Automatic metadata extraction</li>
+                </ul>
+              </div>
+
+              <div class="step-actions">
+                <button mat-button matStepperNext type="button">Next</button>
+              </div>
             </div>
+          </mat-step>
 
-            <p class="step-description">
-              Upload your MusicXML files to build your personal sheet music library. Our platform
-              supports standard MusicXML format files (.xml, .musicxml, .mxl).
-            </p>
+          <!-- Step 2: Browse Public Library -->
+          <mat-step label="Browse">
+            <div class="step-content">
+              <div class="step-header">
+                <mat-icon class="large-icon">library_music</mat-icon>
+                <h3>Browse Public Library</h3>
+              </div>
 
-            <div class="step-features">
-              <ul>
-                <li>Drag and drop or select files</li>
-                <li>Supports .xml, .musicxml, and .mxl formats</li>
-                <li>Maximum file size: 10 MB</li>
-                <li>Automatic metadata extraction</li>
-              </ul>
+              <p class="step-description">
+                Explore our collection of public domain compositions. Discover new pieces to add to
+                your library and expand your musical repertoire.
+              </p>
+
+              <div class="step-features">
+                <ul>
+                  <li>Free public domain works</li>
+                  <li>Easy search and filtering</li>
+                  <li>One-click add to library</li>
+                  <li>Instant access to sheet music</li>
+                </ul>
+              </div>
+
+              <div class="step-actions">
+                <button mat-button matStepperPrevious type="button">Back</button>
+                <button mat-button matStepperNext type="button">Next</button>
+              </div>
             </div>
+          </mat-step>
 
-            <div class="step-actions">
-              <button mat-button matStepperNext type="button">Next</button>
+          <!-- Step 3: Get AI Recommendations -->
+          <mat-step label="AI">
+            <div class="step-content">
+              <div class="step-header">
+                <mat-icon class="large-icon">smart_toy</mat-icon>
+                <h3>Get AI Recommendations</h3>
+              </div>
+
+              <p class="step-description">
+                Let our AI analyze your music collection and suggest similar pieces you might enjoy.
+                Powered by advanced music understanding and machine learning.
+              </p>
+
+              <div class="step-features">
+                <ul>
+                  <li>AI-powered recommendations</li>
+                  <li>Personalized suggestions</li>
+                  <li>Rate and provide feedback</li>
+                  <li>Discover music you'll love</li>
+                </ul>
+              </div>
+
+              <div class="step-actions">
+                <button mat-button matStepperPrevious type="button">Back</button>
+                <button mat-button (click)="onClose()" type="button">Get Started</button>
+              </div>
             </div>
-          </div>
-        </mat-step>
+          </mat-step>
+        </mat-stepper>
+      }
 
-        <!-- Step 2: Browse Public Library -->
-        <mat-step label="Browse">
-          <div class="step-content">
-            <div class="step-header">
-              <mat-icon class="large-icon">library_music</mat-icon>
-              <h3>Browse Public Library</h3>
+      <!-- Anonymous User Onboarding -->
+      @if (mode() === 'anonymous') {
+        <mat-stepper orientation="horizontal" class="onboarding-stepper">
+          <!-- Step 1: What is MuShee? -->
+          <mat-step label="Welcome">
+            <div class="step-content">
+              <div class="step-header">
+                <mat-icon class="large-icon">music_note</mat-icon>
+                <h3>What is MuShee?</h3>
+              </div>
+
+              <p class="step-description">
+                MuShee is your digital sheet music library. Organize, access, and discover sheet
+                music all in one place. Whether you're practicing at home or preparing for a
+                performance, MuShee makes managing your music collection effortless.
+              </p>
+
+              <div class="step-features">
+                <ul>
+                  <li>Centralized sheet music library</li>
+                  <li>Access your music anywhere</li>
+                  <li>Discover new pieces with AI</li>
+                  <li>Clean, readable sheet music rendering</li>
+                </ul>
+              </div>
+
+              <div class="step-actions">
+                <button mat-button matStepperNext type="button">Next</button>
+              </div>
             </div>
+          </mat-step>
 
-            <p class="step-description">
-              Explore our collection of public domain compositions. Discover new pieces to add to
-              your library and expand your musical repertoire.
-            </p>
+          <!-- Step 2: Browse Public Library -->
+          <mat-step label="Browse">
+            <div class="step-content">
+              <div class="step-header">
+                <mat-icon class="large-icon">library_music</mat-icon>
+                <h3>Browse Free Library</h3>
+              </div>
 
-            <div class="step-features">
-              <ul>
-                <li>Free public domain works</li>
-                <li>Easy search and filtering</li>
-                <li>One-click add to library</li>
-                <li>Instant access to sheet music</li>
-              </ul>
+              <p class="step-description">
+                You can explore our collection of public domain compositions right now, no account
+                required. Click on any song to view the sheet music instantly.
+              </p>
+
+              <div class="step-features">
+                <ul>
+                  <li>Browse without signing up</li>
+                  <li>View sheet music instantly</li>
+                  <li>Free public domain works</li>
+                  <li>No account required</li>
+                </ul>
+              </div>
+
+              <div class="step-actions">
+                <button mat-button matStepperPrevious type="button">Back</button>
+                <button mat-button matStepperNext type="button">Next</button>
+              </div>
             </div>
+          </mat-step>
 
-            <div class="step-actions">
-              <button mat-button matStepperPrevious type="button">Back</button>
-              <button mat-button matStepperNext type="button">Next</button>
+          <!-- Step 3: Create Account -->
+          <mat-step label="Get Started">
+            <div class="step-content">
+              <div class="step-header">
+                <mat-icon class="large-icon">person_add</mat-icon>
+                <h3>Create Your Account</h3>
+              </div>
+
+              <p class="step-description">
+                Sign up to unlock your personal library. Upload your own MusicXML files, save songs
+                from the public library, and get AI-powered recommendations based on your
+                collection.
+              </p>
+
+              <div class="step-features">
+                <ul>
+                  <li>Upload your own sheet music</li>
+                  <li>Save favorites to your library</li>
+                  <li>Get personalized AI suggestions</li>
+                  <li>Access your music anywhere</li>
+                </ul>
+              </div>
+
+              <div class="step-actions">
+                <button mat-button matStepperPrevious type="button">Back</button>
+                <button mat-button="filled" (click)="navigateToRegister()" type="button">
+                  Create Account
+                </button>
+                <button mat-button (click)="onClose()" type="button">Get Started</button>
+              </div>
             </div>
-          </div>
-        </mat-step>
-
-        <!-- Step 3: Get AI Recommendations -->
-        <mat-step label="AI">
-          <div class="step-content">
-            <div class="step-header">
-              <mat-icon class="large-icon">smart_toy</mat-icon>
-              <h3>Get AI Recommendations</h3>
-            </div>
-
-            <p class="step-description">
-              Let our AI analyze your music collection and suggest similar pieces you might enjoy.
-              Powered by advanced music understanding and machine learning.
-            </p>
-
-            <div class="step-features">
-              <ul>
-                <li>AI-powered recommendations</li>
-                <li>Personalized suggestions</li>
-                <li>Rate and provide feedback</li>
-                <li>Discover music you'll love</li>
-              </ul>
-            </div>
-
-            <div class="step-actions">
-              <button mat-button matStepperPrevious type="button">Back</button>
-              <button mat-button (click)="onClose()" type="button">Get Started</button>
-            </div>
-          </div>
-        </mat-step>
-      </mat-stepper>
-    }
-
-    <!-- Anonymous User Onboarding -->
-    @if (mode() === 'anonymous') {
-      <mat-stepper orientation="horizontal" class="onboarding-stepper">
-        <!-- Step 1: What is MuShee? -->
-        <mat-step label="Welcome">
-          <div class="step-content">
-            <div class="step-header">
-              <mat-icon class="large-icon">music_note</mat-icon>
-              <h3>What is MuShee?</h3>
-            </div>
-
-            <p class="step-description">
-              MuShee is your digital sheet music library. Organize, access, and discover sheet music
-              all in one place. Whether you're practicing at home or preparing for a performance,
-              MuShee makes managing your music collection effortless.
-            </p>
-
-            <div class="step-features">
-              <ul>
-                <li>Centralized sheet music library</li>
-                <li>Access your music anywhere</li>
-                <li>Discover new pieces with AI</li>
-                <li>Clean, readable sheet music rendering</li>
-              </ul>
-            </div>
-
-            <div class="step-actions">
-              <button mat-button matStepperNext type="button">Next</button>
-            </div>
-          </div>
-        </mat-step>
-
-        <!-- Step 2: Browse Public Library -->
-        <mat-step label="Browse">
-          <div class="step-content">
-            <div class="step-header">
-              <mat-icon class="large-icon">library_music</mat-icon>
-              <h3>Browse Free Library</h3>
-            </div>
-
-            <p class="step-description">
-              You can explore our collection of public domain compositions right now, no account
-              required. Click on any song to view the sheet music instantly.
-            </p>
-
-            <div class="step-features">
-              <ul>
-                <li>Browse without signing up</li>
-                <li>View sheet music instantly</li>
-                <li>Free public domain works</li>
-                <li>No account required</li>
-              </ul>
-            </div>
-
-            <div class="step-actions">
-              <button mat-button matStepperPrevious type="button">Back</button>
-              <button mat-button matStepperNext type="button">Next</button>
-            </div>
-          </div>
-        </mat-step>
-
-        <!-- Step 3: Create Account -->
-        <mat-step label="Get Started">
-          <div class="step-content">
-            <div class="step-header">
-              <mat-icon class="large-icon">person_add</mat-icon>
-              <h3>Create Your Account</h3>
-            </div>
-
-            <p class="step-description">
-              Sign up to unlock your personal library. Upload your own MusicXML files, save songs
-              from the public library, and get AI-powered recommendations based on your collection.
-            </p>
-
-            <div class="step-features">
-              <ul>
-                <li>Upload your own sheet music</li>
-                <li>Save favorites to your library</li>
-                <li>Get personalized AI suggestions</li>
-                <li>Access your music anywhere</li>
-              </ul>
-            </div>
-
-            <div class="step-actions">
-              <button mat-button matStepperPrevious type="button">Back</button>
-              <button mat-button="filled" (click)="navigateToRegister()" type="button">
-                Create Account
-              </button>
-              <button mat-button (click)="onClose()" type="button">Get Started</button>
-            </div>
-          </div>
-        </mat-step>
-      </mat-stepper>
-    }
+          </mat-step>
+        </mat-stepper>
+      }
+    </div>
   </div>
 </div>
