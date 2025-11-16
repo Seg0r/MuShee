@@ -1,0 +1,16 @@
+// Shared glassmorphism token set
+@mixin glassmorphism(
+  $bg-opacity: 50%,
+  $outline-opacity: 50%,
+  $blur: 16px,
+  $shadow: var(--mat-sys-level1),
+  $radius: var(--mat-sys-corner-medium)
+) {
+  background: color-mix(in srgb, var(--mat-sys-surface), transparent $bg-opacity);
+  backdrop-filter: blur($blur);
+  border: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant), transparent $outline-opacity);
+  border-radius: $radius;
+  box-shadow: $shadow;
+  color: var(--mat-sys-on-surface);
+  transition: all 0.2s ease-in-out;
+}

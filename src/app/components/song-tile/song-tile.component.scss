@@ -1,4 +1,5 @@
 @use '@angular/material' as mat;
+@use '../../../styles/mixins/glassmorphism' as glass;
 
 .song-tile-content {
   display: flex;
@@ -104,18 +105,12 @@
 }
 
 .glass-card {
-  background: color-mix(in srgb, var(--mat-sys-surface), transparent 50%);
+  // Reset Material Card background to allow glassmorphism to show through
+  --mdc-elevated-card-container-color: transparent;
+  --mdc-filled-card-container-color: transparent;
+  --mdc-outlined-card-container-color: transparent;
 
-  backdrop-filter: blur(16px);
-
-  border: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant), transparent 50%);
-
-  border-radius: var(--mat-sys-corner-medium);
-  box-shadow: var(--mat-sys-level1);
-
-  color: var(--mat-sys-on-surface);
-
-  transition: all 0.2s ease-in-out;
+  @include glass.glassmorphism(60%, 40%, 12px);
 
   &:hover {
     transform: translateY(-4px);
@@ -123,6 +118,7 @@
     box-shadow: var(--mat-sys-level2);
     border-color: var(--mat-sys-primary);
   }
+
   mat-card-title {
     color: var(--mat-sys-color-on-surface);
     font-weight: 600;

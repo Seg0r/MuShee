@@ -1,15 +1,28 @@
 @use '@angular/material' as mat;
+@use '../../../styles/mixins/glassmorphism' as glass;
 
 // ============================================================================
 // Dialog Container
 // ============================================================================
 
 .upload-dialog {
+  background: transparent;
+  border: none;
+  box-shadow: none;
   min-width: 500px;
+  padding: 0;
 
   @media (max-width: 600px) {
     min-width: 100%;
   }
+}
+
+.glass-shell {
+  @include glass.glassmorphism(65%, 50%, 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
 }
 
 .dialog-header {
@@ -56,7 +69,7 @@
   padding: 2rem;
   border: 2px dashed var(--mat-sys-outline-variant);
   border-radius: var(--mat-sys-corner-medium);
-  background: var(--mat-sys-surface-container-low);
+  background: color-mix(in srgb, var(--mat-sys-surface), transparent 80%);
   transition: all 0.2s ease-in-out;
   cursor: pointer;
   min-height: 200px;
@@ -69,7 +82,7 @@
 
   &.has-file {
     border-style: solid;
-    background: var(--mat-sys-surface-container);
+    background: color-mix(in srgb, var(--mat-sys-surface-container), transparent 70%);
   }
 
   &:focus-within {
@@ -161,10 +174,11 @@
   gap: 0.75rem;
   margin-top: 1rem;
   padding: 1rem;
-  background: var(--mat-sys-error-container);
+  background: color-mix(in srgb, var(--mat-sys-error-container), transparent 70%);
   color: var(--mat-sys-on-error-container);
   border-radius: var(--mat-sys-corner-small);
   align-items: flex-start;
+  border: 1px solid color-mix(in srgb, var(--mat-sys-error), transparent 65%);
 
   .error-icon-small {
     flex-shrink: 0;
@@ -185,7 +199,7 @@
 .file-requirements {
   margin-top: 1.5rem;
   padding: 1rem;
-  background: var(--mat-sys-surface-container);
+  background: color-mix(in srgb, var(--mat-sys-surface-container), transparent 80%);
   border-radius: var(--mat-sys-corner-small);
 
   .requirements-title {
@@ -270,7 +284,7 @@
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  background: rgba(0, 0, 0, 0.05);
+  background: color-mix(in srgb, var(--mat-sys-surface), transparent 85%);
   border-radius: var(--mat-sys-corner-medium);
   backdrop-filter: blur(2px);
 

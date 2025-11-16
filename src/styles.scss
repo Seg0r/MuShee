@@ -74,3 +74,9 @@ body {
   line-height: var(--mat-sys-body-large-line-height);
   letter-spacing: var(--mat-sys-body-large-tracking);
 }
+
+/* Glassmorphism Dialog Container */
+.glass-dialog-container .mdc-dialog__surface {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}

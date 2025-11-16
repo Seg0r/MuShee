@@ -246,6 +246,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
         width: '500px',
         maxWidth: '90vw',
         disableClose: false,
+        panelClass: 'glass-dialog-container',
       })
       .afterClosed()
       .subscribe(result => {
