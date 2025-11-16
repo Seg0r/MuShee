@@ -1,6 +1,23 @@
 /* Import Material Design Tokens */
 @use './styles/tokens.scss';
 
+:root {
+  --page-background-image-dark: url('/page-background.jpg');
+  --page-background-image-light: url('/page-background-light.png');
+  --page-background-dark-opacity: 1;
+  --page-background-light-opacity: 0;
+}
+
+html:not(.dark) {
+  --page-background-dark-opacity: 0;
+  --page-background-light-opacity: 1;
+}
+
+html.dark {
+  --page-background-dark-opacity: 1;
+  --page-background-light-opacity: 0;
+}
+
 /* Global Layout and Typography */
 html,
 body {
@@ -13,24 +30,36 @@ body {
     BlinkMacSystemFont,
     'Segoe UI',
     sans-serif;
-
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
   background-color: transparent;
-  background-image:
-    radial-gradient(
-      circle at 10% 20%,
-      color-mix(in srgb, var(--mat-sys-primary-container), transparent 60%) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      circle at 90% 80%,
-      color-mix(in srgb, var(--mat-sys-tertiary-container), transparent 60%) 0%,
-      transparent 60%
-    );
+  position: relative;
+  min-height: 100%;
+}
+
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center center;
   background-attachment: fixed;
+  pointer-events: none;
+  z-index: -1;
+  transition: opacity 0.6s ease-in-out;
+}
+
+body::before {
+  background-image: var(--page-background-image-dark);
+  opacity: var(--page-background-dark-opacity);
+}
+
+body::after {
+  background-image: var(--page-background-image-light);
+  opacity: var(--page-background-light-opacity);
 }
 
 * {
