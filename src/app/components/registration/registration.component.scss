@@ -38,19 +38,6 @@
   }
 }
 
-.registration-card {
-  box-shadow: none;
-  border-radius: 0;
-  transition:
-    box-shadow 0.3s ease,
-    transform 0.2s ease;
-  background: transparent;
-
-  mat-card-content {
-    padding: 0;
-  }
-}
-
 /* Page Header */
 .page-header {
   display: flex;
