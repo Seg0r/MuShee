@@ -94,9 +94,11 @@
 // ============================================================================
 
 .song-tile-footer {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 1rem;
   border-top: 1px solid var(--mat-sys-outline-variant);
   background: var(--mat-sys-surface-container);
+  border-bottom-left-radius: var(--mat-sys-corner-medium);
+  border-bottom-right-radius: var(--mat-sys-corner-medium);
   display: flex;
   justify-content: space-between;
   align-items: center;
