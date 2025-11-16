@@ -54,6 +54,14 @@
     background-color: var(--mat-sys-surface-dim);
   }
 
+  .mdc-text-field__input:-webkit-autofill,
+  .mdc-text-field__input:-webkit-autofill:focus,
+  .mdc-text-field__input:-webkit-autofill:active {
+    box-shadow: 0 0 0 100px transparent inset !important;
+    background-color: transparent !important;
+    -webkit-text-fill-color: var(--mat-sys-on-surface) !important;
+  }
+
   .mdc-text-field--filled {
     background-color: var(--mat-sys-surface-dim);
   }
