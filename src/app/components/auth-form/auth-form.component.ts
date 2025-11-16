@@ -17,6 +17,7 @@ import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatIcon } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import type { AuthError, LoginFormData } from '../../models/login';
 
 /**
@@ -37,6 +38,7 @@ import type { AuthError, LoginFormData } from '../../models/login';
     MatInput,
     MatProgressSpinner,
     MatIcon,
+    MatButtonModule,
   ],
   templateUrl: './auth-form.component.html',
   styleUrl: './auth-form.component.scss',
