@@ -35,6 +35,11 @@
     color: var(--mat-sys-on-primary-container);
   }
 
+  .toolbar-brand-icon {
+    color: var(--mat-sys-on-primary-container);
+    margin-left: var(--space-sm);
+  }
+
   .spacer {
     flex: 1 1 auto;
   }

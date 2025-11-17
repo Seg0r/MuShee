@@ -176,12 +176,10 @@
   flex: 1;
   overflow: auto;
   background-color: var(--mat-sys-surface);
-  padding: var(--space-md);
 
   .osmd-container {
     width: 100%;
     min-height: 400px;
-    background-color: white;
     border-radius: var(--layout-border-radius);
     box-shadow: var(--mat-sys-level1);
     display: flex;
