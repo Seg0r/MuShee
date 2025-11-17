@@ -17,12 +17,14 @@
 // ============================================================================
 
 .library-header {
-  padding: 2rem 1.5rem 1.5rem;
+  padding: 1.4rem 1.05rem 1.05rem;
   border-bottom: 1px solid var(--mat-sys-outline-variant);
+  display: flex;
+  align-items: center;
 
   h1 {
     margin: 0;
-    font-size: var(--mat-sys-display-medium);
+    font-size: var(--mat-sys-headline-medium);
     font-weight: 500;
     color: var(--mat-sys-on-surface);
   }
