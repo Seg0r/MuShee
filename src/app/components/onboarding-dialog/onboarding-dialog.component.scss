@@ -35,14 +35,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 0.8rem;
+  gap: var(--space-md);
+  padding: var(--space-sm);
   border-bottom: 1px solid var(--mat-sys-outline-variant);
   flex-shrink: 0;
 
   h2 {
     margin: 0;
-    font-size: var(--mat-sys-headline-large);
+    font-size: var(--font-size-lg);
     font-weight: 500;
     color: var(--mat-sys-on-surface);
   }

@@ -19,15 +19,14 @@
   <span class="spacer"></span>
 
   <!-- Dark Mode Toggle (only for authenticated users) -->
-
-  <mat-slide-toggle
-    [checked]="isDarkMode()"
-    (change)="toggleDarkMode()"
-    [attr.aria-label]="'Dark mode toggle'"
+  <button
+    mat-icon-button
+    (click)="toggleDarkMode()"
+    [attr.aria-label]="'Toggle theme mode'"
     class="toolbar-control theme-toggle"
   >
-    Dark mode
-  </mat-slide-toggle>
+    <mat-icon>{{ themeIcon() }}</mat-icon>
+  </button>
 
   <!-- Help/Tour Button (available for all users) -->
   <button

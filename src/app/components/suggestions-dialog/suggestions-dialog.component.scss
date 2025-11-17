@@ -10,10 +10,13 @@
   border: none;
   box-shadow: none;
   min-width: 500px;
+  max-width: 90vw;
+  width: 100%;
   padding: 0;
 
   @media (max-width: 600px) {
     min-width: 100%;
+    max-width: 100vw;
   }
 }
 
@@ -23,19 +26,20 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  border-radius: var(--layout-border-radius);
 }
 
 .dialog-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
-  padding: 0.8rem;
+  gap: var(--space-md);
+  padding: var(--space-sm);
   border-bottom: 1px solid var(--mat-sys-outline-variant);
 
   h2 {
     margin: 0;
-    font-size: var(--mat-sys-headline-large);
+    font-size: var(--font-size-lg);
     font-weight: 500;
     color: var(--mat-sys-on-surface);
   }
@@ -55,40 +59,21 @@
   display: flex;
   flex-direction: column;
   min-height: 300px;
-  padding: 1rem;
+  padding-bottom: 0;
   overflow-y: auto;
   background: transparent;
-}
-
-.suggestions-dialog-content {
-  min-height: 200px;
-  max-height: 60vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-gutter: stable;
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  background: transparent;
-
-  mat-list {
-    width: 100%;
-    padding: 0;
-    margin: 0;
-    background: transparent;
-  }
 }
 
 .suggestions-header {
-  padding: 1.5rem;
+  padding: var(--space-sm);
   border-bottom: 1px solid var(--mat-sys-outline-variant);
 }
 
 .suggestions-description {
   margin: 0;
   color: var(--mat-sys-on-surface-variant);
-  font-size: 0.95rem;
-  line-height: 1.5;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
   font-weight: 500;
 }
 
@@ -99,9 +84,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: var(--space-md);
   text-align: center;
-  padding: 2rem 1.5rem;
+  padding: var(--space-xl) var(--space-lg);
   flex: 1;
 
   mat-icon {
@@ -114,40 +99,41 @@
   p {
     margin: 0;
     color: var(--mat-sys-on-surface);
+    font-size: var(--font-size-base);
   }
 }
 
 .suggestion-item {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--space-xs);
   width: 100%;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  padding-left: 1rem;
+  padding-left: var(--space-sm);
   border-left: 4px solid var(--mat-sys-primary);
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
+  padding-top: var(--space-sm);
+  padding-bottom: var(--space-xs);
   min-width: 0;
 }
 
 mat-list-item {
-  padding: 0.75rem 1rem !important;
-  margin: 0.5rem 1rem !important;
-  border-radius: var(--mat-sys-corner-small);
+  padding: var(--space-sm) var(--space-sm) !important;
+  margin: 0 var(--space-md) !important;
+  border-radius: var(--layout-border-radius);
   height: auto !important;
   align-items: flex-start !important;
 
   &:not(:last-child) {
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-xs) !important;
   }
 }
 
 .suggestion-title {
   font-weight: 500;
   color: var(--mat-sys-on-surface);
-  font-size: var(--mat-sys-body-large);
-  line-height: 1.5;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
   word-break: break-word;
   display: block;
   min-width: 0;
@@ -156,9 +142,9 @@ mat-list-item {
 }
 
 .suggestion-composer {
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   color: var(--mat-sys-on-surface-variant);
-  line-height: 1.4;
+  line-height: var(--line-height-sm);
   word-break: break-word;
   display: block;
   min-width: 0;
@@ -173,8 +159,8 @@ mat-list-item {
 .dialog-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
-  padding: 0.8rem;
+  gap: var(--space-md);
+  padding: var(--space-sm);
   border-top: 1px solid var(--mat-sys-outline-variant);
 
   button {

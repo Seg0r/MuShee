@@ -22,7 +22,7 @@
 
 .song-title {
   margin: 0;
-  font-size: var(--mat-sys-title-medium);
+  font-size: var(--font-size-md);
   font-weight: 500;
   color: var(--mat-sys-on-surface);
   line-height: 1.4;
@@ -36,7 +36,7 @@
 
 .song-composer {
   margin: 0;
-  font-size: var(--mat-sys-body-small);
+  font-size: var(--font-size-md);
   color: var(--mat-sys-on-surface-variant);
   font-style: italic;
   overflow: hidden;
@@ -74,7 +74,7 @@
 // ============================================================================
 
 .song-tile-footer {
-  padding: 0.5rem 1rem;
+  padding: var(--space-xs) var(--space-md);
   border-top: 1px solid var(--mat-sys-outline-variant);
   border-bottom-left-radius: var(--mat-sys-corner-medium);
   border-bottom-right-radius: var(--mat-sys-corner-medium);
@@ -85,7 +85,7 @@
 }
 
 .song-added-date {
-  font-size: var(--mat-sys-label-small);
+  font-size: var(--font-size-sm);
   color: var(--mat-sys-on-surface-variant);
   flex: 1;
   min-width: 0; // Allow text truncation

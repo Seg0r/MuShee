@@ -4,6 +4,7 @@ import {
   inject,
   signal,
   viewChild,
+  computed,
   OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -14,7 +15,6 @@ import { MatNavList, MatListItem, MatListItemTitle } from '@angular/material/lis
 import { MatIcon } from '@angular/material/icon';
 import { MatMenu, MatMenuTrigger, MatMenuItem } from '@angular/material/menu';
 import { MatDivider } from '@angular/material/divider';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '../../services/auth.service';
@@ -58,7 +58,6 @@ interface NavItem {
     MatMenuItem,
     MatMenuTrigger,
     MatDivider,
-    MatSlideToggle,
     MatButtonModule,
   ],
   templateUrl: './app-shell.component.html',
@@ -120,6 +119,11 @@ export class AppShellComponent implements OnInit {
    * Expose theme service signals to template
    */
   readonly isDarkMode = this.themeService.isDarkMode;
+
+  /**
+   * Computed theme icon that changes based on current mode
+   */
+  readonly themeIcon = computed(() => (this.isDarkMode() ? 'light_mode' : 'dark_mode'));
 
   /**
    * Get user email for display in menu

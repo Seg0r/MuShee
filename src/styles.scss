@@ -23,14 +23,6 @@ html,
 body {
   height: 100%;
   margin: 0;
-  font-family:
-    var(--mat-sys-brand-font-family),
-    'Roboto',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    sans-serif;
-  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: transparent;
@@ -69,10 +61,37 @@ body::after {
 /* Ensure proper typography application */
 body {
   font-family: var(--mat-sys-body-large-font);
-  font-size: var(--mat-sys-body-large-size);
+  font-size: var(--font-size-base);
   font-weight: var(--mat-sys-body-large-weight);
-  line-height: var(--mat-sys-body-large-line-height);
+  line-height: var(--line-height-base);
   letter-spacing: var(--mat-sys-body-large-tracking);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0 0 var(--space-md);
+  font-weight: 600;
+  line-height: var(--line-height-heading);
+}
+
+h1 {
+  font-size: var(--font-size-xxxl);
+}
+h2 {
+  font-size: var(--font-size-xxl);
+}
+h3 {
+  font-size: var(--font-size-xl);
+}
+h4 {
+  font-size: var(--font-size-lg);
+}
+p {
+  margin: 0 0 var(--space-md);
 }
 
 /* Glassmorphism Dialog Container */
