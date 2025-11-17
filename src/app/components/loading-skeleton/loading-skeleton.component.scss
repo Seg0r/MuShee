@@ -19,20 +19,19 @@
 
 .skeleton-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
-  padding: 2rem 1.5rem;
+  grid-template-columns: repeat(auto-fit, 280px);
+  grid-auto-rows: max-content;
+  justify-content: start;
 
   @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, 240px);
     gap: 1rem;
-    padding: 1.5rem 1rem;
   }
 
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
     gap: 1rem;
-    padding: 1rem;
   }
 }
 
@@ -43,7 +42,7 @@
 .skeleton-card {
   display: flex;
   flex-direction: column;
-  height: 280px;
+  height: 145px;
   border-radius: var(--mat-sys-corner-medium);
   background: var(--mat-sys-surface-container-low);
   overflow: hidden;
@@ -52,18 +51,6 @@
 // ============================================================================
 // Skeleton Elements
 // ============================================================================
-
-.skeleton-header {
-  height: 60px;
-  background: linear-gradient(
-    90deg,
-    var(--mat-sys-surface-container) 25%,
-    var(--mat-sys-surface-container-high) 50%,
-    var(--mat-sys-surface-container) 75%
-  );
-  background-size: 1000px 100%;
-  animation: shimmer 2s infinite;
-}
 
 .skeleton-content {
   flex: 1;

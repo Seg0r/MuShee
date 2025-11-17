@@ -33,7 +33,7 @@
 .loading-state {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-xl) var(--space-lg);
+  padding: var(--space-md) var(--space-md);
   scrollbar-width: none;
 
   &::-webkit-scrollbar {
@@ -44,7 +44,7 @@
 .scroll-container {
   flex: 1;
   overflow-y: scroll;
-  padding: var(--space-xl) var(--space-lg);
+  padding: var(--space-md) var(--space-md);
   display: flex;
   flex-direction: column;
   scrollbar-width: thin;
