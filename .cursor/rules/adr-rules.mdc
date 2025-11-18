@@ -8,13 +8,31 @@ You are a Senior Software Architect responsible for maintaining the integrity an
 
 ## 1. ADR File Naming Convention
 
-- ADR files MUST be created in the `.ai/decisions/` directory.
+- ADR files MUST be created in the `docs/adr/` directory.
 - The filename MUST follow the format `XXXX-kebab-case-title.md`, where `XXXX` is a zero-padded, incrementing four-digit number (e.g., `0001`, `0002`).
 
 **Correct:** `0003-enforce-not-null-metadata.md`
 **Incorrect:** `3-EnforceNotNullMetadata.md`, `ADR-0003.md`
 
-## 2. ADR Lifecycle (Status)
+## 2. Clarification Process
+
+Before creating an ADR, you MUST have sufficient context. Code and git analysis are the primary sources.
+
+If this analysis is insufficient to confidently explain the **Context**, **Decision**, and **Consequences**, you MUST ask the user for clarification.
+
+- **Limit questions to a maximum of 5.**
+- Focus on the "why" behind the change, not just the "what".
+- Prioritize questions that help fill the ADR template sections.
+
+**Example Questions:**
+
+- What was the primary business or technical driver for this change? (Context)
+- What alternative solutions did you consider, and why were they rejected? (Context)
+- What is the most critical risk or trade-off with this approach? (Consequences)
+- How does this decision affect other parts of the system (e.g., performance, security)? (Consequences)
+- Is this decision intended to be permanent, or is it a temporary solution? (Decision)
+
+## 3. ADR Lifecycle (Status)
 
 Each ADR MUST have a `Status` field. The allowed statuses are:
 
@@ -23,7 +41,7 @@ Each ADR MUST have a `Status` field. The allowed statuses are:
 - **`Deprecated`**: The decision was once `Accepted` but is no longer relevant. It should NOT be followed.
 - **`Superseded by ADR-YYYY`**: The decision has been replaced by a newer ADR. `ADR-YYYY` MUST link to the new record.
 
-## 3. ADR Template Structure
+## 4. ADR Template Structure
 
 Every ADR MUST follow this exact Markdown structure. Do not add or remove sections.
 
@@ -36,24 +54,24 @@ Every ADR MUST follow this exact Markdown structure. Do not add or remove sectio
 
 ## Context
 
-*What is the problem or architectural force that this decision addresses?*
-*Describe the existing architecture, constraints, and technical context.*
-*What alternatives were considered?*
+_What is the problem or architectural force that this decision addresses?_
+_Describe the existing architecture, constraints, and technical context._
+_What alternatives were considered?_
 
 ## Decision
 
-*What is the change that we are proposing or have accepted?*
-*State the decision clearly and concisely.*
-*Provide just enough detail to be unambiguous.*
+_What is the change that we are proposing or have accepted?_
+_State the decision clearly and concisely._
+_Provide just enough detail to be unambiguous._
 
 ## Consequences
 
-*What are the results of this decision? What are the trade-offs?*
-*Detail the positive, negative, and neutral impacts on the codebase, team, and future development.*
-*Include impacts on performance, security, maintainability, and developer experience.*
+_What are the results of this decision? What are the trade-offs?_
+_Detail the positive, negative, and neutral impacts on the codebase, team, and future development._
+_Include impacts on performance, security, maintainability, and developer experience._
 ```
 
-## 4. Preserving Architectural Evolution
+## 5. Preserving Architectural Evolution
 
 To ensure a clear historical record, you MUST adhere to these rules when a new decision modifies an existing one:
 
@@ -71,3 +89,25 @@ To ensure a clear historical record, you MUST adhere to these rules when a new d
     > "This decision supersedes **ADR-0001**, which previously allowed nullable metadata. The UI has since been updated to rely on these fields, making null values a source of bugs."
 5.  `0002` is marked `Accepted`.
 6.  The `Status` of `0001` is changed to `Superseded by ADR-0002`.
+
+## 6. Changelog Management
+
+When an ADR is moved to `Accepted` status and it results in a user-facing or developer-facing change, an entry MUST be added to `docs/CHANGELOG.md`. This ensures that the impact of architectural decisions is communicated clearly.
+
+- **File Location**: The changelog MUST be located at `docs/CHANGELOG.md`.
+- **Format**: Follow the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) standard. Use `Added`, `Changed`, `Fixed`, `Removed`, `Deprecated`, and `Security` categories.
+- **Linking**: Changelog entries SHOULD reference the ADR that prompted the change for traceability.
+
+### Example Changelog Entry:
+
+```markdown
+## [1.1.0] - 2025-11-18
+
+### Changed
+
+- The `songs.title` and `songs.composer` database columns are now non-nullable to enforce data integrity at the schema level. See [ADR-0002](./adr/0002-enforce-not-null-metadata.md) for details.
+
+### Added
+
+- The `songs.subtitle` column was added to store optional movement metadata from MusicXML files. See [ADR-0001](./adr/0001-store-musicxml-metadata.md).
+```

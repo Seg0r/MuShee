@@ -27,6 +27,11 @@ The MVP will deliver the following core functionalities:
   - The application includes a pre-loaded library of public domain songs accessible to all users without requiring login.
   - Users can browse this library and view sheet music.
   - Authenticated users can add songs from the public library to their personal collection.
+  - The publicly seeded metadata must include movement subtitles when available so tiles can describe the "type" of score without reparsing MusicXML.
+
+- FR-17: Score Metadata Integrity
+  - Every song record must include both composer and title metadata before being surfaced to users, matching the database `NOT NULL` constraint so UI tiles render consistently.
+  - Seeded data should persist optional movement-specific metadata (e.g., movement number/title) to `songs.subtitle` for richer descriptions in the discovery and AI recommendation experiences.
 
 - FR-4: Sheet Music Rendering
   - When a user selects a song from their library, the system renders the MusicXML file into readable sheet music.
@@ -59,6 +64,7 @@ The following features and functionalities are explicitly out of scope for the M
 - Native mobile applications for iOS or Android. The MVP is a web-only application.
 - Social login options (e.g., Google, Facebook). Authentication is limited to email and password.
 - Anonymous users can browse the public library and view sheet music, but cannot upload songs or save them to a personal library.
+- The public library relies on persisted composer/title and optional subtitle metadata so discovery tiles never need to reparse MusicXML during browsing.
 
 ## 5. User Stories
 

@@ -16,10 +16,9 @@ alwaysApply: true
 
 ### Workflow
 
-**After making any code changes, you MUST run the linter to verify the changes.**
+**After making any code changes, you MUST run the linter to verify the changes in code files (this do not apply to documentation files)**
 
-1.  Identify the linting command from `package.json` or other project documentation. The command is usually `npm run lint` or similar.
-2.  Execute the linting command.
-3.  Execute the build command.
-4.  If there are errors, fix them.
-5.  Only after the linter and build passes should you consider the task complete.
+1.  Identify the linting and build command from `package.json` or other project documentation. The command is usually `npm run lint` or similar.
+2.  Execute the linting and build command.
+3.  If there are errors, fix them.
+4.  Only after the linter and build passes should you consider the task complete.
