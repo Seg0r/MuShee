@@ -102,11 +102,33 @@ function createSupabaseClient(): SupabaseClient<Database> {
  */
 function getScoreFiles(): string[] {
   try {
-    const files = readdirSync(SCORES_DIR);
-    return files.filter(file => extname(file).toLowerCase() === '.mxl');
+    const scoreFiles: string[] = [];
+
+    function walkDirectory(currentDir: string, relativePath = '') {
+      const entries = readdirSync(currentDir, { withFileTypes: true });
+
+      for (const entry of entries) {
+        const entryPath = join(currentDir, entry.name);
+        const entryRelativePath = relativePath ? join(relativePath, entry.name) : entry.name;
+
+        if (entry.isDirectory()) {
+          walkDirectory(entryPath, entryRelativePath);
+          continue;
+        }
+
+        if (entry.isFile() && extname(entry.name).toLowerCase() === '.mxl') {
+          scoreFiles.push(entryRelativePath);
+        }
+      }
+    }
+
+    walkDirectory(SCORES_DIR);
+    return scoreFiles;
   } catch (error) {
     throw new Error(
-      `Failed to read scores directory: ${error instanceof Error ? error.message : 'Unknown error'}`
+      `Failed to read scores directory ${SCORES_DIR}: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`
     );
   }
 }
