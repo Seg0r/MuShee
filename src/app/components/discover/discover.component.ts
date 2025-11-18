@@ -7,6 +7,8 @@ import {
   computed,
   viewChild,
   ElementRef,
+  Injector,
+  effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -51,6 +53,7 @@ export class DiscoverComponent implements OnInit {
   private readonly snackBar = inject(MatSnackBar);
   private readonly errorHandlingService = inject(ErrorHandlingService);
   private readonly dialog = inject(MatDialog);
+  private readonly injector = inject(Injector);
 
   // ============================================================================
   // Template References
@@ -207,7 +210,7 @@ export class DiscoverComponent implements OnInit {
         limit: pageSongLimit,
       });
 
-      this.publicSongs.set(songsResponse.data);
+      this.publicSongs.set(this.deduplicateSongs(songsResponse.data));
       this.paginationState.set({
         page: songsResponse.pagination.page,
         totalPages: songsResponse.pagination.total_pages,
@@ -246,27 +249,55 @@ export class DiscoverComponent implements OnInit {
    * Setup scroll listener for infinite scroll and back-to-top button
    */
   private setupScrollListener(): void {
-    if (!this.scrollContainer()) {
-      console.warn('Scroll container not found');
-      return;
+    effect(
+      () => {
+        const containerRef = this.scrollContainer();
+        if (!containerRef) {
+          return;
+        }
+
+        const container = containerRef.nativeElement as HTMLElement;
+        const scrollHandler = () => this.handleScroll(container);
+        container.addEventListener('scroll', scrollHandler);
+
+        return () => container.removeEventListener('scroll', scrollHandler);
+      },
+      { injector: this.injector }
+    );
+  }
+
+  private handleScroll(container: HTMLElement): void {
+    this.scrollPosition.set(container.scrollTop);
+
+    const scrollHeight = container.scrollHeight;
+    const clientHeight = container.clientHeight;
+    const scrollTop = container.scrollTop;
+
+    // Approximate item height based on card dimensions
+    const itemHeight = 200; // Adjust based on actual card height
+    const threshold = scrollHeight - clientHeight - itemHeight * 50;
+
+    if (scrollTop > threshold && this.shouldShowLoadMore()) {
+      this.loadMoreSongs();
     }
+  }
 
-    const container = this.scrollContainer()!.nativeElement;
-    container.addEventListener('scroll', () => {
-      this.scrollPosition.set(container.scrollTop);
+  private filterNewSongs(
+    existing: PublicSongListItemDto[],
+    incoming: PublicSongListItemDto[]
+  ): PublicSongListItemDto[] {
+    const existingIds = new Set(existing.map(song => song.id));
+    return this.deduplicateSongs(incoming).filter(song => !existingIds.has(song.id));
+  }
 
-      // Check if user scrolled near bottom (50 items from bottom)
-      const scrollHeight = container.scrollHeight;
-      const clientHeight = container.clientHeight;
-      const scrollTop = container.scrollTop;
-
-      // Approximate item height based on card dimensions
-      const itemHeight = 200; // Adjust based on actual card height
-      const threshold = scrollHeight - clientHeight - itemHeight * 50;
-
-      if (scrollTop > threshold && this.shouldShowLoadMore()) {
-        this.loadMoreSongs();
+  private deduplicateSongs(songs: PublicSongListItemDto[]): PublicSongListItemDto[] {
+    const seen = new Set<string>();
+    return songs.filter(song => {
+      if (seen.has(song.id)) {
+        return false;
       }
+      seen.add(song.id);
+      return true;
     });
   }
 
@@ -285,11 +316,15 @@ export class DiscoverComponent implements OnInit {
       console.log('Loading page:', nextPage);
       const response = await this.songService.getPublicSongsList({
         page: nextPage,
-        limit: 50,
+        limit: pageSongLimit,
       });
 
       // Append new songs to existing list
-      this.publicSongs.update(songs => [...songs, ...response.data]);
+      const uniqueSongs = this.filterNewSongs(this.publicSongs(), response.data);
+      if (uniqueSongs.length > 0) {
+        this.publicSongs.update(songs => [...songs, ...uniqueSongs]);
+      }
+
       this.paginationState.update(state => ({
         ...state,
         page: response.pagination.page,
