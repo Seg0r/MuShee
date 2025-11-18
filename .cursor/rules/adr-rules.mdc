@@ -1,0 +1,73 @@
+---
+alwaysApply: false
+---
+
+# Architecture Decision Records (ADR)
+
+You are a Senior Software Architect responsible for maintaining the integrity and clarity of the project's architectural history. When a user asks to document a significant architectural change, you MUST create an Architectural Decision Record (ADR) following the rules below.
+
+## 1. ADR File Naming Convention
+
+- ADR files MUST be created in the `.ai/decisions/` directory.
+- The filename MUST follow the format `XXXX-kebab-case-title.md`, where `XXXX` is a zero-padded, incrementing four-digit number (e.g., `0001`, `0002`).
+
+**Correct:** `0003-enforce-not-null-metadata.md`
+**Incorrect:** `3-EnforceNotNullMetadata.md`, `ADR-0003.md`
+
+## 2. ADR Lifecycle (Status)
+
+Each ADR MUST have a `Status` field. The allowed statuses are:
+
+- **`Proposed`**: The decision is under consideration.
+- **`Accepted`**: The decision has been approved and is the current standard.
+- **`Deprecated`**: The decision was once `Accepted` but is no longer relevant. It should NOT be followed.
+- **`Superseded by ADR-YYYY`**: The decision has been replaced by a newer ADR. `ADR-YYYY` MUST link to the new record.
+
+## 3. ADR Template Structure
+
+Every ADR MUST follow this exact Markdown structure. Do not add or remove sections.
+
+```markdown
+# ADR-XXXX: [Title of ADR]
+
+- **Status**: [Proposed | Accepted | Deprecated | Superseded by ADR-YYYY]
+- **Date**: [YYYY-MM-DD]
+- **Relevant Issues**: [Link to GitHub issues, PRs, or other context]
+
+## Context
+
+*What is the problem or architectural force that this decision addresses?*
+*Describe the existing architecture, constraints, and technical context.*
+*What alternatives were considered?*
+
+## Decision
+
+*What is the change that we are proposing or have accepted?*
+*State the decision clearly and concisely.*
+*Provide just enough detail to be unambiguous.*
+
+## Consequences
+
+*What are the results of this decision? What are the trade-offs?*
+*Detail the positive, negative, and neutral impacts on the codebase, team, and future development.*
+*Include impacts on performance, security, maintainability, and developer experience.*
+```
+
+## 4. Preserving Architectural Evolution
+
+To ensure a clear historical record, you MUST adhere to these rules when a new decision modifies an existing one:
+
+- **NEVER delete an old ADR.** History is immutable.
+- To reverse a previous decision, create a **new ADR**.
+- The new ADR's `Context` section MUST reference the old ADR it is changing.
+- Update the status of the old ADR to `Superseded by ADR-XXXX`, where `XXXX` is the number of the new ADR.
+
+### Example Flow:
+
+1.  `0001-allow-nullable-metadata.md` is `Accepted`.
+2.  A new requirement makes this decision obsolete.
+3.  A new file, `0002-enforce-not-null-metadata.md`, is created.
+4.  The `Context` section of `0002` states:
+    > "This decision supersedes **ADR-0001**, which previously allowed nullable metadata. The UI has since been updated to rely on these fields, making null values a source of bugs."
+5.  `0002` is marked `Accepted`.
+6.  The `Status` of `0001` is changed to `Superseded by ADR-0002`.
