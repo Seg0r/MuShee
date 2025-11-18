@@ -2,6 +2,9 @@
   <mat-card-content class="song-tile-content">
     <div class="song-details">
       <h3 class="song-title">{{ song().song_details.title || 'Unknown Title' }}</h3>
+      @if (song().song_details.subtitle) {
+        <p class="song-subtitle">{{ song().song_details.subtitle }}</p>
+      }
       <p class="song-composer">{{ song().song_details.composer || 'Unknown Composer' }}</p>
     </div>
 

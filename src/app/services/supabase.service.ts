@@ -48,6 +48,7 @@ interface UserSongWithSongData {
   songs: {
     title: string | null;
     composer: string | null;
+    subtitle: string | null;
   };
 }
 
@@ -280,7 +281,7 @@ export class SupabaseService {
       // Build the base query for public domain songs (uploader_id IS NULL)
       let query = this.client
         .from('songs')
-        .select('id, title, composer, created_at', { count: 'exact' })
+        .select('id, title, composer, subtitle, created_at', { count: 'exact' })
         .is('uploader_id', null);
 
       // Apply search filter if provided
@@ -314,6 +315,7 @@ export class SupabaseService {
           song_details: {
             title: song.title || '',
             composer: song.composer || '',
+            subtitle: song.subtitle ?? null,
           },
         })),
         total: count || 0,
@@ -580,13 +582,13 @@ export class SupabaseService {
    * @param songId - UUID of the song to retrieve details for
    * @returns Promise resolving to song details or null if song doesn't exist
    */
-  async getSongDetails(songId: string): Promise<{ title: string; composer: string } | null> {
+  async getSongDetails(songId: string): Promise<SongDetailsDto | null> {
     try {
       console.log('Retrieving song details for:', songId);
 
       const { data, error } = await this.client
         .from('songs')
-        .select('title, composer')
+        .select('title, composer, subtitle')
         .eq('id', songId)
         .single();
 
@@ -603,6 +605,7 @@ export class SupabaseService {
       return {
         title: data.title || '',
         composer: data.composer || '',
+        subtitle: data.subtitle ?? null,
       };
     } catch (error) {
       console.error('Unexpected error in getSongDetails:', error);
@@ -635,7 +638,8 @@ export class SupabaseService {
           created_at,
           songs!inner (
             title,
-            composer
+            composer,
+            subtitle
           )
         `,
           { count: 'exact' }
@@ -678,6 +682,7 @@ export class SupabaseService {
         song_details: {
           title: item.songs?.title || '',
           composer: item.songs?.composer || '',
+          subtitle: item.songs?.subtitle ?? null,
         },
       }));
 

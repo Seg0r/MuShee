@@ -58,6 +58,7 @@ export class AiSuggestionsService {
           song_details: {
             title: item.song_details.title,
             composer: item.song_details.composer,
+            subtitle: item.song_details.subtitle,
           },
         }));
 

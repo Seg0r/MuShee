@@ -17,6 +17,7 @@ import type {
   UploadSongResponseDto,
   SongDetailsDto,
 } from '../../types';
+import type { MusicXMLMetadata } from '../../utils/musicxml-metadata';
 
 /**
  * Service for managing song-related operations.
@@ -272,6 +273,7 @@ export class SongService {
             song_details: {
               title: songWithAccess.title || '',
               composer: songWithAccess.composer || '',
+              subtitle: songWithAccess.subtitle ?? null,
             },
             file_hash: songWithAccess.file_hash,
             created_at: songWithAccess.created_at,
@@ -304,7 +306,7 @@ export class SongService {
         // No user authenticated - try to fetch as public song
         const { data: publicSong, error: fetchError } = await this.supabaseService.client
           .from('songs')
-          .select('id, title, composer, file_hash, created_at, uploader_id')
+          .select('id, title, composer, subtitle, file_hash, created_at, uploader_id')
           .eq('id', songId)
           .single();
 
@@ -331,6 +333,7 @@ export class SongService {
           song_details: {
             title: publicSong.title || '',
             composer: publicSong.composer || '',
+            subtitle: publicSong.subtitle ?? null,
           },
           file_hash: publicSong.file_hash,
           created_at: publicSong.created_at,
@@ -433,12 +436,13 @@ export class SongService {
       id: string;
       title: string | null;
       composer: string | null;
+      subtitle: string | null;
       file_hash: string;
       created_at: string;
       isInLibrary: boolean;
     },
     userId: string,
-    metadata: { title: string; composer: string }
+    metadata: MusicXMLMetadata
   ): Promise<UploadSongResponseDto> {
     console.log('Handling duplicate song (file already in system):', {
       songId: existingSong.id,
@@ -461,6 +465,7 @@ export class SongService {
     const songDetails: SongDetailsDto = {
       title: existingSong.title || metadata.title || '',
       composer: existingSong.composer || metadata.composer || '',
+      subtitle: existingSong.subtitle ?? metadata.subtitle ?? null,
     };
 
     return {
@@ -487,7 +492,7 @@ export class SongService {
     fileBuffer: ArrayBuffer,
     fileHash: string,
     userId: string,
-    metadata: { title: string; composer: string }
+    metadata: MusicXMLMetadata
   ): Promise<UploadSongResponseDto> {
     console.log('Handling new song creation:', { userId, hash: fileHash });
 
@@ -507,6 +512,7 @@ export class SongService {
       const songRecord = await this.supabaseService.createSong({
         title: metadata.title,
         composer: metadata.composer,
+        subtitle: metadata.subtitle ?? null,
         file_hash: fileHash,
         uploader_id: userId,
       });
@@ -525,6 +531,7 @@ export class SongService {
         song_details: {
           title: songRecord.title || metadata.title,
           composer: songRecord.composer || metadata.composer,
+          subtitle: songRecord.subtitle ?? metadata.subtitle ?? null,
         },
         file_hash: songRecord.file_hash,
         created_at: songRecord.created_at,

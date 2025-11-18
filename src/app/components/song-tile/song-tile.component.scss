@@ -34,6 +34,19 @@
   -webkit-box-orient: vertical;
 }
 
+.song-subtitle {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--mat-sys-on-surface-variant);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
 .song-composer {
   margin: 0;
   font-size: var(--font-size-md);

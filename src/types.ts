@@ -19,7 +19,7 @@ type AiSuggestionFeedbackRow = Tables<'ai_suggestion_feedback'>;
  * Canonical representation of title/composer pairs derived from the songs table.
  * Used across song-related DTOs to maintain consistent metadata structure.
  */
-export type SongDetailsDto = Pick<SongRow, 'title' | 'composer'>;
+export type SongDetailsDto = Pick<SongRow, 'title' | 'composer' | 'subtitle'>;
 
 /**
  * Normalized pagination metadata shared by list endpoints.
