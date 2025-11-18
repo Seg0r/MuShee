@@ -102,27 +102,30 @@ export interface Database {
       };
       songs: {
         Row: {
-          composer: string | null;
+          composer: string;
           created_at: string;
           file_hash: string;
           id: string;
-          title: string | null;
+          title: string;
+          subtitle: string | null;
           uploader_id: string | null;
         };
         Insert: {
-          composer?: string | null;
+          composer?: string;
           created_at?: string;
           file_hash: string;
           id?: string;
-          title?: string | null;
+          title?: string;
+          subtitle?: string | null;
           uploader_id?: string | null;
         };
         Update: {
-          composer?: string | null;
+          composer?: string;
           created_at?: string;
           file_hash?: string;
           id?: string;
-          title?: string | null;
+          title?: string;
+          subtitle?: string | null;
           uploader_id?: string | null;
         };
         Relationships: [];

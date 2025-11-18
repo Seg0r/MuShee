@@ -58,6 +58,7 @@ interface CreateSongDto {
   title: string;
   composer: string;
   file_hash: string;
+  subtitle?: string | null;
   uploader_id: string;
 }
 
@@ -342,7 +343,7 @@ export class SupabaseService {
       // First, retrieve the song to check if it exists
       const { data: song, error: songError } = await this.client
         .from('songs')
-        .select('id, title, composer, file_hash, uploader_id, created_at')
+        .select('id, title, composer, subtitle, file_hash, uploader_id, created_at')
         .eq('id', songId)
         .single();
 
@@ -853,7 +854,7 @@ export class SupabaseService {
 
       const { data, error } = await this.client
         .from('songs')
-        .select('id, title, composer, file_hash, uploader_id, created_at')
+        .select('id, title, composer, subtitle, file_hash, uploader_id, created_at')
         .eq('file_hash', hash)
         .single();
 
@@ -895,10 +896,11 @@ export class SupabaseService {
         .insert({
           title: data.title,
           composer: data.composer,
+          subtitle: data.subtitle ?? null,
           file_hash: data.file_hash,
           uploader_id: data.uploader_id,
         })
-        .select('id, title, composer, file_hash, uploader_id, created_at')
+        .select('id, title, composer, subtitle, file_hash, uploader_id, created_at')
         .single();
 
       if (error) {
@@ -942,7 +944,7 @@ export class SupabaseService {
       // Step 1: Find song by hash
       const { data: songData, error: songError } = await this.client
         .from('songs')
-        .select('id, title, composer, file_hash, uploader_id, created_at')
+        .select('id, title, composer, subtitle, file_hash, uploader_id, created_at')
         .eq('file_hash', hash)
         .single();
 

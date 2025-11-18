@@ -36,8 +36,9 @@ comment on column public.profiles.has_completed_onboarding is 'flag to track if 
 create table public.songs (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
-  composer varchar(200),
-  title varchar(200),
+  composer varchar(200) not null,
+  title varchar(200) not null,
+  subtitle varchar(200),
   file_hash text not null,
   uploader_id uuid references auth.users(id) on delete cascade
 );
@@ -47,6 +48,8 @@ comment on column public.songs.id is 'unique identifier for the song';
 comment on column public.songs.created_at is 'timestamp of when the song was first added';
 comment on column public.songs.composer is 'the composer of the music piece, parsed from the musicxml file';
 comment on column public.songs.title is 'the title of the music piece, parsed from the musicxml file';
+comment on column public.songs.subtitle is
+  'optional movement subtitle derived from movement number/title in the musicxml file';
 comment on column public.songs.file_hash is 'MD5 hash of the MusicXML file content. Multiple songs can have the same hash (different uploaders). Use with uploader_id to identify unique user uploads. Paired with (file_hash, uploader_id) unique index to prevent same user uploading same file twice. Paired with file_hash index for efficient duplicate detection and storage deduplication.';
 comment on column public.songs.uploader_id is 'the user who originally uploaded the song. null indicates a public domain song';
 

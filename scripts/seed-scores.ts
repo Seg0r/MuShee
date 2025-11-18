@@ -44,6 +44,11 @@ dotenvConfig({ override: false });
 const SCORES_DIR = 'src/assets/scores';
 const STORAGE_BUCKET = 'musicxml-files';
 const STORAGE_PREFIX = 'public-domain';
+const CLEAR_DB_FLAGS = new Set(['--clear', '--clear-db']);
+
+function shouldClearPublicDomainData(): boolean {
+  return process.argv.some(arg => CLEAR_DB_FLAGS.has(arg));
+}
 
 // =============================================================================
 // Types
@@ -295,6 +300,7 @@ async function createSongRecord(
       .insert({
         title: metadata.title,
         composer: metadata.composer,
+        subtitle: metadata.subtitle ?? null,
         file_hash: fileHash,
         uploader_id: null, // Public domain
       })
@@ -338,6 +344,70 @@ async function uploadToStorage(
   }
 }
 
+async function listPublicDomainStorageFiles(supabase: SupabaseClient<Database>): Promise<string[]> {
+  const files: string[] = [];
+  const pageSize = 1000;
+  let offset = 0;
+
+  while (true) {
+    const { data, error } = await supabase.storage.from(STORAGE_BUCKET).list(STORAGE_PREFIX, {
+      limit: pageSize,
+      offset,
+      sortBy: { column: 'name', order: 'asc' },
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data?.length) {
+      break;
+    }
+
+    files.push(
+      ...data.map(entry =>
+        entry.name.startsWith(`${STORAGE_PREFIX}/`) ? entry.name : `${STORAGE_PREFIX}/${entry.name}`
+      )
+    );
+
+    if (data.length < pageSize) {
+      break;
+    }
+
+    offset += data.length;
+  }
+
+  return files;
+}
+
+async function clearPublicDomainData(supabase: SupabaseClient<Database>): Promise<void> {
+  try {
+    console.log('🧹 Clearing public-domain songs and storage objects...');
+
+    const { error: deleteError } = await supabase.from('songs').delete().is('uploader_id', null);
+
+    if (deleteError) {
+      throw deleteError;
+    }
+
+    const storageFiles = await listPublicDomainStorageFiles(supabase);
+    if (storageFiles.length === 0) {
+      console.log('   ℹ️  No storage files to remove for public-domain assets.');
+      return;
+    }
+
+    const { error: removeError } = await supabase.storage.from(STORAGE_BUCKET).remove(storageFiles);
+    if (removeError) {
+      throw removeError;
+    }
+
+    console.log(`   🧹 Removed ${storageFiles.length} storage file(s).`);
+  } catch (error) {
+    console.error('Failed to clear public domain data:', error);
+    throw error;
+  }
+}
+
 // =============================================================================
 // Main Processing
 // =============================================================================
@@ -373,11 +443,25 @@ async function processScoreFile(
     // Parse metadata
     const metadata = await parseMusicXMLMetadata(xmlContent);
 
+    if (!metadata.title || !metadata.composer) {
+      console.warn(
+        `   ⚠️  Missing required metadata (title/composer) for ${fileName}, skipping. Parsed metadata: ${JSON.stringify(
+          metadata
+        )}`
+      );
+      return {
+        success: false,
+        fileName,
+        error: 'Missing title or composer metadata',
+      };
+    }
+
     // Upload to storage and create database record
     await uploadToStorage(supabase, fileHash, fileBuffer);
     const songId = await createSongRecord(supabase, metadata, fileHash);
 
-    console.log(`   ✅ Seeded: "${metadata.title}" by ${metadata.composer || 'Unknown'}`);
+    const subtitleInfo = metadata.subtitle ? ` (subtitle: "${metadata.subtitle}")` : '';
+    console.log(`   ✅ Seeded: "${metadata.title}" by ${metadata.composer}${subtitleInfo}`);
     return { success: true, fileName, songId };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -398,6 +482,13 @@ async function main() {
     // Initialize Supabase client
     const supabase = createSupabaseClient();
     console.log('✅ Connected to Supabase');
+
+    if (shouldClearPublicDomainData()) {
+      console.log(
+        '⚠️  --clear-db flag detected; clearing public-domain songs and storage before seeding.'
+      );
+      await clearPublicDomainData(supabase);
+    }
 
     // Note: Storage bucket and policies should be created via SQL migrations:
     // - 20251111000000_create_storage_bucket.sql (creates the bucket)

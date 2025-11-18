@@ -1,16 +1,7 @@
 import { Injectable } from '@angular/core';
 import { OpenSheetMusicDisplay, IOSMDOptions } from 'opensheetmusicdisplay';
 import JSZip from 'jszip';
-import { cleanAndTruncate } from '../../utils/musicxml-metadata';
-
-/**
- * Metadata extracted from a parsed MusicXML file.
- * Contains the essential information needed for song cataloging.
- */
-export interface MusicXMLMetadata {
-  title: string;
-  composer: string;
-}
+import { cleanAndTruncate, type MusicXMLMetadata } from '../../utils/musicxml-metadata';
 
 /**
  * Service for parsing MusicXML files using OpenSheetMusicDisplay.
@@ -330,8 +321,8 @@ export class MusicXMLParserService {
    * @returns Empty metadata (actual extraction happens via XML)
    */
   private extractMetadata(): MusicXMLMetadata {
-    // OSMD doesn't reliably expose metadata, so we return empty
-    // The actual extraction will happen via XML parsing
+    // OSMD doesn't reliably expose metadata, so we return empty.
+    // The actual extraction will happen via XML parsing.
     return { title: '', composer: '' };
   }
 
@@ -397,8 +388,32 @@ export class MusicXMLParserService {
       title = cleanAndTruncate(title, 200);
       composer = cleanAndTruncate(composer, 200);
 
-      console.log('XML metadata extraction result:', { title, composer });
-      return { title, composer };
+      const movementNumberEl = doc.getElementsByTagName('movement-number')[0];
+      const movementTitleEl = doc.getElementsByTagName('movement-title')[0];
+      const subtitleParts: string[] = [];
+
+      if (movementNumberEl?.textContent) {
+        subtitleParts.push(movementNumberEl.textContent);
+      }
+
+      if (movementTitleEl?.textContent) {
+        subtitleParts.push(movementTitleEl.textContent);
+      }
+
+      const subtitleRaw = subtitleParts.join(' ');
+      const subtitle = cleanAndTruncate(subtitleRaw, 200);
+
+      const metadata: MusicXMLMetadata = {
+        title,
+        composer,
+      };
+
+      if (subtitle) {
+        metadata.subtitle = subtitle;
+      }
+
+      console.log('XML metadata extraction result:', metadata);
+      return metadata;
     } catch (error) {
       console.warn(
         `XML parsing failed, returning empty metadata: ${error instanceof Error ? error.message : 'Unknown error'}`

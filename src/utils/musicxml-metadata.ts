@@ -9,6 +9,7 @@
 export interface MusicXMLMetadata {
   title: string;
   composer: string;
+  subtitle?: string;
 }
 
 /**
@@ -50,6 +51,17 @@ export function extractMetadataFromParsedXML(parsed: unknown): MusicXMLMetadata 
   let title = '';
   let composer = '';
 
+  const sections = [obj?.['score-partwise'], obj?.['score-timewise']].filter(Boolean) as Record<
+    string,
+    unknown
+  >[];
+  const movementSection = sections.find(
+    section => section['movement-number'] || section['movement-title']
+  );
+
+  const movementNumber = normalizeXmlText(movementSection?.['movement-number']);
+  const movementTitleValue = normalizeXmlText(movementSection?.['movement-title']);
+
   // Extract title from various possible locations in MusicXML
   if (obj?.['score-partwise']?.['work']?.['work-title']) {
     title = obj['score-partwise']['work']['work-title'];
@@ -86,5 +98,40 @@ export function extractMetadataFromParsedXML(parsed: unknown): MusicXMLMetadata 
   title = cleanAndTruncate(title, 200);
   composer = cleanAndTruncate(composer, 200);
 
-  return { title, composer };
+  const subtitleRaw = [movementNumber, movementTitleValue].filter(Boolean).join(' ');
+  const subtitleClean = cleanAndTruncate(subtitleRaw, 200);
+
+  const metadata: MusicXMLMetadata = {
+    title,
+    composer,
+  };
+
+  if (subtitleClean) {
+    metadata.subtitle = subtitleClean;
+  }
+
+  return metadata;
+}
+
+/**
+ * Normalizes text extracted from xml2js parsing.
+ */
+function normalizeXmlText(value: unknown): string {
+  if (!value) return '';
+
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (typeof value === 'object') {
+    if ('_' in value && typeof value._ === 'string') {
+      return value._;
+    }
+
+    if ('#text' in value && typeof value['#text'] === 'string') {
+      return value['#text'];
+    }
+  }
+
+  return '';
 }
