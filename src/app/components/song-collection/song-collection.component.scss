@@ -58,10 +58,17 @@
 }
 
 .loading-state {
-  padding: 2rem 0;
+  width: 100%;
+  padding-block: var(--space-md, 1rem);
+  padding-inline-start: var(--space-md, 1rem);
+  padding-inline-end: calc(var(--space-md, 1rem) + var(--shell-nav-rail-width, 64px));
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: stretch;
+}
+
+.loading-state app-loading-skeleton {
+  width: 100%;
 }
 
 .scroll-container {
@@ -77,6 +84,9 @@
 
 @media (max-width: breakpoints.$shell-nav-breakpoint) {
   .scroll-container {
+    padding-inline-end: var(--space-md, 1rem);
+  }
+  .loading-state {
     padding-inline-end: var(--space-md, 1rem);
   }
 }

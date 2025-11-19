@@ -1,7 +1,7 @@
 .songs-grid {
   display: grid;
-  gap: 1.5rem;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--song-card-grid-gap, 1.5rem);
+  grid-template-columns: repeat(auto-fit, minmax(var(--song-card-grid-min-width, 300px), 1fr));
   grid-auto-rows: max-content;
   justify-content: stretch;
 }

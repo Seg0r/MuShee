@@ -19,20 +19,10 @@
 
 .skeleton-grid {
   display: grid;
-  gap: 1.5rem;
-  grid-template-columns: repeat(auto-fit, 280px);
+  gap: var(--song-card-grid-gap, 1.5rem);
+  grid-template-columns: repeat(auto-fit, minmax(var(--song-card-grid-min-width, 300px), 1fr));
   grid-auto-rows: max-content;
-  justify-content: start;
-
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fit, 240px);
-    gap: 1rem;
-  }
-
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
+  justify-content: stretch;
 }
 
 // ============================================================================
