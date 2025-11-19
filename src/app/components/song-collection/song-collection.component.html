@@ -1,0 +1,54 @@
+<main class="song-collection-root">
+  @if (isInitialLoading()) {
+    <div class="loading-state">
+      <app-loading-skeleton
+        [count]="skeletonCount()"
+        [rows]="skeletonRows()"
+        [cols]="skeletonCols()"
+      />
+    </div>
+  } @else {
+    <div class="scroll-container" #scrollContainer>
+      @if (shouldShowEmptyState() && emptyStateTemplate()) {
+        <ng-container *ngTemplateOutlet="emptyStateTemplate()"></ng-container>
+      } @else {
+        <app-song-list
+          [songs]="visibleSongs()"
+          [isUserLibrary]="isUserLibraryView()"
+          [isSongInLibrary]="config().isSongInLibrary || defaultSongInLibrary"
+          [isAuthenticated]="resolveIsAuthenticated()"
+          (tileClick)="tileClick.emit($event)"
+          (addToLibrary)="addToLibrary.emit($event)"
+          (deleteClick)="deleteClick.emit($event)"
+        />
+      }
+
+      @if (isPaginationLoading()) {
+        <div class="pagination-loading">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading more songs...</p>
+        </div>
+      }
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error-banner">
+      <p>{{ error() }}</p>
+      <button mat-button type="button" (click)="retry()">Retry</button>
+    </div>
+  }
+
+  @if (showBackToTop() && isBackToTopVisible()) {
+    <button
+      mat-icon-button
+      type="button"
+      class="back-to-top-fab"
+      (click)="scrollToTop()"
+      aria-label="Scroll to top"
+      [attr.aria-hidden]="!isBackToTopVisible()"
+    >
+      <mat-icon>arrow_upward</mat-icon>
+    </button>
+  }
+</main>

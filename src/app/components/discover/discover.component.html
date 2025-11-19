@@ -1,55 +1,11 @@
 <main class="discover-container">
-  <!-- Header -->
   <div class="discover-header">
     <h1>Discover</h1>
   </div>
 
-  <!-- Loading State -->
-  @if (isInitialLoading()) {
-    <div class="loading-state">
-      <app-loading-skeleton [count]="skeletonCount()" />
-    </div>
-  } @else {
-    <!-- Songs Grid -->
-    <div #scrollContainer class="scroll-container">
-      <app-song-list
-        [songs]="visibleSongs()"
-        [isUserLibrary]="false"
-        [isSongInLibrary]="isSongInLibrary.bind(this)"
-        [isAuthenticated]="isAuthenticated()"
-        (tileClick)="onSongCardClick($event)"
-        (addToLibrary)="onAddToLibrary($event)"
-      />
-
-      <!-- Pagination Loading Indicator -->
-      @if (isPaginationLoading()) {
-        <div class="pagination-loading">
-          <mat-spinner diameter="40"></mat-spinner>
-          <p>Loading more songs...</p>
-        </div>
-      }
-    </div>
-
-    <!-- Back to Top FAB -->
-    <button
-      mat-icon-button
-      type="button"
-      (click)="scrollToTop()"
-      class="back-to-top-fab"
-      [class.visible]="isBackToTopVisible()"
-      [attr.aria-hidden]="!isBackToTopVisible()"
-      [attr.tabindex]="isBackToTopVisible() ? 0 : -1"
-      aria-label="Scroll to top"
-    >
-      <mat-icon>arrow_upward</mat-icon>
-    </button>
-  }
-
-  <!-- Error State -->
-  @if (error()) {
-    <div class="error-banner">
-      <p>{{ error()!.message }}</p>
-      <button mat-button (click)="retryInitialize()">Retry</button>
-    </div>
-  }
+  <app-song-collection
+    [config]="discoverCollectionConfig"
+    (tileClick)="onSongCardClick($event)"
+    (addToLibrary)="onAddToLibrary($event)"
+  ></app-song-collection>
 </main>

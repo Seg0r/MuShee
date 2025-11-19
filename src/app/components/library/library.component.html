@@ -1,74 +1,43 @@
 <div class="library-container">
-  <!-- Header -->
   <div class="library-header">
     <h1>My Library</h1>
   </div>
 
-  <!-- Loading State -->
-  @if (isLoading()) {
-    <div class="loading-state">
-      <app-loading-skeleton [count]="8" [rows]="2" [cols]="4"></app-loading-skeleton>
-    </div>
-  } @else {
-    <!-- Scroll Container -->
-    <div class="scroll-container" #scrollContainer>
-      <!-- Empty State -->
-      @if (isEmptyState()) {
-        <div class="empty-state-wrapper">
-          <app-empty-state [message]="'Your library is empty'" [iconName]="'queue_music'">
-            <div class="empty-state-actions">
-              <button mat-flat-button (click)="onUploadClick()">
-                <mat-icon>cloud_upload</mat-icon>
-                Upload Your Music
-              </button>
-              <button mat-button [routerLink]="['/app/discover']">
-                <mat-icon>explore</mat-icon>
-                Browse Public Library
-              </button>
-            </div>
-          </app-empty-state>
+  <app-song-collection
+    #songCollection
+    [config]="libraryCollectionConfig"
+    [emptyStateTemplate]="libraryEmptyState"
+    [showBackToTop]="true"
+    (tileClick)="onSongCardClick($event)"
+    (deleteClick)="onSongDeleteClick($event)"
+    (viewStateChange)="onCollectionStateChange($event)"
+  ></app-song-collection>
+
+  <ng-template #libraryEmptyState>
+    <div class="empty-state-wrapper">
+      <app-empty-state [message]="'Your library is empty'" [iconName]="'queue_music'">
+        <div class="empty-state-actions">
+          <button mat-flat-button (click)="onUploadClick()">
+            <mat-icon>cloud_upload</mat-icon>
+            Upload Your Music
+          </button>
+          <button mat-button [routerLink]="['/app/discover']">
+            <mat-icon>explore</mat-icon>
+            Browse Public Library
+          </button>
         </div>
-      } @else {
-        <!-- Songs Grid -->
-        <app-song-list
-          [songs]="visibleSongs()"
-          [isUserLibrary]="true"
-          (tileClick)="onSongCardClick($event)"
-          (deleteClick)="onSongDeleteClick($event)"
-        />
-      }
-
-      <!-- Pagination Loading Indicator -->
-      @if (isPaginationLoading()) {
-        <div class="pagination-loading">
-          <mat-spinner diameter="40"></mat-spinner>
-          <p>Loading more songs...</p>
-        </div>
-      }
+      </app-empty-state>
     </div>
-  }
+  </ng-template>
 
-  <!-- Error State -->
-  @if (errorMessage()) {
-    <div class="error-banner">
-      <p>{{ errorMessage() }}</p>
-      <button mat-icon-button (click)="onRetryLoadLibrary()" aria-label="Retry loading library">
-        <mat-icon>refresh</mat-icon>
-      </button>
-    </div>
-  }
-
-  <!-- FABs -->
   <div class="fab-container">
-    <!-- Upload FAB - only show after loading and when library has content -->
-    @if (!isLoading() && !isEmptyState()) {
+    @if (!collectionState().isLoading && !collectionState().isEmpty) {
       <button mat-fab class="upload-fab" (click)="onUploadClick()" aria-label="Upload a new song">
         <mat-icon>cloud_upload</mat-icon>
       </button>
     }
 
-    <!-- Find Similar Music FAB - only show after loading and when library has content -->
-    @if (!isLoading() && canFindSimilar()) {
+    @if (!collectionState().isLoading && canFindSimilar()) {
       <button
         mat-fab
         class="find-similar-fab"

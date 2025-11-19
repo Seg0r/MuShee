@@ -64,10 +64,11 @@ export class SongService {
         total_pages: totalPages,
       };
 
-      console.log(`Returning ${data.length} songs with pagination:`, pagination);
+      const uniqueSongs = this.deduplicateSongs(data);
+      console.log(`Returning ${uniqueSongs.length} songs with pagination:`, pagination);
 
       return {
-        data,
+        data: uniqueSongs,
         pagination,
       };
     } catch (error) {
@@ -224,6 +225,19 @@ export class SongService {
   private isValidUUID(uuid: string): boolean {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     return uuidRegex.test(uuid);
+  }
+
+  private deduplicateSongs(
+    songs: PublicSongsListResponseDto['data']
+  ): PublicSongsListResponseDto['data'] {
+    const seen = new Set<string>();
+    return songs.filter(song => {
+      if (seen.has(song.id)) {
+        return false;
+      }
+      seen.add(song.id);
+      return true;
+    });
   }
 
   /**
