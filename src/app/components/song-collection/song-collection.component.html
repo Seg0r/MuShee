@@ -80,16 +80,18 @@
     </div>
   }
 
-  @if (showBackToTop() && isBackToTopVisible()) {
-    <button
-      mat-icon-button
-      type="button"
-      class="back-to-top-fab"
-      (click)="scrollToTop()"
-      aria-label="Scroll to top"
-      [attr.aria-hidden]="!isBackToTopVisible()"
-    >
-      <mat-icon>arrow_upward</mat-icon>
-    </button>
+  @if (showBackToTop()) {
+    <div class="back-to-top-fab-wrapper floating-fab-right">
+      <button
+        mat-fab
+        class="back-to-top-fab floating-fab"
+        [class.visible]="isBackToTopVisible()"
+        (click)="scrollToTop()"
+        aria-label="Scroll to top"
+        [attr.aria-hidden]="!isBackToTopVisible()"
+      >
+        <mat-icon>arrow_upward</mat-icon>
+      </button>
+    </div>
   }
 </main>

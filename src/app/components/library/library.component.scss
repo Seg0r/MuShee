@@ -101,17 +101,14 @@
 // ============================================================================
 
 .fab-container {
-  position: fixed;
-  bottom: var(--space-xl);
-  right: var(--space-xl);
+  bottom: calc(var(--space-xl) + 56px + var(--space-md));
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
   z-index: 40;
 
   @media (max-width: 600px) {
-    bottom: var(--space-lg);
-    right: var(--space-lg);
+    bottom: calc(var(--space-lg) + 56px + var(--space-sm));
     gap: var(--space-sm);
   }
 }

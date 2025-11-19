@@ -6,6 +6,7 @@
   --page-background-image-light: url('/page-background-light.png');
   --page-background-dark-opacity: 1;
   --page-background-light-opacity: 0;
+  --floating-fab-hover-offset: -2px;
 }
 
 html:not(.dark) {
@@ -101,4 +102,29 @@ p {
   padding: 0;
   border-radius: var(--mat-sys-corner-medium);
   overflow: visible;
+}
+
+.floating-fab {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+  display: grid;
+  place-items: center;
+  border: none;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(var(--floating-fab-hover-offset));
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25);
+  }
+}
+
+.floating-fab-right {
+  position: fixed;
+  right: var(--space-lg);
 }
