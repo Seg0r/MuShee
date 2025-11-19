@@ -97,6 +97,7 @@ export class LibraryComponent implements OnInit {
     mergeStrategy: (existing, incoming) => [...existing, ...incoming],
     loadingSkeletonConfig: { count: 8, rows: 2, cols: 4 },
     showBackToTop: true,
+    header: { title: 'My Library' },
   };
 
   ngOnInit(): void {

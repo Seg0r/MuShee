@@ -1,4 +1,45 @@
 <main class="song-collection-root">
+  <section class="song-collection-header">
+    <div class="song-collection-header__titles">
+      <h1>{{ headerTitle() }}</h1>
+      @if (headerSubtitle()) {
+        <p class="song-collection-header__subtitle">{{ headerSubtitle() }}</p>
+      }
+    </div>
+    @if (headerControls().length) {
+      <div class="song-collection-header-controls" role="toolbar" aria-label="Collection controls">
+        @for (control of headerControls(); track control.id ?? control.label) {
+          @if (control.type === 'select') {
+            <mat-form-field appearance="outline" class="song-collection-control">
+              <mat-label>{{ control.label }}</mat-label>
+              <mat-select
+                [value]="control.value"
+                (selectionChange)="control.onValueChange($event.value)"
+              >
+                @for (option of control.options; track option.value) {
+                  <mat-option [value]="option.value" [disabled]="option.disabled">
+                    {{ option.label }}
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          } @else if (control.type === 'search') {
+            <mat-form-field appearance="outline" class="song-collection-control">
+              <mat-label>{{ control.label }}</mat-label>
+              <input
+                matInput
+                type="search"
+                [value]="control.value"
+                [placeholder]="control.placeholder ?? control.label"
+                (input)="handleHeaderSearchInput(control, $event)"
+              />
+            </mat-form-field>
+          }
+        }
+      </div>
+    }
+  </section>
+
   @if (isInitialLoading()) {
     <div class="loading-state">
       <app-loading-skeleton

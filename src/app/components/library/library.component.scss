@@ -17,24 +17,6 @@
   min-height: 0;
 }
 
-// ============================================================================
-// Header
-// ============================================================================
-
-.library-header {
-  padding: var(--space-md) var(--space-md);
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
-  display: flex;
-  align-items: center;
-
-  h1 {
-    margin: 0;
-    font-size: var(--font-size-lg);
-    font-weight: 500;
-    color: var(--mat-sys-on-surface);
-  }
-}
-
 .loading-state {
   flex: 1;
   overflow-y: auto;

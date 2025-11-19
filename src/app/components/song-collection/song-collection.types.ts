@@ -32,4 +32,41 @@ export interface SongCollectionConfig<T extends SongTileData = SongTileData> {
     cols?: number;
   };
   showBackToTop?: boolean;
+  header?: SongCollectionHeaderConfig;
+}
+
+export interface SongCollectionHeaderConfig {
+  title?: string;
+  subtitle?: string;
+  controls?: SongCollectionHeaderControl[];
+}
+
+interface SongCollectionHeaderControlBase {
+  id?: string;
+  label: string;
+}
+
+export interface SongCollectionHeaderSelectControl extends SongCollectionHeaderControlBase {
+  type: 'select';
+  value?: string;
+  placeholder?: string;
+  options: SongCollectionHeaderSelectOption[];
+  onValueChange: (value: string) => void;
+}
+
+export interface SongCollectionHeaderSearchControl extends SongCollectionHeaderControlBase {
+  type: 'search';
+  value?: string;
+  placeholder?: string;
+  onValueChange: (value: string) => void;
+}
+
+export type SongCollectionHeaderControl =
+  | SongCollectionHeaderSelectControl
+  | SongCollectionHeaderSearchControl;
+
+export interface SongCollectionHeaderSelectOption {
+  value: string;
+  label: string;
+  disabled?: boolean;
 }

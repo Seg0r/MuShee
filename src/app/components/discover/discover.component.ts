@@ -63,6 +63,7 @@ export class DiscoverComponent implements OnInit {
     isSongInLibrary: songId => this.userLibrarySongIds().has(songId),
     isAuthenticated: () => this.authService.isAuthenticated(),
     loadingSkeletonConfig: { count: 50 },
+    header: { title: 'Discover' },
   };
 
   ngOnInit(): void {

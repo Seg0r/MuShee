@@ -15,12 +15,19 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 
 import { LoadingSkeletonComponent } from '../loading-skeleton/loading-skeleton.component';
 import { SongListComponent } from '../song-list/song-list.component';
-import { SongCollectionConfig, SongCollectionViewState } from './song-collection.types';
+import {
+  SongCollectionConfig,
+  SongCollectionHeaderSearchControl,
+  SongCollectionViewState,
+} from './song-collection.types';
 import { SongTileData } from '../song-tile/song-tile.component';
 import { ErrorHandlingService } from '../../services/error-handling.service';
 
@@ -36,7 +43,10 @@ const defaultSkeletonConfig = { count: 50, rows: undefined, cols: undefined };
     SongListComponent,
     MatProgressSpinner,
     MatButtonModule,
+    MatFormFieldModule,
     MatIcon,
+    MatInputModule,
+    MatSelectModule,
   ],
   templateUrl: './song-collection.component.html',
   styleUrl: './song-collection.component.scss',
@@ -87,6 +97,10 @@ export class SongCollectionComponent implements OnInit {
   readonly skeletonRows = computed(() => this.skeletonConfig().rows ?? 2);
   readonly skeletonCols = computed(() => this.skeletonConfig().cols ?? 4);
   readonly defaultSongInLibrary = () => false;
+  readonly headerConfig = computed(() => this.config().header ?? null);
+  readonly headerTitle = computed(() => this.headerConfig()?.title ?? 'Songs');
+  readonly headerSubtitle = computed(() => this.headerConfig()?.subtitle ?? null);
+  readonly headerControls = computed(() => this.headerConfig()?.controls ?? []);
 
   ngOnInit(): void {
     this.initializeCollection();
@@ -227,6 +241,11 @@ export class SongCollectionComponent implements OnInit {
         behavior: 'smooth',
       });
     }
+  }
+
+  handleHeaderSearchInput(control: SongCollectionHeaderSearchControl, event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    control.onValueChange(input?.value ?? '');
   }
 
   resolveIsAuthenticated(): boolean {
