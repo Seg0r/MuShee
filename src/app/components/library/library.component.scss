@@ -28,40 +28,6 @@
   }
 }
 
-.scroll-container {
-  flex: 1;
-  overflow-y: scroll;
-  padding: var(--space-md) var(--space-md);
-  display: flex;
-  flex-direction: column;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(124, 124, 124, 0.3) transparent;
-
-  &::-webkit-scrollbar {
-    width: 8px;
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--mat-sys-outline-variant);
-    border-radius: var(--layout-border-radius);
-    opacity: 0.4;
-    transition:
-      opacity 0.2s ease,
-      background-color 0.2s ease;
-  }
-
-  /* Make scrollbar more visible on hover */
-  &:hover::-webkit-scrollbar-thumb {
-    background: var(--mat-sys-outline);
-    opacity: 1;
-  }
-}
-
 // ============================================================================
 // Empty State Wrapper
 // ============================================================================

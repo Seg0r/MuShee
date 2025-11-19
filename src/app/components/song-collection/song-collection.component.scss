@@ -1,3 +1,5 @@
+@use '../../../styles/breakpoints' as breakpoints;
+
 .song-collection-root {
   position: relative;
   display: flex;
@@ -66,9 +68,17 @@
   position: relative;
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-md, 1rem);
+  padding-block: var(--space-md, 1rem);
+  padding-inline-start: var(--space-md, 1rem);
+  padding-inline-end: calc(var(--space-md, 1rem) + var(--shell-nav-rail-width, 64px));
   min-height: 0;
   height: 100%;
+}
+
+@media (max-width: breakpoints.$shell-nav-breakpoint) {
+  .scroll-container {
+    padding-inline-end: var(--space-md, 1rem);
+  }
 }
 
 .pagination-loading {
