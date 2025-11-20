@@ -648,17 +648,15 @@ export class SupabaseService {
 
       // Apply sorting
       const sortField = params.sort || 'created_at';
-      const sortOrder = params.order === 'desc' ? false : true; // Supabase uses boolean for ascending
+      const ascending = params.order !== 'desc';
 
-      // Handle sorting by song metadata fields vs user_songs fields
       if (sortField === 'title' || sortField === 'composer') {
-        query = query.order(`songs.${sortField}`, { ascending: sortOrder });
-      } else if (sortField === 'added_at') {
-        // Map 'added_at' to the created_at field in user_songs
-        query = query.order('created_at', { ascending: sortOrder });
+        // Order parent rows by the joined songs table column (see Supabase order() docs).
+        const nestedColumn = `songs(${sortField})`;
+        query = query.order(nestedColumn, { ascending });
       } else {
-        // Default to created_at for any other sort field
-        query = query.order('created_at', { ascending: sortOrder });
+        const column = sortField === 'added_at' ? 'created_at' : sortField;
+        query = query.order(column, { ascending });
       }
 
       // Apply pagination
@@ -686,10 +684,19 @@ export class SupabaseService {
         },
       }));
 
+      const previewRows = transformedData.slice(0, 5).map(item => ({
+        song_id: item.song_id,
+        title: item.song_details.title,
+        composer: item.song_details.composer,
+        added_at: item.created_at,
+      }));
       console.log(
         `Retrieved ${transformedData.length} library items (total: ${count}) for user:`,
-        userId
+        userId,
+        'Sort:',
+        { sortField, order: params.order ?? 'asc' }
       );
+      console.table(previewRows);
       return {
         data: transformedData,
         total: count || 0,

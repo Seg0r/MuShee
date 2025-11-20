@@ -15,9 +15,11 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 
@@ -26,6 +28,10 @@ import { SongListComponent } from '../song-list/song-list.component';
 import {
   SongCollectionConfig,
   SongCollectionHeaderSearchControl,
+  SongCollectionSortDirection,
+  SongCollectionSortingConfig,
+  SongCollectionSortingOption,
+  SongCollectionSortingState,
   SongCollectionViewState,
 } from './song-collection.types';
 import { SongTileData } from '../song-tile/song-tile.component';
@@ -43,9 +49,11 @@ const defaultSkeletonConfig = { count: 50, rows: undefined, cols: undefined };
     SongListComponent,
     MatProgressSpinner,
     MatButtonModule,
+    MatChipsModule,
     MatFormFieldModule,
     MatIcon,
     MatInputModule,
+    MatMenuModule,
     MatSelectModule,
   ],
   templateUrl: './song-collection.component.html',
@@ -101,15 +109,42 @@ export class SongCollectionComponent implements OnInit {
   readonly headerTitle = computed(() => this.headerConfig()?.title ?? 'Songs');
   readonly headerSubtitle = computed(() => this.headerConfig()?.subtitle ?? null);
   readonly headerControls = computed(() => this.headerConfig()?.controls ?? []);
+  readonly sortingConfig = computed<SongCollectionSortingConfig | null>(
+    () => this.config().sorting ?? null
+  );
+  readonly sortingOptions = computed(() => this.sortingConfig()?.options ?? []);
+  readonly hasSortingOptions = computed(() => this.sortingOptions().length > 0);
+  readonly sortingLabel = computed(() => this.sortingConfig()?.label ?? 'Sort songs');
+  private readonly sortingMenuOpen = signal(false);
+  readonly isSortingMenuOpen = this.sortingMenuOpen.asReadonly();
+  private readonly activeSortStates = signal<SongCollectionSortingState[]>([]);
+  readonly sortingChips = computed(() => this.computeSortingChipOrder());
 
   ngOnInit(): void {
     this.initializeCollection();
     this.setupScrollListener();
     this.emitViewState();
+    this.initializeSortingEffect();
   }
 
   private initializeCollection(): void {
     this.loadPage(this.config().initialPage ?? 1, false);
+  }
+
+  private computeSortingChipOrder(): SongCollectionSortingOption[] {
+    const options = this.sortingOptions();
+    if (!options.length) {
+      return [];
+    }
+
+    const active = this.activeSortStates();
+    const activeKeys = new Set(active.map(state => state.key));
+    const orderedActive = active
+      .map(state => options.find(option => option.key === state.key))
+      .filter((option): option is SongCollectionSortingOption => Boolean(option));
+
+    const inactive = options.filter(option => !activeKeys.has(option.key));
+    return [...orderedActive, ...inactive];
   }
 
   private async loadPage(page: number, append: boolean): Promise<void> {
@@ -198,6 +233,76 @@ export class SongCollectionComponent implements OnInit {
       },
       { injector: this.injector }
     );
+  }
+
+  private initializeSortingEffect(): void {
+    effect(
+      () => {
+        const initialState = this.sortingConfig()?.initialState ?? [];
+        this.activeSortStates.set(initialState);
+      },
+      { injector: this.injector }
+    );
+  }
+
+  onSortingMenuOpened(): void {
+    this.sortingMenuOpen.set(true);
+  }
+
+  onSortingMenuClosed(): void {
+    this.sortingMenuOpen.set(false);
+  }
+
+  handleSortingChipClick(option: SongCollectionSortingOption): void {
+    if (option.disabled) {
+      return;
+    }
+
+    const current = this.activeSortStates();
+    const existingIndex = current.findIndex(state => state.key === option.key);
+    let next: SongCollectionSortingState[];
+
+    if (existingIndex === -1) {
+      const direction: SongCollectionSortDirection = option.initialDirection ?? 'asc';
+      next = [{ key: option.key, direction }, ...current];
+    } else {
+      const existing = current[existingIndex];
+      if (existing.direction === 'asc') {
+        next = [
+          { key: option.key, direction: 'desc' },
+          ...current.filter((_, index) => index !== existingIndex),
+        ];
+      } else {
+        next = current.filter((_, index) => index !== existingIndex);
+      }
+    }
+
+    this.activeSortStates.set(next);
+    this.emitSortingChange(next);
+  }
+
+  isSortingChipActive(option: SongCollectionSortingOption): boolean {
+    return Boolean(this.getSortState(option.key));
+  }
+
+  getSortingDirectionIcon(option: SongCollectionSortingOption): string | null {
+    const state = this.getSortState(option.key);
+    if (!state) {
+      return null;
+    }
+    return state.direction === 'asc' ? 'arrow_upward' : 'arrow_downward';
+  }
+
+  private emitSortingChange(active: SongCollectionSortingState[]): void {
+    const sorting = this.sortingConfig();
+    if (!sorting) {
+      return;
+    }
+    sorting.onChange(active);
+  }
+
+  private getSortState(key: string): SongCollectionSortingState | undefined {
+    return this.activeSortStates().find(state => state.key === key);
   }
 
   private handleScroll(container: HTMLElement): void {

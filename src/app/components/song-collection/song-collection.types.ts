@@ -33,6 +33,7 @@ export interface SongCollectionConfig<T extends SongTileData = SongTileData> {
   };
   showBackToTop?: boolean;
   header?: SongCollectionHeaderConfig;
+  sorting?: SongCollectionSortingConfig;
 }
 
 export interface SongCollectionHeaderConfig {
@@ -69,4 +70,28 @@ export interface SongCollectionHeaderSelectOption {
   value: string;
   label: string;
   disabled?: boolean;
+}
+
+export type SongCollectionSortDirection = 'asc' | 'desc';
+
+export interface SongCollectionSortingState {
+  key: string;
+  direction: SongCollectionSortDirection;
+}
+
+export interface SongCollectionSortingOption {
+  key: string;
+  label: string;
+  disabled?: boolean;
+  /** Direction applied when the option is first activated. Defaults to "asc". */
+  initialDirection?: SongCollectionSortDirection;
+}
+
+export interface SongCollectionSortingConfig {
+  options: SongCollectionSortingOption[];
+  onChange: (sorting: SongCollectionSortingState[]) => void;
+  /** Accessible label shown for the sorting panel. Defaults to "Sort songs". */
+  label?: string;
+  /** Optional sort state that should be selected when the control first renders. */
+  initialState?: SongCollectionSortingState[];
 }

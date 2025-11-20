@@ -18,6 +18,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import type { UserLibraryItemDto, ProfileDto } from '@/types';
 import { UserLibraryService } from '@/app/services/user-library.service';
+import type { LibraryQueryParams } from '@/app/services/supabase.service';
 import { ProfileService } from '@/app/services/profile.service';
 import { AiSuggestionsService } from '@/app/services/ai-suggestions.service';
 import { AuthService } from '@/app/services/auth.service';
@@ -34,8 +35,16 @@ import { SongTileData } from '../song-tile/song-tile.component';
 import { SongCollectionComponent } from '../song-collection/song-collection.component';
 import {
   SongCollectionConfig,
+  SongCollectionSortingConfig,
+  SongCollectionSortingOption,
+  SongCollectionSortingState,
   SongCollectionViewState,
 } from '../song-collection/song-collection.types';
+
+const librarySortingOptions: SongCollectionSortingOption[] = [
+  { key: 'title', label: 'Title', initialDirection: 'asc' },
+  { key: 'composer', label: 'Composer', initialDirection: 'asc' },
+];
 
 @Component({
   selector: 'app-library',
@@ -77,6 +86,15 @@ export class LibraryComponent implements OnInit {
 
   readonly collectionState = this.collectionStateSignal.asReadonly();
 
+  private readonly sortingState = signal<SongCollectionSortingState[]>([]);
+
+  readonly librarySortingConfig: SongCollectionSortingConfig = {
+    options: librarySortingOptions,
+    label: 'Sort most recent songs first',
+    initialState: [],
+    onChange: sorting => this.handleLibrarySortingChange(sorting),
+  };
+
   readonly canFindSimilar = computed(
     () =>
       !this.collectionState().isLoading &&
@@ -85,19 +103,14 @@ export class LibraryComponent implements OnInit {
   );
 
   readonly libraryCollectionConfig: SongCollectionConfig<SongTileData> = {
-    fetchPage: (page, limit) =>
-      this.userLibraryService.getUserLibrary({
-        page,
-        limit,
-        sort: 'created_at',
-        order: 'desc',
-      }),
+    fetchPage: (page, limit) => this.fetchLibraryPage(page, limit),
     limit: 50,
     isUserLibrary: true,
     mergeStrategy: (existing, incoming) => [...existing, ...incoming],
     loadingSkeletonConfig: { count: 8, rows: 2, cols: 4 },
     showBackToTop: true,
     header: { title: 'My Library' },
+    sorting: this.librarySortingConfig,
   };
 
   ngOnInit(): void {
@@ -292,6 +305,34 @@ export class LibraryComponent implements OnInit {
       horizontalPosition: 'end',
       verticalPosition: 'bottom',
     });
+  }
+
+  private fetchLibraryPage(page: number, limit: number) {
+    const [activeSort] = this.sortingState();
+    const params: LibraryQueryParams = {
+      page,
+      limit,
+    };
+
+    if (activeSort) {
+      params.sort = this.mapSortKey(activeSort.key);
+      params.order = activeSort.direction;
+    }
+
+    return this.userLibraryService.getUserLibrary(params);
+  }
+
+  private handleLibrarySortingChange(sorting: SongCollectionSortingState[]): void {
+    const next = sorting.length ? sorting : [];
+    this.sortingState.set(next);
+    this.refreshCollection();
+  }
+
+  private mapSortKey(key: string): 'title' | 'composer' {
+    if (key === 'title' || key === 'composer') {
+      return key;
+    }
+    return 'composer';
   }
 
   private getResponsiveDialogWidth(): string {

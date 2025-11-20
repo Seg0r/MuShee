@@ -57,6 +57,32 @@
   width: min(220px, 100%);
 }
 
+.song-collection-sort-trigger {
+  display: flex;
+  align-items: center;
+
+  button {
+    color: var(--mat-sys-on-surface);
+  }
+}
+
+.song-collection-sorting-panel__chip-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs, 0.25rem);
+  padding: var(--space-sm, 0.75rem);
+  width: 160px;
+}
+
+.song-collection-sorting-panel__chip-list mat-chip {
+  justify-content: space-between;
+  font-weight: 500;
+}
+
+.song-collection-sorting-panel__chip-list mat-chip.song-collection-sorting-chip--active {
+  font-weight: 600;
+}
+
 .loading-state {
   width: 100%;
   padding-block: var(--space-md, 1rem);

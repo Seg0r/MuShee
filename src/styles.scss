@@ -1,5 +1,6 @@
 /* Import Material Design Tokens */
 @use './styles/tokens.scss';
+@use './styles/mixins/glassmorphism' as glass;
 
 :root {
   --page-background-image-dark: url('/page-background.jpg');
@@ -127,4 +128,9 @@ p {
 .floating-fab-right {
   position: fixed;
   right: var(--space-lg);
+}
+
+// For glassmorphism menu panels
+.cdk-overlay-pane .mat-mdc-menu-panel {
+  @include glass.glassmorphism(65%, 50%, 24px);
 }
