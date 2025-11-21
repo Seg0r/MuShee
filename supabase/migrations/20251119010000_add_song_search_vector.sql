@@ -8,15 +8,15 @@
 
 begin;
 
-alter table public.songs
-  add column search_vector tsvector generated always as (
-    to_tsvector(
-      'english',
-      coalesce(title, '') || ' ' || coalesce(subtitle, '') || ' ' || coalesce(composer, '')
-    )
-  ) stored;
+ALTER TABLE songs
+DROP COLUMN IF EXISTS search_vector;
 
-create index songs_search_vector_idx on public.songs using gin (search_vector);
+ALTER TABLE songs
+ADD COLUMN search_vector tsvector GENERATED ALWAYS AS (
+  to_tsvector('simple', title || ' ' || coalesce(composer, '') || ' ' || coalesce(subtitle, ''))
+) STORED;
+
+CREATE INDEX IF NOT EXISTS songs_search_vector_idx ON songs USING GIN (search_vector);
 
 commit;
 
