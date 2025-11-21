@@ -108,6 +108,7 @@ export interface Database {
           id: string;
           title: string;
           subtitle: string | null;
+          search_vector: string;
           uploader_id: string | null;
         };
         Insert: {

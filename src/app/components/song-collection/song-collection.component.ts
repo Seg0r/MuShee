@@ -21,7 +21,6 @@ import { MatIcon } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { MatSelectModule } from '@angular/material/select';
 
 import { LoadingSkeletonComponent } from '../loading-skeleton/loading-skeleton.component';
 import { SongListComponent } from '../song-list/song-list.component';
@@ -54,7 +53,6 @@ const defaultSkeletonConfig = { count: 50, rows: undefined, cols: undefined };
     MatIcon,
     MatInputModule,
     MatMenuModule,
-    MatSelectModule,
   ],
   templateUrl: './song-collection.component.html',
   styleUrl: './song-collection.component.scss',

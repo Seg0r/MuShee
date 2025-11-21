@@ -1,6 +1,7 @@
 import {
   Component,
   ChangeDetectionStrategy,
+  OnDestroy,
   OnInit,
   inject,
   signal,
@@ -21,6 +22,7 @@ import type { UserLibraryItemDto } from '@/types';
 import { SongCollectionComponent } from '../song-collection/song-collection.component';
 import type {
   SongCollectionConfig,
+  SongCollectionHeaderConfig,
   SongCollectionSortingConfig,
   SongCollectionSortingState,
 } from '../song-collection/song-collection.types';
@@ -34,6 +36,7 @@ import {
   SONG_COLLECTION_DEFAULT_SORTING_OPTIONS,
 } from '../song-collection/song-collection-sorting.presets';
 import type { PublicSongSortField, PublicSongsQueryParams } from '../../services/supabase.service';
+import { SongCollectionSearchController } from '../song-collection/song-collection-search.controller';
 
 const pageSongLimit = 50;
 
@@ -45,7 +48,7 @@ const pageSongLimit = 50;
   styleUrl: './discover.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DiscoverComponent implements OnInit {
+export class DiscoverComponent implements OnInit, OnDestroy {
   private readonly songService = inject(SongService);
   private readonly userLibraryService = inject(UserLibraryService);
   private readonly authService = inject(AuthService);
@@ -59,6 +62,12 @@ export class DiscoverComponent implements OnInit {
   private readonly userLibrarySongs = signal<UserLibraryItemDto[]>([]);
   private readonly addingToLibraryMap = signal<Map<string, boolean>>(new Map());
   private readonly sortingState = signal<SongCollectionSortingState[]>([]);
+  private readonly searchController = new SongCollectionSearchController({
+    label: 'Search songs',
+    placeholder: 'Search title, subtitle, or composer',
+    debounceMs: 700,
+    onDebouncedChange: () => this.refreshCollection(),
+  });
 
   readonly userLibrarySongIds = computed(
     () => new Set(this.userLibrarySongs().map(song => song.song_id))
@@ -72,16 +81,21 @@ export class DiscoverComponent implements OnInit {
     onChange: sorting => this.handleDiscoverSortingChange(sorting),
   };
 
-  readonly discoverCollectionConfig: SongCollectionConfig<SongTileData> = {
+  readonly discoverHeader = computed<SongCollectionHeaderConfig>(() => ({
+    title: 'Discover',
+    controls: [this.searchController.headerControl()],
+  }));
+
+  readonly discoverCollectionConfig = computed<SongCollectionConfig<SongTileData>>(() => ({
     fetchPage: (page, limit) => this.fetchDiscoverPage(page, limit),
     limit: pageSongLimit,
     isUserLibrary: false,
     isSongInLibrary: songId => this.userLibrarySongIds().has(songId),
     isAuthenticated: () => this.authService.isAuthenticated(),
     loadingSkeletonConfig: { count: 50 },
-    header: { title: 'Discover' },
+    header: this.discoverHeader(),
     sorting: this.discoverSortingConfig,
-  };
+  }));
 
   ngOnInit(): void {
     this.loadUserLibrary();
@@ -178,6 +192,11 @@ export class DiscoverComponent implements OnInit {
       page,
       limit,
     };
+
+    const trimmedSearch = this.searchController.searchTerm();
+    if (trimmedSearch) {
+      params.search = trimmedSearch;
+    }
 
     if (sortingStates.length) {
       const descriptors = sortingStates.map(state => ({
@@ -287,5 +306,9 @@ export class DiscoverComponent implements OnInit {
 
   private refreshCollection(): void {
     this.songCollectionRef()?.retry();
+  }
+
+  ngOnDestroy(): void {
+    this.searchController.destroy();
   }
 }

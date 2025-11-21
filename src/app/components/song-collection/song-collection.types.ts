@@ -39,7 +39,7 @@ export interface SongCollectionConfig<T extends SongTileData = SongTileData> {
 export interface SongCollectionHeaderConfig {
   title?: string;
   subtitle?: string;
-  controls?: SongCollectionHeaderControl[];
+  controls?: SongCollectionHeaderSearchControl[];
 }
 
 interface SongCollectionHeaderControlBase {
@@ -47,29 +47,10 @@ interface SongCollectionHeaderControlBase {
   label: string;
 }
 
-export interface SongCollectionHeaderSelectControl extends SongCollectionHeaderControlBase {
-  type: 'select';
-  value?: string;
-  placeholder?: string;
-  options: SongCollectionHeaderSelectOption[];
-  onValueChange: (value: string) => void;
-}
-
 export interface SongCollectionHeaderSearchControl extends SongCollectionHeaderControlBase {
-  type: 'search';
   value?: string;
   placeholder?: string;
   onValueChange: (value: string) => void;
-}
-
-export type SongCollectionHeaderControl =
-  | SongCollectionHeaderSelectControl
-  | SongCollectionHeaderSearchControl;
-
-export interface SongCollectionHeaderSelectOption {
-  value: string;
-  label: string;
-  disabled?: boolean;
 }
 
 export type SongCollectionSortDirection = 'asc' | 'desc';

@@ -52,6 +52,7 @@ export interface LibraryQueryParams {
   sort?: LibrarySortField;
   order?: 'asc' | 'desc';
   sorts?: LibrarySortDescriptor[];
+  search?: string;
 }
 
 /**
@@ -301,8 +302,12 @@ export class SupabaseService {
         .is('uploader_id', null);
 
       // Apply search filter if provided
-      if (params.search) {
-        query = query.or(`title.ilike.%${params.search}%,composer.ilike.%${params.search}%`);
+      const searchTerm = params.search?.trim();
+      if (searchTerm) {
+        query = query.textSearch('search_vector', searchTerm, {
+          config: 'english',
+          type: 'websearch',
+        });
       }
 
       // Apply sorting
@@ -368,7 +373,7 @@ export class SupabaseService {
       // First, retrieve the song to check if it exists
       const { data: song, error: songError } = await this.client
         .from('songs')
-        .select('id, title, composer, subtitle, file_hash, uploader_id, created_at')
+        .select('id, title, composer, subtitle, file_hash, uploader_id, created_at, search_vector')
         .eq('id', songId)
         .single();
 
@@ -669,6 +674,14 @@ export class SupabaseService {
         )
         .eq('user_id', userId);
 
+      const searchTerm = params.search?.trim();
+      if (searchTerm) {
+        query = query.textSearch('songs.search_vector', searchTerm, {
+          config: 'english',
+          type: 'websearch',
+        });
+      }
+
       // Apply sorting (supports multi-column order)
       const sortDescriptors: LibrarySortDescriptor[] =
         Array.isArray(params.sorts) && params.sorts.length
@@ -900,7 +913,7 @@ export class SupabaseService {
 
       const { data, error } = await this.client
         .from('songs')
-        .select('id, title, composer, subtitle, file_hash, uploader_id, created_at')
+        .select('id, title, composer, subtitle, file_hash, uploader_id, created_at, search_vector')
         .eq('file_hash', hash)
         .single();
 
@@ -946,7 +959,7 @@ export class SupabaseService {
           file_hash: data.file_hash,
           uploader_id: data.uploader_id,
         })
-        .select('id, title, composer, subtitle, file_hash, uploader_id, created_at')
+        .select('id, title, composer, subtitle, file_hash, uploader_id, created_at, search_vector')
         .single();
 
       if (error) {
@@ -990,7 +1003,7 @@ export class SupabaseService {
       // Step 1: Find song by hash
       const { data: songData, error: songError } = await this.client
         .from('songs')
-        .select('id, title, composer, subtitle, file_hash, uploader_id, created_at')
+        .select('id, title, composer, subtitle, file_hash, uploader_id, created_at, search_vector')
         .eq('file_hash', hash)
         .single();
 

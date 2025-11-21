@@ -164,7 +164,14 @@ export class UserLibraryService {
     }
 
     // Check for unexpected additional properties (strict validation)
-    const allowedProperties = ['page', 'limit', 'sort', 'order', 'sorts'];
+    if (params.search !== undefined) {
+      if (typeof params.search !== 'string') {
+        throw new ValidationError('search must be a string');
+      }
+      params.search = params.search.trim();
+    }
+
+    const allowedProperties = ['page', 'limit', 'sort', 'order', 'sorts', 'search'];
     const paramKeys = Object.keys(params);
     const extraProperties = paramKeys.filter(key => !allowedProperties.includes(key));
 

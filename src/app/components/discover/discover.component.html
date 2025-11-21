@@ -1,7 +1,7 @@
 <main class="discover-container">
   <app-song-collection
     #songCollection
-    [config]="discoverCollectionConfig"
+    [config]="discoverCollectionConfig()"
     (tileClick)="onSongCardClick($event)"
     (addToLibrary)="onAddToLibrary($event)"
   ></app-song-collection>

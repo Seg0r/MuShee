@@ -1,7 +1,7 @@
 <div class="library-container">
   <app-song-collection
     #songCollection
-    [config]="libraryCollectionConfig"
+    [config]="libraryCollectionConfig()"
     [emptyStateTemplate]="libraryEmptyState"
     [showBackToTop]="true"
     (tileClick)="onSongCardClick($event)"

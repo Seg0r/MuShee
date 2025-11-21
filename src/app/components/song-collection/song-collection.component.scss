@@ -19,7 +19,7 @@
 
 .song-collection-header {
   width: 100%;
-  padding: var(--space-md, 1rem);
+  padding: var(--space-sm, 1rem) var(--space-md, 1rem);
   border-bottom: 1px solid var(--mat-sys-outline-variant);
   display: flex;
   justify-content: space-between;
@@ -29,7 +29,6 @@
 }
 
 .song-collection-header__titles {
-  min-width: 200px;
   flex: 1;
 }
 
@@ -51,16 +50,22 @@
   gap: var(--space-sm, 0.75rem);
   align-items: center;
   flex-wrap: wrap;
-  padding-right: var(--space-xs, 0.75rem);
+  padding-right: var(--space-sm, 0.75rem);
 }
 
 .song-collection-control {
   width: min(220px, 100%);
 }
 
+.song-collection-control--search {
+  min-width: 240px;
+  flex: 1 1 240px;
+}
+
 .song-collection-sort-trigger {
   display: flex;
   align-items: center;
+  margin-left: auto;
 
   button {
     color: var(--mat-sys-on-surface);

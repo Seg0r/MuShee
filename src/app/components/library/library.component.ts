@@ -1,6 +1,7 @@
 import {
   Component,
   OnInit,
+  OnDestroy,
   ChangeDetectionStrategy,
   inject,
   signal,
@@ -47,6 +48,7 @@ import {
   SONG_COLLECTION_DEFAULT_SORTING_LABEL,
   SONG_COLLECTION_DEFAULT_SORTING_OPTIONS,
 } from '../song-collection/song-collection-sorting.presets';
+import { SongCollectionSearchController } from '../song-collection/song-collection-search.controller';
 
 @Component({
   selector: 'app-library',
@@ -63,7 +65,7 @@ import {
   styleUrl: './library.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LibraryComponent implements OnInit {
+export class LibraryComponent implements OnInit, OnDestroy {
   private readonly userLibraryService = inject(UserLibraryService);
   private readonly profileService = inject(ProfileService);
   private readonly aiSuggestionsService = inject(AiSuggestionsService);
@@ -89,6 +91,12 @@ export class LibraryComponent implements OnInit {
   readonly collectionState = this.collectionStateSignal.asReadonly();
 
   private readonly sortingState = signal<SongCollectionSortingState[]>([]);
+  private readonly searchController = new SongCollectionSearchController({
+    label: 'Search library',
+    placeholder: 'Search title, subtitle, or composer',
+    debounceMs: 700,
+    onDebouncedChange: () => this.refreshCollection(),
+  });
 
   readonly librarySortingConfig: SongCollectionSortingConfig = {
     options: [...SONG_COLLECTION_DEFAULT_SORTING_OPTIONS],
@@ -104,19 +112,26 @@ export class LibraryComponent implements OnInit {
       !this.suggestionsLoading()
   );
 
-  readonly libraryCollectionConfig: SongCollectionConfig<SongTileData> = {
+  readonly libraryCollectionConfig = computed<SongCollectionConfig<SongTileData>>(() => ({
     fetchPage: (page, limit) => this.fetchLibraryPage(page, limit),
     limit: 50,
     isUserLibrary: true,
     mergeStrategy: (existing, incoming) => [...existing, ...incoming],
     loadingSkeletonConfig: { count: 8, rows: 2, cols: 4 },
     showBackToTop: true,
-    header: { title: 'My Library' },
+    header: {
+      title: 'My Library',
+      controls: [this.searchController.headerControl()],
+    },
     sorting: this.librarySortingConfig,
-  };
+  }));
 
   ngOnInit(): void {
     this.checkOnboardingStatus();
+  }
+
+  ngOnDestroy(): void {
+    this.searchController.destroy();
   }
 
   onCollectionStateChange(state: SongCollectionViewState): void {
@@ -315,6 +330,11 @@ export class LibraryComponent implements OnInit {
       page,
       limit,
     };
+
+    const searchTerm = this.searchController.searchTerm();
+    if (searchTerm) {
+      params.search = searchTerm;
+    }
 
     if (sortingStates.length) {
       const sortDescriptors: LibrarySortDescriptor[] = sortingStates.map(state => ({
