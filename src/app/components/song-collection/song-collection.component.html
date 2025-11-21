@@ -52,7 +52,6 @@
             </button>
             <mat-menu
               #sortMenu="matMenu"
-              class="song-collection-sorting-menu"
               (opened)="onSortingMenuOpened()"
               (closed)="onSortingMenuClosed()"
               xPosition="before"
@@ -61,7 +60,7 @@
               <mat-chip-listbox
                 multiple
                 aria-label="Sort options"
-                class="song-collection-sorting-panel__chip-list"
+                class="song-collection-sorting-panel__chip-list mat-mdc-chip-set-stacked"
               >
                 @for (option of sortingChips(); track option.key) {
                   <mat-chip

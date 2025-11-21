@@ -51,6 +51,7 @@
   gap: var(--space-sm, 0.75rem);
   align-items: center;
   flex-wrap: wrap;
+  padding-right: var(--space-xs, 0.75rem);
 }
 
 .song-collection-control {
@@ -66,21 +67,13 @@
   }
 }
 
+.mat-mdc-chip-set {
+  width: min-content;
+}
+
 .song-collection-sorting-panel__chip-list {
-  display: flex;
-  flex-direction: column;
   gap: var(--space-2xs, 0.25rem);
   padding: var(--space-sm, 0.75rem);
-  width: 160px;
-}
-
-.song-collection-sorting-panel__chip-list mat-chip {
-  justify-content: space-between;
-  font-weight: 500;
-}
-
-.song-collection-sorting-panel__chip-list mat-chip.song-collection-sorting-chip--active {
-  font-weight: 600;
 }
 
 .loading-state {
