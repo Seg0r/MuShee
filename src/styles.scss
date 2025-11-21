@@ -132,5 +132,5 @@ p {
 
 // For glassmorphism menu panels
 .cdk-overlay-pane .mat-mdc-menu-panel {
-  @include glass.glassmorphism(65%, 50%, 24px);
+  @include glass.glassmorphism(65%, 50%, 4px);
 }
