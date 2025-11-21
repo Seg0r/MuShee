@@ -12,10 +12,12 @@
           @for (control of headerControls(); track control.id ?? control.label) {
             <mat-form-field
               appearance="outline"
-              class="song-collection-control song-collection-control--search"
+              class="song-collection-control-search"
               subscriptSizing="dynamic"
             >
-              <mat-label>{{ control.label }}</mat-label>
+              <mat-label class="song-collection-control-search-label">{{
+                control.label
+              }}</mat-label>
               <input
                 matInput
                 type="search"

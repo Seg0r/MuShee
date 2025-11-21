@@ -53,13 +53,14 @@
   padding-right: var(--space-sm, 0.75rem);
 }
 
-.song-collection-control {
-  width: min(220px, 100%);
+.song-collection-control-search {
+  min-width: 320px;
+  flex: 1 1 320px;
 }
 
-.song-collection-control--search {
-  min-width: 240px;
-  flex: 1 1 240px;
+.song-collection-control-search-label {
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 500;
 }
 
 .song-collection-sort-trigger {
