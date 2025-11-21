@@ -10,11 +10,7 @@
       <div class="song-collection-header-controls" role="toolbar" aria-label="Collection controls">
         @if (headerControls().length) {
           @for (control of headerControls(); track control.id ?? control.label) {
-            <mat-form-field
-              appearance="outline"
-              class="song-collection-control-search"
-              subscriptSizing="dynamic"
-            >
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
               <mat-label class="song-collection-control-search-label">{{
                 control.label
               }}</mat-label>
@@ -22,9 +18,9 @@
                 matInput
                 type="search"
                 [value]="control.value"
-                [placeholder]="control.placeholder ?? control.label"
                 (input)="handleHeaderSearchInput(control, $event)"
               />
+              <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
           }
         }
