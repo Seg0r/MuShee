@@ -21,7 +21,7 @@
 }
 
 .glass-shell {
-  @include glass.glassmorphism(65%, 50%, 24px);
+  @include glass.glassmorphism(65%, 50%, 14px);
   display: flex;
   flex-direction: column;
   height: 100%;

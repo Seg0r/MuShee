@@ -10,9 +10,9 @@ export interface SongCollectionSearchControllerOptions {
 
 export class SongCollectionSearchController {
   private readonly valueSignal = signal('');
+  private readonly debouncedValueSignal = signal('');
   private readonly options: SongCollectionSearchControllerOptions;
   private readonly debounceMs: number;
-  private debouncedValue = '';
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(options: SongCollectionSearchControllerOptions) {
@@ -30,8 +30,10 @@ export class SongCollectionSearchController {
   }
 
   searchTerm(): string {
-    return this.debouncedValue;
+    return this.debouncedValueSignal();
   }
+
+  searchTermSignal = this.debouncedValueSignal.asReadonly();
 
   destroy(): void {
     if (this.debounceTimer) {
@@ -48,11 +50,11 @@ export class SongCollectionSearchController {
 
     const trimmedValue = value.trim();
     this.debounceTimer = setTimeout(() => {
-      if (trimmedValue === this.debouncedValue) {
+      if (trimmedValue === this.debouncedValueSignal()) {
         this.debounceTimer = null;
         return;
       }
-      this.debouncedValue = trimmedValue;
+      this.debouncedValueSignal.set(trimmedValue);
       this.options.onDebouncedChange?.(trimmedValue);
       this.debounceTimer = null;
     }, this.debounceMs);

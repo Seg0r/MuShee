@@ -9,6 +9,7 @@ import {
   viewChild,
   Injector,
   effect,
+  TemplateRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
@@ -76,6 +77,8 @@ export class LibraryComponent implements OnInit, OnDestroy {
   private readonly injector = inject(Injector);
 
   readonly songCollectionRef = viewChild<SongCollectionComponent>('songCollection');
+  readonly libraryEmptyStateRef = viewChild<TemplateRef<void>>('libraryEmptyState');
+  readonly librarySearchEmptyStateRef = viewChild<TemplateRef<void>>('librarySearchEmptyState');
 
   private readonly suggestionsLoading = signal(false);
   private readonly selectedSongForDelete = signal<UserLibraryItemDto | null>(null);
@@ -111,6 +114,15 @@ export class LibraryComponent implements OnInit, OnDestroy {
       !this.collectionState().isEmpty &&
       !this.suggestionsLoading()
   );
+
+  readonly hasActiveSearch = computed(() => Boolean(this.searchController.searchTermSignal()));
+
+  readonly currentEmptyStateTemplate = computed<TemplateRef<void> | null>(() => {
+    if (this.hasActiveSearch()) {
+      return this.librarySearchEmptyStateRef() ?? null;
+    }
+    return this.libraryEmptyStateRef() ?? null;
+  });
 
   readonly libraryCollectionConfig = computed<SongCollectionConfig<SongTileData>>(() => ({
     fetchPage: (page, limit) => this.fetchLibraryPage(page, limit),
@@ -157,6 +169,12 @@ export class LibraryComponent implements OnInit, OnDestroy {
 
   onUploadClick(): void {
     this.openUploadDialog();
+  }
+
+  onClearSearch(): void {
+    // Clear the search by triggering the input handler with empty value
+    this.searchController.headerControl().onValueChange('');
+    this.refreshCollection();
   }
 
   async onFindSimilarClick(): Promise<void> {
@@ -331,7 +349,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
       limit,
     };
 
-    const searchTerm = this.searchController.searchTerm();
+    const searchTerm = this.searchController.searchTermSignal();
     if (searchTerm) {
       params.search = searchTerm;
     }

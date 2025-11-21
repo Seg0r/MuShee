@@ -2,7 +2,7 @@
   <app-song-collection
     #songCollection
     [config]="libraryCollectionConfig()"
-    [emptyStateTemplate]="libraryEmptyState"
+    [emptyStateTemplate]="currentEmptyStateTemplate()"
     [showBackToTop]="true"
     (tileClick)="onSongCardClick($event)"
     (deleteClick)="onSongDeleteClick($event)"
@@ -16,6 +16,27 @@
           <button mat-flat-button (click)="onUploadClick()">
             <mat-icon>cloud_upload</mat-icon>
             Upload Your Music
+          </button>
+          <button mat-button [routerLink]="['/app/discover']">
+            <mat-icon>explore</mat-icon>
+            Browse Public Library
+          </button>
+        </div>
+      </app-empty-state>
+    </div>
+  </ng-template>
+
+  <ng-template #librarySearchEmptyState>
+    <div class="empty-state-wrapper">
+      <app-empty-state
+        [message]="'No songs found'"
+        [description]="'Try adjusting your search terms or browse all songs in your library'"
+        [iconName]="'search_off'"
+      >
+        <div class="empty-state-actions">
+          <button mat-button (click)="onClearSearch()">
+            <mat-icon>clear</mat-icon>
+            Clear Search
           </button>
           <button mat-button [routerLink]="['/app/discover']">
             <mat-icon>explore</mat-icon>

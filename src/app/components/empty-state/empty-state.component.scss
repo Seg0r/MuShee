@@ -1,4 +1,5 @@
 @use '@angular/material' as mat;
+@use '../../../styles/mixins/glassmorphism' as glass;
 
 .empty-state-container {
   display: flex;
@@ -9,13 +10,14 @@
   text-align: center;
   min-height: 400px;
   gap: 1.5rem;
+  @include glass.glassmorphism(65%, 50%, 14px);
 }
 
 .empty-state-icon {
   font-size: 80px;
   width: 80px;
   height: 80px;
-  color: var(--mat-sys-primary);
+  color: var(--mat-sys-error);
   opacity: 0.8;
 }
 
