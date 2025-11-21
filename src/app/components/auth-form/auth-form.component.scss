@@ -51,7 +51,7 @@
   width: 100%;
 
   .mdc-text-field {
-    background-color: var(--mat-sys-surface-dim);
+    background-color: transparent;
   }
 
   .mdc-text-field__input:-webkit-autofill,
@@ -63,7 +63,7 @@
   }
 
   .mdc-text-field--filled {
-    background-color: var(--mat-sys-surface-dim);
+    background-color: transparent;
   }
 
   .mdc-notched-outline__leading,
