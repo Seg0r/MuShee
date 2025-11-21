@@ -207,6 +207,29 @@ export class SongService {
       throw new ValidationError('Order must be either "asc" or "desc"', 'INVALID_PARAMETERS');
     }
 
+    if (params.sorts !== undefined) {
+      if (!Array.isArray(params.sorts)) {
+        throw new ValidationError('Sorts must be an array', 'INVALID_PARAMETERS');
+      }
+
+      params.sorts.forEach(descriptor => {
+        if (!descriptor || typeof descriptor !== 'object') {
+          throw new ValidationError('Each sort descriptor must be an object', 'INVALID_PARAMETERS');
+        }
+
+        if (!allowedSortFields.includes(descriptor.field)) {
+          throw new ValidationError(
+            `Sort field must be one of: ${allowedSortFields.join(', ')}`,
+            'INVALID_PARAMETERS'
+          );
+        }
+
+        if (descriptor.direction !== 'asc' && descriptor.direction !== 'desc') {
+          throw new ValidationError('Sort direction must be "asc" or "desc"', 'INVALID_PARAMETERS');
+        }
+      });
+    }
+
     // Validate search (optional string, no specific constraints)
     if (params.search !== undefined && typeof params.search !== 'string') {
       throw new ValidationError('Search must be a string', 'INVALID_PARAMETERS');

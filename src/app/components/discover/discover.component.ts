@@ -5,6 +5,7 @@ import {
   inject,
   signal,
   computed,
+  viewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -18,12 +19,21 @@ import { ErrorHandlingService } from '../../services/error-handling.service';
 
 import type { UserLibraryItemDto } from '@/types';
 import { SongCollectionComponent } from '../song-collection/song-collection.component';
-import type { SongCollectionConfig } from '../song-collection/song-collection.types';
+import type {
+  SongCollectionConfig,
+  SongCollectionSortingConfig,
+  SongCollectionSortingState,
+} from '../song-collection/song-collection.types';
 import { SongTileData } from '../song-tile/song-tile.component';
 import {
   OnboardingDialogComponent,
   type OnboardingDialogData,
 } from '../onboarding-dialog/onboarding-dialog.component';
+import {
+  SONG_COLLECTION_DEFAULT_SORTING_LABEL,
+  SONG_COLLECTION_DEFAULT_SORTING_OPTIONS,
+} from '../song-collection/song-collection-sorting.presets';
+import type { PublicSongSortField, PublicSongsQueryParams } from '../../services/supabase.service';
 
 const pageSongLimit = 50;
 
@@ -44,26 +54,33 @@ export class DiscoverComponent implements OnInit {
   private readonly errorHandlingService = inject(ErrorHandlingService);
   private readonly dialog = inject(MatDialog);
 
+  readonly songCollectionRef = viewChild<SongCollectionComponent>('songCollection');
+
   private readonly userLibrarySongs = signal<UserLibraryItemDto[]>([]);
   private readonly addingToLibraryMap = signal<Map<string, boolean>>(new Map());
+  private readonly sortingState = signal<SongCollectionSortingState[]>([]);
 
   readonly userLibrarySongIds = computed(
     () => new Set(this.userLibrarySongs().map(song => song.song_id))
   );
   readonly isAuthenticated = computed(() => this.authService.isAuthenticated());
 
-  readonly discoverCollectionConfig: SongCollectionConfig = {
-    fetchPage: (page, limit) =>
-      this.songService.getPublicSongsList({
-        page,
-        limit,
-      }),
+  readonly discoverSortingConfig: SongCollectionSortingConfig = {
+    options: [...SONG_COLLECTION_DEFAULT_SORTING_OPTIONS],
+    label: SONG_COLLECTION_DEFAULT_SORTING_LABEL,
+    initialState: [],
+    onChange: sorting => this.handleDiscoverSortingChange(sorting),
+  };
+
+  readonly discoverCollectionConfig: SongCollectionConfig<SongTileData> = {
+    fetchPage: (page, limit) => this.fetchDiscoverPage(page, limit),
     limit: pageSongLimit,
     isUserLibrary: false,
     isSongInLibrary: songId => this.userLibrarySongIds().has(songId),
     isAuthenticated: () => this.authService.isAuthenticated(),
     loadingSkeletonConfig: { count: 50 },
     header: { title: 'Discover' },
+    sorting: this.discoverSortingConfig,
   };
 
   ngOnInit(): void {
@@ -155,6 +172,28 @@ export class DiscoverComponent implements OnInit {
     await this.router.navigate(['/song', song.id]);
   }
 
+  private fetchDiscoverPage(page: number, limit: number) {
+    const sortingStates = this.sortingState();
+    const params: PublicSongsQueryParams = {
+      page,
+      limit,
+    };
+
+    if (sortingStates.length) {
+      const descriptors = sortingStates.map(state => ({
+        field: this.mapSortKey(state.key),
+        direction: state.direction,
+      }));
+      params.sorts = descriptors;
+
+      const [primary] = descriptors;
+      params.sort = primary.field;
+      params.order = primary.direction;
+    }
+
+    return this.songService.getPublicSongsList(params);
+  }
+
   private async loadUserLibrary(): Promise<void> {
     if (!this.authService.isAuthenticated()) {
       this.userLibrarySongs.set([]);
@@ -227,5 +266,26 @@ export class DiscoverComponent implements OnInit {
       verticalPosition: 'bottom',
       panelClass: ['error-toast'],
     });
+  }
+
+  private handleDiscoverSortingChange(sorting: SongCollectionSortingState[]): void {
+    const next = sorting.length ? sorting : [];
+    this.sortingState.set(next);
+    this.refreshCollection();
+  }
+
+  private mapSortKey(key: string): PublicSongSortField {
+    switch (key) {
+      case 'title':
+      case 'composer':
+      case 'created_at':
+        return key;
+      default:
+        return 'created_at';
+    }
+  }
+
+  private refreshCollection(): void {
+    this.songCollectionRef()?.retry();
   }
 }

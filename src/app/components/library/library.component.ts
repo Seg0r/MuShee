@@ -40,15 +40,13 @@ import { SongCollectionComponent } from '../song-collection/song-collection.comp
 import {
   SongCollectionConfig,
   SongCollectionSortingConfig,
-  SongCollectionSortingOption,
   SongCollectionSortingState,
   SongCollectionViewState,
 } from '../song-collection/song-collection.types';
-
-const librarySortingOptions: SongCollectionSortingOption[] = [
-  { key: 'title', label: 'Title', initialDirection: 'asc' },
-  { key: 'composer', label: 'Composer', initialDirection: 'asc' },
-];
+import {
+  SONG_COLLECTION_DEFAULT_SORTING_LABEL,
+  SONG_COLLECTION_DEFAULT_SORTING_OPTIONS,
+} from '../song-collection/song-collection-sorting.presets';
 
 @Component({
   selector: 'app-library',
@@ -93,8 +91,8 @@ export class LibraryComponent implements OnInit {
   private readonly sortingState = signal<SongCollectionSortingState[]>([]);
 
   readonly librarySortingConfig: SongCollectionSortingConfig = {
-    options: librarySortingOptions,
-    label: 'Sort most recent songs first',
+    options: [...SONG_COLLECTION_DEFAULT_SORTING_OPTIONS],
+    label: SONG_COLLECTION_DEFAULT_SORTING_LABEL,
     initialState: [],
     onChange: sorting => this.handleLibrarySortingChange(sorting),
   };

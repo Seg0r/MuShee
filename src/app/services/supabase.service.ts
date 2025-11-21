@@ -19,12 +19,20 @@ import type { Tables } from '../../db/database.types';
  * Query parameters for retrieving public domain songs.
  * Supports pagination, sorting, and search functionality.
  */
+export type PublicSongSortField = 'title' | 'composer' | 'created_at';
+
+export interface PublicSongSortDescriptor {
+  field: PublicSongSortField;
+  direction: 'asc' | 'desc';
+}
+
 export interface PublicSongsQueryParams {
   page?: number;
   limit?: number;
-  sort?: 'title' | 'composer' | 'created_at';
+  sort?: PublicSongSortField;
   order?: 'asc' | 'desc';
   search?: string;
+  sorts?: PublicSongSortDescriptor[];
 }
 
 export type LibrarySortField = 'title' | 'composer' | 'created_at' | 'added_at';
@@ -298,9 +306,16 @@ export class SupabaseService {
       }
 
       // Apply sorting
-      const sortField = params.sort || 'title';
-      const sortOrder = params.order === 'desc' ? false : true; // Supabase uses boolean for ascending
-      query = query.order(sortField, { ascending: sortOrder });
+      if (params.sorts?.length) {
+        params.sorts.forEach(sortDescriptor => {
+          const ascending = sortDescriptor.direction === 'asc';
+          query = query.order(sortDescriptor.field, { ascending });
+        });
+      } else {
+        const sortField = params.sort || 'title';
+        const sortOrder = params.order === 'desc' ? false : true; // Supabase uses boolean for ascending
+        query = query.order(sortField, { ascending: sortOrder });
+      }
 
       // Apply pagination
       const page = Math.max(1, params.page || 1);
