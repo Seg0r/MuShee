@@ -264,14 +264,13 @@ export class SongCollectionComponent implements OnInit {
 
     if (existingIndex === -1) {
       const direction: SongCollectionSortDirection = option.initialDirection ?? 'asc';
-      next = [{ key: option.key, direction }, ...current];
+      next = [...current, { key: option.key, direction }];
     } else {
       const existing = current[existingIndex];
       if (existing.direction === 'asc') {
-        next = [
-          { key: option.key, direction: 'desc' },
-          ...current.filter((_, index) => index !== existingIndex),
-        ];
+        next = current.map((state, index) =>
+          index === existingIndex ? { key: option.key, direction: 'desc' } : state
+        );
       } else {
         next = current.filter((_, index) => index !== existingIndex);
       }

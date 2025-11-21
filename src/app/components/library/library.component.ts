@@ -18,7 +18,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import type { UserLibraryItemDto, ProfileDto } from '@/types';
 import { UserLibraryService } from '@/app/services/user-library.service';
-import type { LibraryQueryParams } from '@/app/services/supabase.service';
+import type {
+  LibraryQueryParams,
+  LibrarySortDescriptor,
+  LibrarySortField,
+} from '@/app/services/supabase.service';
 import { ProfileService } from '@/app/services/profile.service';
 import { AiSuggestionsService } from '@/app/services/ai-suggestions.service';
 import { AuthService } from '@/app/services/auth.service';
@@ -308,15 +312,23 @@ export class LibraryComponent implements OnInit {
   }
 
   private fetchLibraryPage(page: number, limit: number) {
-    const [activeSort] = this.sortingState();
+    const sortingStates = this.sortingState();
     const params: LibraryQueryParams = {
       page,
       limit,
     };
 
-    if (activeSort) {
-      params.sort = this.mapSortKey(activeSort.key);
-      params.order = activeSort.direction;
+    if (sortingStates.length) {
+      const sortDescriptors: LibrarySortDescriptor[] = sortingStates.map(state => ({
+        field: this.mapSortKey(state.key),
+        direction: state.direction,
+      }));
+      params.sorts = sortDescriptors;
+
+      // Provide primary sort fallback for services that rely on single-field params.
+      const [primary] = sortDescriptors;
+      params.sort = primary.field;
+      params.order = primary.direction;
     }
 
     return this.userLibraryService.getUserLibrary(params);
@@ -328,11 +340,16 @@ export class LibraryComponent implements OnInit {
     this.refreshCollection();
   }
 
-  private mapSortKey(key: string): 'title' | 'composer' {
-    if (key === 'title' || key === 'composer') {
-      return key;
+  private mapSortKey(key: string): LibrarySortField {
+    switch (key) {
+      case 'title':
+      case 'composer':
+      case 'added_at':
+      case 'created_at':
+        return key;
+      default:
+        return 'created_at';
     }
-    return 'composer';
   }
 
   private getResponsiveDialogWidth(): string {

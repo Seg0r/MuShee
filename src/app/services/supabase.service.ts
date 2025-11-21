@@ -27,6 +27,13 @@ export interface PublicSongsQueryParams {
   search?: string;
 }
 
+export type LibrarySortField = 'title' | 'composer' | 'created_at' | 'added_at';
+
+export interface LibrarySortDescriptor {
+  field: LibrarySortField;
+  direction: 'asc' | 'desc';
+}
+
 /**
  * Query parameters for retrieving user's personal library.
  * Supports pagination and sorting by library association or song metadata.
@@ -34,8 +41,9 @@ export interface PublicSongsQueryParams {
 export interface LibraryQueryParams {
   page?: number;
   limit?: number;
-  sort?: 'title' | 'composer' | 'created_at' | 'added_at';
+  sort?: LibrarySortField;
   order?: 'asc' | 'desc';
+  sorts?: LibrarySortDescriptor[];
 }
 
 /**
@@ -646,18 +654,29 @@ export class SupabaseService {
         )
         .eq('user_id', userId);
 
-      // Apply sorting
-      const sortField = params.sort || 'created_at';
-      const ascending = params.order !== 'desc';
+      // Apply sorting (supports multi-column order)
+      const sortDescriptors: LibrarySortDescriptor[] =
+        Array.isArray(params.sorts) && params.sorts.length
+          ? params.sorts
+          : [
+              {
+                field: params.sort ?? 'created_at',
+                direction: params.order ?? 'asc',
+              },
+            ];
 
-      if (sortField === 'title' || sortField === 'composer') {
-        // Order parent rows by the joined songs table column (see Supabase order() docs).
-        const nestedColumn = `songs(${sortField})`;
-        query = query.order(nestedColumn, { ascending });
-      } else {
-        const column = sortField === 'added_at' ? 'created_at' : sortField;
-        query = query.order(column, { ascending });
-      }
+      sortDescriptors.forEach(descriptor => {
+        const ascending = descriptor.direction !== 'desc';
+
+        if (descriptor.field === 'title' || descriptor.field === 'composer') {
+          // Order parent rows by the joined songs table column (see Supabase order() docs).
+          const nestedColumn = `songs(${descriptor.field})`;
+          query = query.order(nestedColumn, { ascending });
+        } else {
+          const column = descriptor.field === 'added_at' ? 'created_at' : descriptor.field;
+          query = query.order(column, { ascending });
+        }
+      });
 
       // Apply pagination
       const page = Math.max(1, params.page || 1);
@@ -694,7 +713,7 @@ export class SupabaseService {
         `Retrieved ${transformedData.length} library items (total: ${count}) for user:`,
         userId,
         'Sort:',
-        { sortField, order: params.order ?? 'asc' }
+        sortDescriptors
       );
       console.table(previewRows);
       return {

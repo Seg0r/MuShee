@@ -109,13 +109,14 @@ export class UserLibraryService {
       }
     }
 
+    const allowedSortFields = ['title', 'composer', 'created_at', 'added_at'] as const;
+
     // Validate sort parameter
     if (params.sort !== undefined) {
-      const allowedSortFields = ['title', 'composer', 'created_at', 'added_at'];
       if (typeof params.sort !== 'string') {
         throw new ValidationError('sort must be a string');
       }
-      if (!allowedSortFields.includes(params.sort)) {
+      if (!allowedSortFields.includes(params.sort as (typeof allowedSortFields)[number])) {
         throw new ValidationError(`sort must be one of: ${allowedSortFields.join(', ')}`);
       }
     }
@@ -130,8 +131,40 @@ export class UserLibraryService {
       }
     }
 
+    if (params.sorts !== undefined) {
+      if (!Array.isArray(params.sorts)) {
+        throw new ValidationError('sorts must be an array of sort descriptors');
+      }
+
+      params.sorts.forEach((descriptor, index) => {
+        if (!descriptor || typeof descriptor !== 'object') {
+          throw new ValidationError(`sorts[${index}] must be a valid sort descriptor`);
+        }
+
+        const { field, direction } = descriptor;
+
+        if (typeof field !== 'string') {
+          throw new ValidationError(`sorts[${index}].field must be a string`);
+        }
+
+        if (!allowedSortFields.includes(field as (typeof allowedSortFields)[number])) {
+          throw new ValidationError(
+            `sorts[${index}].field must be one of: ${allowedSortFields.join(', ')}`
+          );
+        }
+
+        if (typeof direction !== 'string') {
+          throw new ValidationError(`sorts[${index}].direction must be a string`);
+        }
+
+        if (direction !== 'asc' && direction !== 'desc') {
+          throw new ValidationError(`sorts[${index}].direction must be either "asc" or "desc"`);
+        }
+      });
+    }
+
     // Check for unexpected additional properties (strict validation)
-    const allowedProperties = ['page', 'limit', 'sort', 'order'];
+    const allowedProperties = ['page', 'limit', 'sort', 'order', 'sorts'];
     const paramKeys = Object.keys(params);
     const extraProperties = paramKeys.filter(key => !allowedProperties.includes(key));
 
