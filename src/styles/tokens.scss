@@ -134,7 +134,7 @@ host {
   @include mat.theme(
     (
       typography: Roboto,
-      density: -1,
+      density: -2,
     )
   );
   @include mat.theme-overrides($light-theme-colors);
@@ -149,7 +149,7 @@ host {
         theme-type: dark,
       ),
       typography: Roboto,
-      density: 0,
+      density: -2,
     )
   );
   @include mat.theme-overrides($dark-theme-colors);

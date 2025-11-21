@@ -106,18 +106,19 @@ export interface Database {
           created_at: string;
           file_hash: string;
           id: string;
-          title: string;
+          search_vector: unknown;
           subtitle: string | null;
-          search_vector: string;
+          title: string;
           uploader_id: string | null;
         };
         Insert: {
-          composer?: string;
+          composer: string;
           created_at?: string;
           file_hash: string;
           id?: string;
-          title?: string;
+          search_vector?: unknown;
           subtitle?: string | null;
+          title: string;
           uploader_id?: string | null;
         };
         Update: {
@@ -125,8 +126,9 @@ export interface Database {
           created_at?: string;
           file_hash?: string;
           id?: string;
-          title?: string;
+          search_vector?: unknown;
           subtitle?: string | null;
+          title?: string;
           uploader_id?: string | null;
         };
         Relationships: [];
@@ -159,7 +161,38 @@ export interface Database {
       };
     };
     Views: Record<never, never>;
-    Functions: Record<never, never>;
+    Functions: {
+      search_public_songs: {
+        Args: { p_limit: number; p_offset: number; p_search_term: string };
+        Returns: {
+          composer: string;
+          created_at: string;
+          id: string;
+          rank: number;
+          subtitle: string;
+          title: string;
+          total_count: number;
+        }[];
+      };
+      search_user_library_songs: {
+        Args: {
+          p_limit: number;
+          p_offset: number;
+          p_search_term: string;
+          p_user_id: string;
+        };
+        Returns: {
+          added_at: string;
+          composer: string;
+          rank: number;
+          song_id: string;
+          subtitle: string;
+          title: string;
+          total_count: number;
+          user_id: string;
+        }[];
+      };
+    };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;
   };

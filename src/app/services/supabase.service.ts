@@ -295,6 +295,42 @@ export class SupabaseService {
     try {
       console.log('Querying public domain songs with params:', params);
 
+      const page = Math.max(1, params.page || 1);
+      const limit = Math.min(100, Math.max(1, params.limit || 50));
+      const offset = (page - 1) * limit;
+      const searchTerm = params.search?.trim();
+
+      if (searchTerm) {
+        console.log('Using RPC for public song search:', searchTerm);
+
+        const { data, error } = await this.client.rpc('search_public_songs', {
+          p_search_term: searchTerm,
+          p_limit: limit,
+          p_offset: offset,
+        });
+
+        if (error) {
+          console.error('RPC error retrieving public songs:', error);
+          throw error;
+        }
+
+        const total = data && data.length > 0 ? Number(data[0].total_count) : 0;
+        console.log(`Retrieved ${data?.length || 0} public songs via RPC (total: ${total})`);
+
+        return {
+          data: (data || []).map(song => ({
+            id: song.id,
+            created_at: song.created_at,
+            song_details: {
+              title: song.title || '',
+              composer: song.composer || '',
+              subtitle: song.subtitle ?? null,
+            },
+          })),
+          total,
+        };
+      }
+
       // Build the base query for public domain songs (uploader_id IS NULL)
       let query = this.client
         .from('songs')
@@ -302,7 +338,6 @@ export class SupabaseService {
         .is('uploader_id', null);
 
       // Apply search filter if provided
-      const searchTerm = params.search?.trim();
       if (searchTerm) {
         query = query.textSearch('search_vector', searchTerm, {
           config: 'english',
@@ -323,9 +358,6 @@ export class SupabaseService {
       }
 
       // Apply pagination
-      const page = Math.max(1, params.page || 1);
-      const limit = Math.min(100, Math.max(1, params.limit || 50));
-      const offset = (page - 1) * limit;
       query = query.range(offset, offset + limit - 1);
 
       const { data, error, count } = await query;
@@ -656,6 +688,46 @@ export class SupabaseService {
     try {
       console.log('Querying user library with params:', { userId, params });
 
+      const page = Math.max(1, params.page || 1);
+      const limit = Math.min(100, Math.max(1, params.limit || 50));
+      const offset = (page - 1) * limit;
+      const searchTerm = params.search?.trim();
+
+      if (searchTerm) {
+        console.log('Using RPC for user library search:', searchTerm);
+
+        const { data, error } = await this.client.rpc('search_user_library_songs', {
+          p_user_id: userId,
+          p_search_term: searchTerm,
+          p_limit: limit,
+          p_offset: offset,
+        });
+
+        if (error) {
+          console.error('RPC error retrieving user library songs:', error);
+          throw error;
+        }
+
+        const total = data && data.length > 0 ? Number(data[0].total_count) : 0;
+        console.log(`Retrieved ${data?.length || 0} user library songs via RPC (total: ${total})`);
+
+        const transformedData = (data || []).map(item => ({
+          user_id: item.user_id,
+          song_id: item.song_id,
+          created_at: item.added_at,
+          song_details: {
+            title: item.title || '',
+            composer: item.composer || '',
+            subtitle: item.subtitle ?? null,
+          },
+        }));
+
+        return {
+          data: transformedData,
+          total,
+        };
+      }
+
       // Build the JOIN query between user_songs and songs
       let query = this.client
         .from('user_songs')
@@ -673,14 +745,6 @@ export class SupabaseService {
           { count: 'exact' }
         )
         .eq('user_id', userId);
-
-      const searchTerm = params.search?.trim();
-      if (searchTerm) {
-        query = query.textSearch('songs.search_vector', searchTerm, {
-          config: 'english',
-          type: 'websearch',
-        });
-      }
 
       // Apply sorting (supports multi-column order)
       const sortDescriptors: LibrarySortDescriptor[] =
@@ -707,9 +771,6 @@ export class SupabaseService {
       });
 
       // Apply pagination
-      const page = Math.max(1, params.page || 1);
-      const limit = Math.min(100, Math.max(1, params.limit || 50));
-      const offset = (page - 1) * limit;
       query = query.range(offset, offset + limit - 1);
 
       const { data, error, count } = await query;
