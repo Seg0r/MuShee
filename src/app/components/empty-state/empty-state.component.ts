@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, TemplateRef, input, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 
@@ -31,4 +31,14 @@ export class EmptyStateComponent {
    * Material icon name to display
    */
   readonly iconName = input<string>('queue_music');
+
+  private readonly template = viewChild<TemplateRef<void>>('emptyStateTemplate');
+
+  /**
+   * Exposes the rendered template so feature components can pass it down
+   * to collection views without repeating the markup.
+   */
+  templateRef(): TemplateRef<void> | null {
+    return this.template() ?? null;
+  }
 }

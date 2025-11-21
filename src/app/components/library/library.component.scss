@@ -29,17 +29,6 @@
 }
 
 // ============================================================================
-// Empty State Wrapper
-// ============================================================================
-
-.empty-state-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100%;
-}
-
-// ============================================================================
 // Pagination Loading
 // ============================================================================
 
@@ -130,26 +119,6 @@
   &:hover {
     background: var(--mat-sys-on-tertiary) !important;
     color: var(--mat-sys-tertiary) !important;
-  }
-}
-
-// ============================================================================
-// Empty State Actions
-// ============================================================================
-
-.empty-state-actions {
-  display: flex;
-  gap: var(--space-md);
-  margin-top: var(--space-xl);
-
-  @media (max-width: 480px) {
-    flex-direction: column;
-    width: 100%;
-    max-width: 320px;
-  }
-
-  button {
-    min-width: 160px;
   }
 }
 

@@ -7,11 +7,14 @@ import {
   signal,
   computed,
   viewChild,
+  TemplateRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
+import { MatIcon } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
 import { SongService } from '../../services/song.service';
 import { UserLibraryService } from '../../services/user-library.service';
@@ -31,6 +34,7 @@ import {
   OnboardingDialogComponent,
   type OnboardingDialogData,
 } from '../onboarding-dialog/onboarding-dialog.component';
+import { EmptyStateComponent } from '../empty-state/empty-state.component';
 import {
   SONG_COLLECTION_DEFAULT_SORTING_LABEL,
   SONG_COLLECTION_DEFAULT_SORTING_OPTIONS,
@@ -43,7 +47,14 @@ const pageSongLimit = 50;
 @Component({
   selector: 'app-discover',
   standalone: true,
-  imports: [CommonModule, SongCollectionComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    SongCollectionComponent,
+    EmptyStateComponent,
+    MatIcon,
+    MatButtonModule,
+  ],
   templateUrl: './discover.component.html',
   styleUrl: './discover.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -58,6 +69,10 @@ export class DiscoverComponent implements OnInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
 
   readonly songCollectionRef = viewChild<SongCollectionComponent>('songCollection');
+  readonly discoverEmptyStateComponent = viewChild<EmptyStateComponent>('discoverEmptyState');
+  readonly discoverSearchEmptyStateComponent = viewChild<EmptyStateComponent>(
+    'discoverSearchEmptyState'
+  );
 
   private readonly userLibrarySongs = signal<UserLibraryItemDto[]>([]);
   private readonly addingToLibraryMap = signal<Map<string, boolean>>(new Map());
@@ -73,6 +88,15 @@ export class DiscoverComponent implements OnInit, OnDestroy {
     () => new Set(this.userLibrarySongs().map(song => song.song_id))
   );
   readonly isAuthenticated = computed(() => this.authService.isAuthenticated());
+
+  readonly hasActiveSearch = computed(() => Boolean(this.searchController.searchTermSignal()));
+
+  readonly currentEmptyStateTemplate = computed<TemplateRef<void> | null>(() => {
+    if (this.hasActiveSearch()) {
+      return this.discoverSearchEmptyStateComponent()?.templateRef() ?? null;
+    }
+    return this.discoverEmptyStateComponent()?.templateRef() ?? null;
+  });
 
   readonly discoverSortingConfig: SongCollectionSortingConfig = {
     options: [...SONG_COLLECTION_DEFAULT_SORTING_OPTIONS],
@@ -186,6 +210,12 @@ export class DiscoverComponent implements OnInit, OnDestroy {
     await this.router.navigate(['/song', song.id]);
   }
 
+  onClearSearch(): void {
+    // Clear the search by triggering the input handler with empty value
+    this.searchController.headerControl().onValueChange('');
+    this.refreshCollection();
+  }
+
   private fetchDiscoverPage(page: number, limit: number) {
     const sortingStates = this.sortingState();
     const params: PublicSongsQueryParams = {
@@ -193,7 +223,7 @@ export class DiscoverComponent implements OnInit, OnDestroy {
       limit,
     };
 
-    const trimmedSearch = this.searchController.searchTerm();
+    const trimmedSearch = this.searchController.searchTermSignal();
     if (trimmedSearch) {
       params.search = trimmedSearch;
     }

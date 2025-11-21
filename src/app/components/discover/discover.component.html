@@ -2,7 +2,29 @@
   <app-song-collection
     #songCollection
     [config]="discoverCollectionConfig()"
+    [emptyStateTemplate]="currentEmptyStateTemplate()"
     (tileClick)="onSongCardClick($event)"
     (addToLibrary)="onAddToLibrary($event)"
   ></app-song-collection>
+
+  <app-empty-state
+    #discoverEmptyState
+    [message]="'No public songs available'"
+    [description]="'There are no public domain songs to discover at the moment'"
+    [iconName]="'library_music'"
+  >
+    <button mat-button [routerLink]="['/app/library']">Go to My Library</button>
+  </app-empty-state>
+
+  <app-empty-state
+    #discoverSearchEmptyState
+    [message]="'No songs found'"
+    [description]="'Try adjusting your search terms'"
+    [iconName]="'search_off'"
+  >
+    <button mat-button (click)="onClearSearch()">
+      <mat-icon>clear</mat-icon>
+      Clear Search
+    </button>
+  </app-empty-state>
 </main>

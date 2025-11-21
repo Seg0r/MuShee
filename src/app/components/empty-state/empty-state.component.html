@@ -1,13 +1,17 @@
-<div class="empty-state-container">
-  <mat-icon class="empty-state-icon" [attr.aria-label]="iconName()">
-    {{ iconName() }}
-  </mat-icon>
+<ng-template #emptyStateTemplate>
+  <div class="empty-state-wrapper">
+    <div class="empty-state-container">
+      <mat-icon class="empty-state-icon" [attr.aria-label]="iconName()">
+        {{ iconName() }}
+      </mat-icon>
 
-  <h2 class="empty-state-message">{{ message() }}</h2>
+      <h2 class="empty-state-message">{{ message() }}</h2>
 
-  <p class="empty-state-description">{{ description() }}</p>
+      <p class="empty-state-description">{{ description() }}</p>
 
-  <div class="empty-state-actions">
-    <ng-content></ng-content>
+      <div class="empty-state-actions">
+        <ng-content></ng-content>
+      </div>
+    </div>
   </div>
-</div>
+</ng-template>

@@ -9,43 +9,32 @@
     (viewStateChange)="onCollectionStateChange($event)"
   ></app-song-collection>
 
-  <ng-template #libraryEmptyState>
-    <div class="empty-state-wrapper">
-      <app-empty-state [message]="'Your library is empty'" [iconName]="'queue_music'">
-        <div class="empty-state-actions">
-          <button mat-flat-button (click)="onUploadClick()">
-            <mat-icon>cloud_upload</mat-icon>
-            Upload Your Music
-          </button>
-          <button mat-button [routerLink]="['/app/discover']">
-            <mat-icon>explore</mat-icon>
-            Browse Public Library
-          </button>
-        </div>
-      </app-empty-state>
-    </div>
-  </ng-template>
+  <app-empty-state
+    #libraryEmptyState
+    [message]="'Your library is empty'"
+    [iconName]="'queue_music'"
+  >
+    <button mat-flat-button (click)="onUploadClick()">
+      <mat-icon>cloud_upload</mat-icon>
+      Upload Your Music
+    </button>
+    <button mat-button [routerLink]="['/app/discover']">
+      <mat-icon>explore</mat-icon>
+      Browse Public Library
+    </button>
+  </app-empty-state>
 
-  <ng-template #librarySearchEmptyState>
-    <div class="empty-state-wrapper">
-      <app-empty-state
-        [message]="'No songs found'"
-        [description]="'Try adjusting your search terms or browse all songs in your library'"
-        [iconName]="'search_off'"
-      >
-        <div class="empty-state-actions">
-          <button mat-button (click)="onClearSearch()">
-            <mat-icon>clear</mat-icon>
-            Clear Search
-          </button>
-          <button mat-button [routerLink]="['/app/discover']">
-            <mat-icon>explore</mat-icon>
-            Browse Public Library
-          </button>
-        </div>
-      </app-empty-state>
-    </div>
-  </ng-template>
+  <app-empty-state
+    #librarySearchEmptyState
+    [message]="'No songs found'"
+    [description]="'Try adjusting your search terms'"
+    [iconName]="'search_off'"
+  >
+    <button mat-button (click)="onClearSearch()">
+      <mat-icon>clear</mat-icon>
+      Clear Search
+    </button>
+  </app-empty-state>
 
   <div class="fab-container floating-fab-right">
     @if (!collectionState().isLoading && !collectionState().isEmpty) {

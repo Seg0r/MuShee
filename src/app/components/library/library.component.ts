@@ -77,8 +77,9 @@ export class LibraryComponent implements OnInit, OnDestroy {
   private readonly injector = inject(Injector);
 
   readonly songCollectionRef = viewChild<SongCollectionComponent>('songCollection');
-  readonly libraryEmptyStateRef = viewChild<TemplateRef<void>>('libraryEmptyState');
-  readonly librarySearchEmptyStateRef = viewChild<TemplateRef<void>>('librarySearchEmptyState');
+  readonly libraryEmptyStateComponent = viewChild<EmptyStateComponent>('libraryEmptyState');
+  readonly librarySearchEmptyStateComponent =
+    viewChild<EmptyStateComponent>('librarySearchEmptyState');
 
   private readonly suggestionsLoading = signal(false);
   private readonly selectedSongForDelete = signal<UserLibraryItemDto | null>(null);
@@ -119,9 +120,9 @@ export class LibraryComponent implements OnInit, OnDestroy {
 
   readonly currentEmptyStateTemplate = computed<TemplateRef<void> | null>(() => {
     if (this.hasActiveSearch()) {
-      return this.librarySearchEmptyStateRef() ?? null;
+      return this.librarySearchEmptyStateComponent()?.templateRef() ?? null;
     }
-    return this.libraryEmptyStateRef() ?? null;
+    return this.libraryEmptyStateComponent()?.templateRef() ?? null;
   });
 
   readonly libraryCollectionConfig = computed<SongCollectionConfig<SongTileData>>(() => ({

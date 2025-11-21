@@ -1,6 +1,14 @@
 @use '@angular/material' as mat;
 @use '../../../styles/mixins/glassmorphism' as glass;
 
+.empty-state-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100%;
+}
+
 .empty-state-container {
   display: flex;
   flex-direction: column;
@@ -37,9 +45,19 @@
 }
 
 .empty-state-actions {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
   justify-content: center;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    width: 100%;
+    max-width: 320px;
+  }
+
+  button {
+    min-width: 160px;
+  }
 }

@@ -134,3 +134,17 @@ p {
 .cdk-overlay-pane .mat-mdc-menu-panel {
   @include glass.glassmorphism(65%, 50%, 4px);
 }
+
+.mdc-text-field--outlined {
+  --mdc-outlined-text-field-container-shape: var(--layout-border-radius) !important;
+  --mdc-outlined-text-field-outline-color: color-mix(
+    in srgb,
+    var(--mat-sys-outline-variant),
+    transparent 50%
+  );
+  --mdc-outlined-text-field-hover-outline-color: color-mix(
+    in srgb,
+    var(--mat-sys-primary),
+    transparent 50%
+  );
+}
