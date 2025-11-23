@@ -41,6 +41,7 @@ export interface SongCollectionHeaderConfig {
   subtitle?: string;
   controls?: SongCollectionHeaderSearchControl[];
   infoButton?: SongCollectionHeaderInfoButton;
+  hasActiveFilter?: boolean;
 }
 
 interface SongCollectionHeaderControlBase {

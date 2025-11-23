@@ -1,7 +1,7 @@
 @use '../../../styles/breakpoints' as breakpoints;
 @use '../../../styles/mixins/glassmorphism' as glass;
 
-$search-collapse-breakpoint: 768px;
+$search-collapse-breakpoint: 540px;
 
 .song-collection-root {
   position: relative;
@@ -61,6 +61,26 @@ $search-collapse-breakpoint: 768px;
   flex-wrap: wrap;
   padding-right: var(--space-sm, 0.75rem);
 
+  .song-collection-search-trigger {
+    position: relative;
+
+    &__badge {
+      position: absolute;
+      top: -4px;
+      right: -2px;
+      min-width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      background-color: var(--mat-sys-error);
+      color: var(--mat-sys-on-error);
+      font-size: 10px;
+      font-weight: 600;
+      display: grid;
+      place-items: center;
+      padding: 0 3px;
+    }
+  }
+
   &__search {
     display: flex;
     align-items: center;
@@ -87,6 +107,13 @@ $search-collapse-breakpoint: 768px;
   width: 100%;
 }
 
+.song-collection-search-submit {
+  --mdc-icon-button-state-layer-size: 32px;
+  width: 32px;
+  height: 32px;
+  color: var(--mat-sys-on-surface);
+}
+
 .song-collection-sort-trigger {
   display: flex;
   align-items: center;
@@ -108,7 +135,7 @@ $search-collapse-breakpoint: 768px;
 
 .song-collection-search-overlay {
   @include glass.glassmorphism(70%, 45%, 12px);
-  width: min(560px, calc(100vw - 1.5rem));
+  width: min(540px, calc(100vw - 1rem));
   padding: var(--space-md, 0.75rem);
   display: flex;
   flex-direction: column;
@@ -116,6 +143,24 @@ $search-collapse-breakpoint: 768px;
   border-radius: var(--mat-sys-corner-large);
   box-shadow: var(--mat-sys-level2);
   margin-inline: var(--space-sm, 0.75rem);
+  margin-left: 2rem;
+
+  &__body {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm, 0.75rem);
+  }
+
+  &__fields {
+    display: flex;
+    flex: 1;
+    gap: var(--space-sm, 0.75rem);
+  }
+
+  &__close {
+    color: var(--mat-sys-on-surface);
+    flex-shrink: 0;
+  }
 }
 
 @media (max-width: $search-collapse-breakpoint) {
@@ -130,6 +175,15 @@ $search-collapse-breakpoint: 768px;
 
   .song-collection-header-controls__search-trigger {
     display: flex;
+  }
+
+  .song-collection-search-overlay__body {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .song-collection-search-overlay__fields {
+    flex: 1;
   }
 }
 

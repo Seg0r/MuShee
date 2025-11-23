@@ -40,10 +40,12 @@
               aria-haspopup="dialog"
               [attr.aria-expanded]="isHeaderSearchOverlayOpen()"
               [attr.aria-controls]="headerSearchContainerId"
+              class="song-collection-search-trigger"
             >
-              <mat-icon aria-hidden="true">{{
-                isHeaderSearchOverlayOpen() ? 'close' : 'search'
-              }}</mat-icon>
+              <mat-icon aria-hidden="true">search</mat-icon>
+              @if (hasActiveHeaderFilter()) {
+                <span class="song-collection-search-trigger__badge" aria-hidden="true">!</span>
+              }
             </button>
           </div>
           <ng-template
@@ -64,7 +66,20 @@
               [attr.id]="headerSearchContainerId"
               aria-label="Library search"
             >
-              <ng-container *ngTemplateOutlet="headerSearchControls"></ng-container>
+              <div class="song-collection-search-overlay__body">
+                <div class="song-collection-search-overlay__fields">
+                  <ng-container *ngTemplateOutlet="headerSearchControls"></ng-container>
+                </div>
+                <button
+                  mat-icon-button
+                  type="button"
+                  class="song-collection-search-overlay__close"
+                  aria-label="Close search panel"
+                  (click)="closeHeaderSearchOverlay()"
+                >
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
             </div>
           </ng-template>
         }
@@ -131,8 +146,18 @@
           [placeholder]="control.placeholder ?? control.label"
           [value]="control.value"
           (input)="handleHeaderSearchInput(control, $event)"
+          (keydown.enter)="handleHeaderSearchSubmit()"
         />
-        <mat-icon matSuffix>search</mat-icon>
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          class="song-collection-search-submit"
+          (click)="handleHeaderSearchSubmit()"
+          aria-label="Apply search"
+        >
+          <mat-icon>search</mat-icon>
+        </button>
       </mat-form-field>
     }
   </ng-template>

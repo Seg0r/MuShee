@@ -119,6 +119,12 @@ export class SongCollectionComponent implements OnInit {
     const [firstControl] = this.headerControls();
     return firstControl?.label ?? firstControl?.placeholder ?? 'Search songs';
   });
+  readonly hasActiveHeaderFilter = computed(() => {
+    const controls = this.headerControls();
+    const hasControlValue = controls.some(control => Boolean(control.value?.trim()));
+    const configFlag = Boolean(this.headerConfig()?.hasActiveFilter);
+    return hasControlValue || configFlag;
+  });
   readonly headerSearchContainerId = `song-collection-header-search-${Math.random()
     .toString(36)
     .slice(2)}`;
@@ -126,16 +132,16 @@ export class SongCollectionComponent implements OnInit {
   readonly isHeaderSearchOverlayOpen = this.headerSearchOverlayOpen.asReadonly();
   readonly headerSearchOverlayPositions: ConnectedPosition[] = [
     {
-      originX: 'end',
-      originY: 'bottom',
+      originX: 'start',
+      originY: 'center',
       overlayX: 'end',
-      overlayY: 'top',
-      offsetY: 8,
+      overlayY: 'center',
+      offsetX: -12,
     },
     {
-      originX: 'start',
+      originX: 'center',
       originY: 'bottom',
-      overlayX: 'start',
+      overlayX: 'center',
       overlayY: 'top',
       offsetY: 8,
     },
@@ -398,6 +404,12 @@ export class SongCollectionComponent implements OnInit {
   handleHeaderSearchInput(control: SongCollectionHeaderSearchControl, event: Event): void {
     const input = event.target as HTMLInputElement | null;
     control.onValueChange(input?.value ?? '');
+  }
+
+  handleHeaderSearchSubmit(): void {
+    if (this.isCompactViewport()) {
+      this.closeHeaderSearchOverlay();
+    }
   }
 
   toggleHeaderSearchOverlay(): void {
