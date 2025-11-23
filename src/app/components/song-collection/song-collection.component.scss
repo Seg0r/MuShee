@@ -32,6 +32,12 @@
   flex: 1;
 }
 
+.song-collection-header__title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md, 0.5rem);
+}
+
 .song-collection-header__titles h1 {
   margin: 0;
   font-size: var(--font-size-lg, 1.5rem);

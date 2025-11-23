@@ -41,6 +41,7 @@ import {
 } from '../song-collection/song-collection-sorting.presets';
 import type { PublicSongSortField, PublicSongsQueryParams } from '../../services/supabase.service';
 import { SongCollectionSearchController } from '../song-collection/song-collection-search.controller';
+import { LicenseInfoDialogComponent } from '../license-info-dialog/license-info-dialog.component';
 
 const pageSongLimit = 50;
 
@@ -108,6 +109,10 @@ export class DiscoverComponent implements OnInit, OnDestroy {
   readonly discoverHeader = computed<SongCollectionHeaderConfig>(() => ({
     title: 'Discover',
     controls: [this.searchController.headerControl()],
+    infoButton: {
+      ariaLabel: 'View license and acknowledgement details',
+      onClick: () => this.openLicenseInfoDialog(),
+    },
   }));
 
   readonly discoverCollectionConfig = computed<SongCollectionConfig<SongTileData>>(() => ({
@@ -296,6 +301,14 @@ export class DiscoverComponent implements OnInit, OnDestroy {
       if (result?.navigateTo) {
         this.router.navigate([result.navigateTo]);
       }
+    });
+  }
+
+  openLicenseInfoDialog(): void {
+    this.dialog.open(LicenseInfoDialogComponent, {
+      width: '480px',
+      maxWidth: '90vw',
+      panelClass: 'glass-dialog-container',
     });
   }
 

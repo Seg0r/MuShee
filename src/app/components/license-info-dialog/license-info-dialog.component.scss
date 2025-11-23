@@ -1,0 +1,100 @@
+@use '../../../styles/mixins/glassmorphism' as glass;
+
+.license-info-dialog {
+  min-width: 500px;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  background: transparent;
+
+  @media (max-width: 500px) {
+    min-width: 100%;
+  }
+}
+
+.license-info-dialog__shell {
+  @include glass.glassmorphism(65%, 50%, 14px);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.license-info-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.8rem;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+  h2 {
+    margin: 0;
+    font-size: var(--mat-sys-headline-large);
+    font-weight: 500;
+    color: var(--mat-sys-on-surface);
+  }
+}
+
+.license-info-dialog__content {
+  padding: var(--space-lg) !important;
+  font-size: var(--mat-sys-body-large);
+  color: var(--mat-sys-on-surface);
+  background: transparent;
+}
+
+.license-info-dialog__credits-label {
+  font-size: var(--mat-sys-body-large);
+  color: var(--mat-sys-on-surface);
+  flex: 0 0 auto;
+}
+
+.license-info-dialog__credits-list {
+  padding-inline-start: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs, 0.25rem);
+
+  a {
+    color: var(--mat-sys-primary);
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+  }
+}
+
+.license-info-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 0.8rem;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+
+  button {
+    min-width: 100px;
+  }
+
+  .confirm-button {
+    &.button-warn {
+      background: var(--mat-sys-error) !important;
+      color: var(--mat-sys-on-error) !important;
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+
+    &.button-primary {
+      background: var(--mat-sys-primary) !important;
+      color: var(--mat-sys-on-primary) !important;
+    }
+
+    &.button-accent {
+      background: var(--mat-sys-tertiary) !important;
+      color: var(--mat-sys-on-tertiary) !important;
+    }
+  }
+}

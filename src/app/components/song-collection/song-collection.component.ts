@@ -107,6 +107,7 @@ export class SongCollectionComponent implements OnInit {
   readonly headerTitle = computed(() => this.headerConfig()?.title ?? 'Songs');
   readonly headerSubtitle = computed(() => this.headerConfig()?.subtitle ?? null);
   readonly headerControls = computed(() => this.headerConfig()?.controls ?? []);
+  readonly headerInfoButton = computed(() => this.headerConfig()?.infoButton ?? null);
   readonly sortingConfig = computed<SongCollectionSortingConfig | null>(
     () => this.config().sorting ?? null
   );
@@ -356,5 +357,10 @@ export class SongCollectionComponent implements OnInit {
       return isAuthenticated();
     }
     return Boolean(isAuthenticated);
+  }
+
+  onHeaderInfoButtonClick(): void {
+    const infoButton = this.headerInfoButton();
+    infoButton?.onClick();
   }
 }

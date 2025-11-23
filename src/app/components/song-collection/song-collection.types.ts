@@ -40,6 +40,7 @@ export interface SongCollectionHeaderConfig {
   title?: string;
   subtitle?: string;
   controls?: SongCollectionHeaderSearchControl[];
+  infoButton?: SongCollectionHeaderInfoButton;
 }
 
 interface SongCollectionHeaderControlBase {
@@ -51,6 +52,11 @@ export interface SongCollectionHeaderSearchControl extends SongCollectionHeaderC
   value?: string;
   placeholder?: string;
   onValueChange: (value: string) => void;
+}
+
+export interface SongCollectionHeaderInfoButton {
+  ariaLabel: string;
+  onClick: () => void;
 }
 
 export type SongCollectionSortDirection = 'asc' | 'desc';

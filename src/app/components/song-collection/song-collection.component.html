@@ -1,7 +1,20 @@
 <main class="song-collection-root">
   <section class="song-collection-header">
     <div class="song-collection-header__titles">
-      <h1>{{ headerTitle() }}</h1>
+      <div class="song-collection-header__title-row">
+        <h1>{{ headerTitle() }}</h1>
+        @if (headerInfoButton()) {
+          <button
+            mat-icon-button
+            type="button"
+            [attr.aria-label]="headerInfoButton()?.ariaLabel"
+            aria-haspopup="dialog"
+            (click)="onHeaderInfoButtonClick()"
+          >
+            <mat-icon aria-hidden="true">info</mat-icon>
+          </button>
+        }
+      </div>
       @if (headerSubtitle()) {
         <p class="song-collection-header__subtitle">{{ headerSubtitle() }}</p>
       }
