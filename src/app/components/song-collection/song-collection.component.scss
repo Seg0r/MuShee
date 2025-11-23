@@ -1,4 +1,7 @@
 @use '../../../styles/breakpoints' as breakpoints;
+@use '../../../styles/mixins/glassmorphism' as glass;
+
+$search-collapse-breakpoint: 768px;
 
 .song-collection-root {
   position: relative;
@@ -57,11 +60,31 @@
   align-items: center;
   flex-wrap: wrap;
   padding-right: var(--space-sm, 0.75rem);
+
+  &__search {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm, 0.75rem);
+  }
+
+  &__search-trigger {
+    display: none;
+    align-items: center;
+
+    button {
+      color: var(--mat-sys-on-surface);
+    }
+  }
 }
 
 .song-collection-control-search-label {
   font-size: var(--font-size-sm, 0.875rem);
   font-weight: 500;
+}
+
+.song-collection-control-search-field {
+  min-width: clamp(220px, 28vw, 360px);
+  width: 100%;
 }
 
 .song-collection-sort-trigger {
@@ -81,6 +104,33 @@
 .song-collection-sorting-panel__chip-list {
   gap: var(--space-2xs, 0.25rem);
   padding: var(--space-xs, 0.75rem);
+}
+
+.song-collection-search-overlay {
+  @include glass.glassmorphism(70%, 45%, 12px);
+  width: min(560px, calc(100vw - 1.5rem));
+  padding: var(--space-md, 0.75rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm, 0.75rem);
+  border-radius: var(--mat-sys-corner-large);
+  box-shadow: var(--mat-sys-level2);
+  margin-inline: var(--space-sm, 0.75rem);
+}
+
+@media (max-width: $search-collapse-breakpoint) {
+  .song-collection-header-controls {
+    flex-wrap: nowrap;
+    gap: var(--space-xs, 0.5rem);
+  }
+
+  .song-collection-header-controls__search {
+    display: none;
+  }
+
+  .song-collection-header-controls__search-trigger {
+    display: flex;
+  }
 }
 
 .loading-state {

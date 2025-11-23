@@ -13,14 +13,17 @@ import {
   TemplateRef,
   viewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatMenuModule } from '@angular/material/menu';
 
 import { LoadingSkeletonComponent } from '../loading-skeleton/loading-skeleton.component';
 import { SongListComponent } from '../song-list/song-list.component';
@@ -35,14 +38,17 @@ import {
 } from './song-collection.types';
 import { SongTileData } from '../song-tile/song-tile.component';
 import { ErrorHandlingService } from '../../services/error-handling.service';
+import { map } from 'rxjs/operators';
 
 const defaultLimit = 50;
 const defaultSkeletonConfig = { count: 50, rows: undefined, cols: undefined };
+const headerSearchCollapseQuery = '(max-width: 768px)';
 
 @Component({
   selector: 'app-song-collection',
   standalone: true,
   imports: [
+    OverlayModule,
     CommonModule,
     LoadingSkeletonComponent,
     SongListComponent,
@@ -61,6 +67,7 @@ const defaultSkeletonConfig = { count: 50, rows: undefined, cols: undefined };
 export class SongCollectionComponent implements OnInit {
   private readonly injector = inject(Injector);
   private readonly errorHandlingService = inject(ErrorHandlingService);
+  private readonly breakpointObserver = inject(BreakpointObserver);
 
   readonly config = input.required<SongCollectionConfig>();
   readonly emptyStateTemplate = input<TemplateRef<void> | null>(null);
@@ -107,6 +114,36 @@ export class SongCollectionComponent implements OnInit {
   readonly headerTitle = computed(() => this.headerConfig()?.title ?? 'Songs');
   readonly headerSubtitle = computed(() => this.headerConfig()?.subtitle ?? null);
   readonly headerControls = computed(() => this.headerConfig()?.controls ?? []);
+  readonly hasHeaderSearchControls = computed(() => this.headerControls().length > 0);
+  readonly headerSearchAriaLabel = computed(() => {
+    const [firstControl] = this.headerControls();
+    return firstControl?.label ?? firstControl?.placeholder ?? 'Search songs';
+  });
+  readonly headerSearchContainerId = `song-collection-header-search-${Math.random()
+    .toString(36)
+    .slice(2)}`;
+  private readonly headerSearchOverlayOpen = signal(false);
+  readonly isHeaderSearchOverlayOpen = this.headerSearchOverlayOpen.asReadonly();
+  readonly headerSearchOverlayPositions: ConnectedPosition[] = [
+    {
+      originX: 'end',
+      originY: 'bottom',
+      overlayX: 'end',
+      overlayY: 'top',
+      offsetY: 8,
+    },
+    {
+      originX: 'start',
+      originY: 'bottom',
+      overlayX: 'start',
+      overlayY: 'top',
+      offsetY: 8,
+    },
+  ];
+  private readonly isCompactViewport = toSignal(
+    this.breakpointObserver.observe(headerSearchCollapseQuery).pipe(map(state => state.matches)),
+    { initialValue: false }
+  );
   readonly headerInfoButton = computed(() => this.headerConfig()?.infoButton ?? null);
   readonly sortingConfig = computed<SongCollectionSortingConfig | null>(
     () => this.config().sorting ?? null
@@ -124,6 +161,7 @@ export class SongCollectionComponent implements OnInit {
     this.setupScrollListener();
     this.emitViewState();
     this.initializeSortingEffect();
+    this.setupViewportEffects();
   }
 
   private initializeCollection(): void {
@@ -244,6 +282,17 @@ export class SongCollectionComponent implements OnInit {
     );
   }
 
+  private setupViewportEffects(): void {
+    effect(
+      () => {
+        if (!this.isCompactViewport() && this.isHeaderSearchOverlayOpen()) {
+          this.closeHeaderSearchOverlay();
+        }
+      },
+      { injector: this.injector }
+    );
+  }
+
   onSortingMenuOpened(): void {
     this.sortingMenuOpen.set(true);
   }
@@ -349,6 +398,18 @@ export class SongCollectionComponent implements OnInit {
   handleHeaderSearchInput(control: SongCollectionHeaderSearchControl, event: Event): void {
     const input = event.target as HTMLInputElement | null;
     control.onValueChange(input?.value ?? '');
+  }
+
+  toggleHeaderSearchOverlay(): void {
+    if (!this.isCompactViewport()) {
+      this.headerSearchOverlayOpen.set(false);
+      return;
+    }
+    this.headerSearchOverlayOpen.update(isOpen => !isOpen);
+  }
+
+  closeHeaderSearchOverlay(): void {
+    this.headerSearchOverlayOpen.set(false);
   }
 
   resolveIsAuthenticated(): boolean {

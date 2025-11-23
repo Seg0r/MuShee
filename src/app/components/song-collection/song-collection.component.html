@@ -19,23 +19,54 @@
         <p class="song-collection-header__subtitle">{{ headerSubtitle() }}</p>
       }
     </div>
-    @if (headerControls().length || hasSortingOptions()) {
+    @if (hasHeaderSearchControls() || hasSortingOptions()) {
       <div class="song-collection-header-controls" role="toolbar" aria-label="Collection controls">
-        @if (headerControls().length) {
-          @for (control of headerControls(); track control.id ?? control.label) {
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label class="song-collection-control-search-label">{{
-                control.label
-              }}</mat-label>
-              <input
-                matInput
-                type="search"
-                [value]="control.value"
-                (input)="handleHeaderSearchInput(control, $event)"
-              />
-              <mat-icon matSuffix>search</mat-icon>
-            </mat-form-field>
-          }
+        @if (hasHeaderSearchControls()) {
+          <div class="song-collection-header-controls__search">
+            <ng-container *ngTemplateOutlet="headerSearchControls"></ng-container>
+          </div>
+          <div
+            class="song-collection-header-controls__search-trigger"
+            cdkOverlayOrigin
+            #headerSearchOverlayOrigin="cdkOverlayOrigin"
+          >
+            <button
+              mat-icon-button
+              type="button"
+              (click)="toggleHeaderSearchOverlay()"
+              [attr.aria-label]="
+                isHeaderSearchOverlayOpen() ? 'Hide search' : headerSearchAriaLabel()
+              "
+              aria-haspopup="dialog"
+              [attr.aria-expanded]="isHeaderSearchOverlayOpen()"
+              [attr.aria-controls]="headerSearchContainerId"
+            >
+              <mat-icon aria-hidden="true">{{
+                isHeaderSearchOverlayOpen() ? 'close' : 'search'
+              }}</mat-icon>
+            </button>
+          </div>
+          <ng-template
+            cdk-connected-overlay
+            [cdkConnectedOverlayOrigin]="headerSearchOverlayOrigin"
+            [cdkConnectedOverlayOpen]="isHeaderSearchOverlayOpen()"
+            [cdkConnectedOverlayPositions]="headerSearchOverlayPositions"
+            [cdkConnectedOverlayFlexibleDimensions]="true"
+            [cdkConnectedOverlayPush]="true"
+            [cdkConnectedOverlayHasBackdrop]="true"
+            cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+            (backdropClick)="closeHeaderSearchOverlay()"
+            (detach)="closeHeaderSearchOverlay()"
+          >
+            <div
+              class="song-collection-search-overlay"
+              role="dialog"
+              [attr.id]="headerSearchContainerId"
+              aria-label="Library search"
+            >
+              <ng-container *ngTemplateOutlet="headerSearchControls"></ng-container>
+            </div>
+          </ng-template>
         }
 
         @if (hasSortingOptions()) {
@@ -85,6 +116,26 @@
       </div>
     }
   </section>
+
+  <ng-template #headerSearchControls>
+    @for (control of headerControls(); track control.id ?? control.label) {
+      <mat-form-field
+        appearance="outline"
+        subscriptSizing="dynamic"
+        class="song-collection-control-search-field"
+      >
+        <mat-label class="song-collection-control-search-label">{{ control.label }}</mat-label>
+        <input
+          matInput
+          type="search"
+          [placeholder]="control.placeholder ?? control.label"
+          [value]="control.value"
+          (input)="handleHeaderSearchInput(control, $event)"
+        />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    }
+  </ng-template>
 
   @if (isInitialLoading()) {
     <div class="loading-state">
