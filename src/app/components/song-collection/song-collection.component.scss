@@ -98,8 +98,7 @@ $search-collapse-breakpoint: 540px;
 }
 
 .song-collection-control-search-label {
-  font-size: var(--font-size-sm, 0.875rem);
-  font-weight: 500;
+  font-size: var(--font-size-md);
 }
 
 .song-collection-control-search-field {
@@ -241,11 +240,11 @@ $search-collapse-breakpoint: 540px;
 }
 
 .back-to-top-fab-wrapper {
-  bottom: var(--space-xl);
+  bottom: var(--space-xs);
   z-index: 40;
 
   @media (max-width: 600px) {
-    bottom: var(--space-lg);
+    bottom: var(--space-xs);
   }
 }
 
