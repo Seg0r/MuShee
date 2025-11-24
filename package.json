@@ -49,6 +49,12 @@
     "yauzl": "^3.2.0",
     "zone.js": "~0.15.0"
   },
+  "overrides": {
+    "osmd-audio-player": {
+      "opensheetmusicdisplay": "^1.9.2",
+      "jszip": "^3.10.1"
+    }
+  },
   "devDependencies": {
     "@angular-devkit/build-angular": "^19.2.18",
     "@angular/cli": "^19.2.18",
