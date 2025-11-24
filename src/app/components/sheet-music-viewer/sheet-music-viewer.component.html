@@ -45,13 +45,65 @@
         </div>
       </div>
 
-      <!-- Zoom Controls - Centered -->
+      <!-- Playback Controls - Center Left -->
+      <div class="playback-controls">
+        @if (isPlaybackLoading()) {
+          <mat-spinner diameter="24" class="playback-spinner"></mat-spinner>
+          <span class="playback-loading-text">Loading audio...</span>
+        } @else if (playbackReady()) {
+          <!-- Stop Button -->
+          <button
+            mat-icon-button
+            (click)="onStop()"
+            [disabled]="!canStop()"
+            matTooltip="Stop"
+            aria-label="Stop playback"
+            class="playback-btn stop-btn"
+          >
+            <mat-icon>stop</mat-icon>
+          </button>
+
+          <!-- Play/Pause Toggle Button -->
+          <button
+            mat-icon-button
+            (click)="onPlayPauseToggle()"
+            [matTooltip]="isPlaying() ? 'Pause' : 'Play'"
+            [attr.aria-label]="isPlaying() ? 'Pause playback' : 'Start playback'"
+            class="playback-btn play-pause-btn"
+            [class.playing]="isPlaying()"
+          >
+            <mat-icon>{{ isPlaying() ? 'pause' : 'play_arrow' }}</mat-icon>
+          </button>
+
+          <!-- Tempo/BPM Control -->
+          <div class="tempo-control">
+            <mat-icon class="tempo-icon" matTooltip="Tempo (BPM)">speed</mat-icon>
+            <input
+              type="range"
+              class="tempo-slider"
+              [min]="getMinBpm()"
+              [max]="getMaxBpm()"
+              [value]="currentBpm()"
+              (input)="onBpmChange($event)"
+              aria-label="Tempo control"
+            />
+            <span class="tempo-value">{{ currentBpm() }}</span>
+          </div>
+        } @else {
+          <span class="playback-unavailable" matTooltip="Playback not available for this score">
+            <mat-icon>music_off</mat-icon>
+          </span>
+        }
+      </div>
+
+      <!-- Zoom Controls - Center Right -->
       <div class="zoom-controls">
         <button
           mat-icon-button
           (click)="onZoomOut()"
           [disabled]="!canZoomOut()"
-          [attr.aria-label]="'Zoom out'"
+          matTooltip="Zoom out"
+          aria-label="Zoom out"
         >
           <mat-icon>zoom_out</mat-icon>
         </button>
@@ -62,7 +114,8 @@
           mat-icon-button
           (click)="onZoomIn()"
           [disabled]="!canZoomIn()"
-          [attr.aria-label]="'Zoom in'"
+          matTooltip="Zoom in"
+          aria-label="Zoom in"
         >
           <mat-icon>zoom_in</mat-icon>
         </button>

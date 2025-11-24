@@ -6,6 +6,7 @@ import {
   ElementRef,
   OnDestroy,
   OnInit,
+  computed,
   effect,
   inject,
   signal,
@@ -18,7 +19,23 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSliderModule } from '@angular/material/slider';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { OpenSheetMusicDisplay, IOSMDOptions } from 'opensheetmusicdisplay';
+import PlaybackEngine from 'osmd-audio-player';
+
+// PlaybackState and PlaybackEvent are not re-exported from index, define locally
+enum PlaybackState {
+  INIT = 'INIT',
+  PLAYING = 'PLAYING',
+  STOPPED = 'STOPPED',
+  PAUSED = 'PAUSED',
+}
+
+enum PlaybackEvent {
+  STATE_CHANGE = 'state-change',
+  ITERATION = 'iteration',
+}
 
 import { SongService } from '../../services/song.service';
 import { FeedbackService } from '../../services/feedback.service';
@@ -33,8 +50,14 @@ import type { SongAccessDto } from '../../../types';
  */
 @Component({
   selector: 'app-sheet-music-viewer',
-  standalone: true,
-  imports: [CommonModule, MatIcon, MatButtonModule, MatProgressSpinner],
+  imports: [
+    CommonModule,
+    MatIcon,
+    MatButtonModule,
+    MatProgressSpinner,
+    MatSliderModule,
+    MatTooltipModule,
+  ],
   templateUrl: './sheet-music-viewer.component.html',
   styleUrl: './sheet-music-viewer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -67,8 +90,30 @@ export class SheetMusicViewerComponent implements OnInit, OnDestroy, AfterViewIn
   // OSMD state - use signal to enable reactive tracking in effects
   readonly osmdReady = signal(false);
 
+  // Playback state signals
+  readonly playbackState = signal<PlaybackState>(PlaybackState.INIT);
+  readonly isPlaybackLoading = signal(false);
+  readonly playbackReady = signal(false);
+  readonly currentBpm = signal(120);
+  readonly playbackProgress = signal(0);
+  readonly totalSteps = signal(0);
+
+  // Computed playback state helpers
+  readonly isPlaying = computed(() => this.playbackState() === PlaybackState.PLAYING);
+  readonly isPaused = computed(() => this.playbackState() === PlaybackState.PAUSED);
+  readonly isStopped = computed(
+    () =>
+      this.playbackState() === PlaybackState.STOPPED || this.playbackState() === PlaybackState.INIT
+  );
+  readonly canPlay = computed(() => this.playbackReady() && !this.isPlaying());
+  readonly canPause = computed(() => this.isPlaying());
+  readonly canStop = computed(() => !this.isStopped());
+
   // OSMD instance
   private osmd: OpenSheetMusicDisplay | null = null;
+
+  // Playback engine instance
+  private playbackEngine: PlaybackEngine | null = null;
 
   // Expose authentication status to template
   readonly isUserAuthenticated = this.authService.isAuthenticated;
@@ -77,6 +122,9 @@ export class SheetMusicViewerComponent implements OnInit, OnDestroy, AfterViewIn
   private readonly ZOOM_STEP = 0.1;
   private readonly MIN_ZOOM = 0.5;
   private readonly MAX_ZOOM = 2.0;
+  private readonly DEFAULT_BPM = 120;
+  private readonly MIN_BPM = 40;
+  private readonly MAX_BPM = 240;
 
   private osmdInitialized = false;
 
@@ -122,6 +170,12 @@ export class SheetMusicViewerComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   ngOnDestroy(): void {
+    // Cleanup playback engine first
+    if (this.playbackEngine) {
+      this.playbackEngine.stop();
+      this.playbackEngine = null;
+    }
+
     // Cleanup OSMD instance
     if (this.osmd) {
       this.osmd.clear();
@@ -220,6 +274,94 @@ export class SheetMusicViewerComponent implements OnInit, OnDestroy, AfterViewIn
     return `${Math.round(this.zoomLevel() * 100)}%`;
   }
 
+  // ========== Playback Controls ==========
+
+  /**
+   * Starts or resumes playback
+   */
+  async onPlay(): Promise<void> {
+    if (!this.playbackEngine || !this.playbackReady()) {
+      return;
+    }
+
+    try {
+      await this.playbackEngine.play();
+    } catch (error) {
+      console.error('Failed to start playback:', error);
+      this.showError('Failed to start playback. Please try again.');
+    }
+  }
+
+  /**
+   * Pauses playback
+   */
+  onPause(): void {
+    if (!this.playbackEngine) {
+      return;
+    }
+
+    try {
+      this.playbackEngine.pause();
+    } catch (error) {
+      console.error('Failed to pause playback:', error);
+    }
+  }
+
+  /**
+   * Stops playback and resets to beginning
+   */
+  async onStop(): Promise<void> {
+    if (!this.playbackEngine) {
+      return;
+    }
+
+    try {
+      await this.playbackEngine.stop();
+      this.playbackProgress.set(0);
+    } catch (error) {
+      console.error('Failed to stop playback:', error);
+    }
+  }
+
+  /**
+   * Toggles between play and pause
+   */
+  async onPlayPauseToggle(): Promise<void> {
+    if (this.isPlaying()) {
+      this.onPause();
+    } else {
+      await this.onPlay();
+    }
+  }
+
+  /**
+   * Updates the BPM (tempo) for playback
+   */
+  onBpmChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const bpm = parseInt(input.value, 10);
+    if (bpm >= this.MIN_BPM && bpm <= this.MAX_BPM) {
+      this.currentBpm.set(bpm);
+      if (this.playbackEngine) {
+        this.playbackEngine.setBpm(bpm);
+      }
+    }
+  }
+
+  /**
+   * Gets the minimum BPM value
+   */
+  getMinBpm(): number {
+    return this.MIN_BPM;
+  }
+
+  /**
+   * Gets the maximum BPM value
+   */
+  getMaxBpm(): number {
+    return this.MAX_BPM;
+  }
+
   /**
    * Loads song data and renders sheet music
    */
@@ -302,9 +444,59 @@ export class SheetMusicViewerComponent implements OnInit, OnDestroy, AfterViewIn
       this.setZoom(this.zoomLevel());
 
       console.log('Sheet music rendered successfully');
+
+      // Initialize playback engine after rendering
+      await this.initializePlayback();
     } catch (error) {
       console.error('Failed to render sheet music:', error);
       throw new Error('Failed to render sheet music. The file may be corrupted or unsupported.');
+    }
+  }
+
+  /**
+   * Initializes the playback engine for audio playback
+   */
+  private async initializePlayback(): Promise<void> {
+    if (!this.osmd) {
+      console.warn('Cannot initialize playback: OSMD not available');
+      return;
+    }
+
+    try {
+      this.isPlaybackLoading.set(true);
+
+      // Create new playback engine instance
+      this.playbackEngine = new PlaybackEngine();
+
+      // Set up event listeners
+      this.playbackEngine.on(PlaybackEvent.STATE_CHANGE, (state: PlaybackState) => {
+        this.playbackState.set(state);
+        this.cdr.markForCheck();
+      });
+
+      this.playbackEngine.on(PlaybackEvent.ITERATION, (data: { iterationStep: number }) => {
+        this.playbackProgress.set(data.iterationStep);
+        this.cdr.markForCheck();
+      });
+
+      // Load the score into the playback engine
+      // Use type assertion to handle version mismatch between OSMD versions
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await this.playbackEngine.loadScore(this.osmd as any);
+
+      // Set initial BPM
+      this.playbackEngine.setBpm(this.currentBpm());
+
+      this.playbackReady.set(true);
+      console.log('Playback engine initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize playback engine:', error);
+      // Don't show error to user - playback is optional feature
+      // Just log it and continue without playback
+      this.playbackReady.set(false);
+    } finally {
+      this.isPlaybackLoading.set(false);
+      this.cdr.markForCheck();
     }
   }
 

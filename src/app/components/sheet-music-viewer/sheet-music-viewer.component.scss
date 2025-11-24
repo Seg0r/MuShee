@@ -68,12 +68,12 @@
 // Header
 .viewer-header {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: 1fr auto auto auto;
   align-items: center;
   padding: var(--space-sm) var(--space-md);
   background-color: var(--mat-sys-surface-container-low);
   border-bottom: 1px solid var(--mat-sys-outline-variant);
-  gap: var(--space-sm);
+  gap: var(--space-md);
 
   .header-left {
     display: flex;
@@ -112,13 +112,128 @@
     }
   }
 
+  // Playback controls
+  .playback-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 0 var(--space-sm);
+    border-left: 1px solid var(--mat-sys-outline-variant);
+    border-right: 1px solid var(--mat-sys-outline-variant);
+
+    .playback-spinner {
+      margin: 0 var(--space-xs);
+    }
+
+    .playback-loading-text {
+      font-size: var(--font-size-sm);
+      color: var(--mat-sys-on-surface-variant);
+      white-space: nowrap;
+    }
+
+    .playback-btn {
+      transition: all 0.2s ease;
+
+      &.play-pause-btn {
+        background-color: var(--mat-sys-primary-container);
+        color: var(--mat-sys-on-primary-container);
+
+        &:hover:not(:disabled) {
+          background-color: var(--mat-sys-primary);
+          color: var(--mat-sys-on-primary);
+        }
+
+        &.playing {
+          background-color: var(--mat-sys-secondary-container);
+          color: var(--mat-sys-on-secondary-container);
+        }
+      }
+
+      &.stop-btn {
+        &:hover:not(:disabled) {
+          color: var(--mat-sys-error);
+        }
+      }
+
+      &:disabled {
+        opacity: 0.5;
+      }
+    }
+
+    .tempo-control {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      margin-left: var(--space-sm);
+
+      .tempo-icon {
+        font-size: 1.25rem;
+        width: 1.25rem;
+        height: 1.25rem;
+        color: var(--mat-sys-on-surface-variant);
+      }
+
+      .tempo-slider {
+        width: 80px;
+        height: 4px;
+        appearance: none;
+        background: var(--mat-sys-outline-variant);
+        border-radius: 2px;
+        cursor: pointer;
+
+        &::-webkit-slider-thumb {
+          appearance: none;
+          width: 14px;
+          height: 14px;
+          background: var(--mat-sys-primary);
+          border-radius: 50%;
+          cursor: pointer;
+          transition: transform 0.15s ease;
+
+          &:hover {
+            transform: scale(1.2);
+          }
+        }
+
+        &::-moz-range-thumb {
+          width: 14px;
+          height: 14px;
+          background: var(--mat-sys-primary);
+          border: none;
+          border-radius: 50%;
+          cursor: pointer;
+        }
+      }
+
+      .tempo-value {
+        min-width: 2rem;
+        font-size: var(--font-size-sm);
+        font-weight: 500;
+        color: var(--mat-sys-on-surface);
+        text-align: right;
+      }
+    }
+
+    .playback-unavailable {
+      display: flex;
+      align-items: center;
+      color: var(--mat-sys-on-surface-variant);
+      opacity: 0.6;
+
+      mat-icon {
+        font-size: 1.25rem;
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+    }
+  }
+
   // Zoom controls - centered
   .zoom-controls {
     display: flex;
     align-items: center;
     gap: var(--space-xs);
     flex-shrink: 0;
-    justify-self: center;
 
     .zoom-level {
       min-width: 2.5rem;
@@ -199,15 +314,31 @@
   }
 }
 
-// Responsive adjustments
+// Responsive adjustments for medium screens
+@media (max-width: 900px) {
+  .viewer-header {
+    .playback-controls {
+      .tempo-control {
+        .tempo-slider {
+          width: 60px;
+        }
+      }
+    }
+  }
+}
+
+// Responsive adjustments for small screens
 @media (max-width: 600px) {
   .viewer-header {
     padding: var(--space-sm);
-    gap: var(--space-sm);
+    gap: var(--space-xs);
     grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto auto;
 
     .header-left {
       gap: var(--space-sm);
+      grid-column: 1 / -1;
+      grid-row: 1;
 
       .song-info {
         .song-title {
@@ -220,12 +351,37 @@
       }
     }
 
+    .playback-controls {
+      grid-row: 2;
+      grid-column: 1;
+      border-left: none;
+      padding-left: 0;
+
+      .playback-loading-text {
+        display: none;
+      }
+
+      .tempo-control {
+        .tempo-slider {
+          width: 50px;
+        }
+      }
+    }
+
     .zoom-controls {
+      grid-row: 2;
+      grid-column: 2;
       justify-self: center;
+
       .zoom-level {
         min-width: 2rem;
         font-size: 0.6875rem; // Keep smaller
       }
+    }
+
+    .header-right {
+      grid-row: 2;
+      grid-column: 3;
     }
 
     .feedback-controls {
