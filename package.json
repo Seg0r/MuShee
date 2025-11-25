@@ -41,7 +41,7 @@
     "crypto-js": "^4.2.0",
     "dotenv": "^17.2.3",
     "jszip": "^3.10.1",
-    "opensheetmusicdisplay": "^1.9.2",
+    "opensheetmusicdisplay": "^1.9.3",
     "osmd-audio-player": "^0.7.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
@@ -51,7 +51,7 @@
   },
   "overrides": {
     "osmd-audio-player": {
-      "opensheetmusicdisplay": "^1.9.2",
+      "opensheetmusicdisplay": "^1.9.3",
       "jszip": "^3.10.1"
     }
   },
