@@ -11,7 +11,7 @@
 const https = require('https');
 
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
-const GEMINI_MODEL = 'gemini-pro';
+const GEMINI_MODEL = 'gemini-2.5-flash';
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 if (!GOOGLE_API_KEY) {
