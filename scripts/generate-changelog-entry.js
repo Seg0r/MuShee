@@ -162,11 +162,8 @@ const req = https.request(options, res => {
         `### ${formattedDateFrom} - ${formattedDateTo}`
       );
 
-      // Write to file for next step
-      const fs = require('fs');
-      fs.writeFileSync('changelog-entry.txt', cleanedText);
-
-      console.log('CHANGELOG entry generated successfully');
+      // Output to stdout for workflow to capture
+      console.log(cleanedText);
     } catch (error) {
       console.error('Error parsing API response:', error.message);
       console.error('Response data:', data);

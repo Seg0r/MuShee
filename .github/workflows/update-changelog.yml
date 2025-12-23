@@ -77,23 +77,27 @@ jobs:
             exit 1
           fi
 
-          node scripts/generate-changelog-entry.js "${{ steps.get-commits.outputs.commits }}" "${{ steps.get-commits.outputs.date_from }}" "${{ steps.get-commits.outputs.date_to }}"
+          CHANGELOG_ENTRY=$(node scripts/generate-changelog-entry.js "${{ steps.get-commits.outputs.commits }}" "${{ steps.get-commits.outputs.date_from }}" "${{ steps.get-commits.outputs.date_to }}")
 
-          if [ ! -f "changelog-entry.txt" ]; then
+          if [ -z "$CHANGELOG_ENTRY" ]; then
             echo "Error: Failed to generate changelog entry"
             exit 1
           fi
 
+          echo "changelog_entry<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG_ENTRY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Update CHANGELOG.md
         id: update-changelog
         run: |
-          if [ ! -f "changelog-entry.txt" ]; then
-            echo "Error: changelog-entry.txt not found"
+          CHANGELOG_ENTRY="${{ steps.analyze-commits.outputs.changelog_entry }}"
+          CHANGELOG_PATH="docs/CHANGELOG.md"
+
+          if [ -z "$CHANGELOG_ENTRY" ]; then
+            echo "Error: Changelog entry is empty"
             exit 1
           fi
-
-          CHANGELOG_ENTRY=$(cat changelog-entry.txt)
-          CHANGELOG_PATH="docs/CHANGELOG.md"
 
           # Ensure docs directory exists
           mkdir -p docs
