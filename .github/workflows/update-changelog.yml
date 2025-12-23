@@ -93,48 +93,71 @@ jobs:
           fi
 
           CHANGELOG_ENTRY=$(cat changelog-entry.txt)
+          CHANGELOG_PATH="docs/CHANGELOG.md"
 
-          if [ -f "CHANGELOG.md" ]; then
-            # File exists - add new section after header
-            HEADER=$(head -1 CHANGELOG.md)
-            if [ "$HEADER" = "## MuShee - Changelog" ]; then
-              # Create temporary file with new content
+          # Ensure docs directory exists
+          mkdir -p docs
+
+          if [ -f "$CHANGELOG_PATH" ]; then
+            # File exists - add new section after header and description
+            HEADER=$(head -1 "$CHANGELOG_PATH")
+            if [ "$HEADER" = "# Changelog" ]; then
+              # Keep a Changelog format - insert after header and description, before existing sections
               {
-                head -1 CHANGELOG.md
+                head -1 "$CHANGELOG_PATH"
                 echo ""
                 echo "$CHANGELOG_ENTRY"
                 echo ""
-                tail -n +2 CHANGELOG.md
-              } > CHANGELOG.md.tmp
-              mv CHANGELOG.md.tmp CHANGELOG.md
+                tail -n +2 "$CHANGELOG_PATH"
+              } > "$CHANGELOG_PATH.tmp"
+              mv "$CHANGELOG_PATH.tmp" "$CHANGELOG_PATH"
+            elif [ "$HEADER" = "## MuShee - Changelog" ]; then
+              # MuShee format - insert after header
+              {
+                head -1 "$CHANGELOG_PATH"
+                echo ""
+                echo "$CHANGELOG_ENTRY"
+                echo ""
+                tail -n +2 "$CHANGELOG_PATH"
+              } > "$CHANGELOG_PATH.tmp"
+              mv "$CHANGELOG_PATH.tmp" "$CHANGELOG_PATH"
             else
-              # Add header if missing
+              # Unknown format - prepend header and entry
               {
                 echo "## MuShee - Changelog"
                 echo ""
                 echo "$CHANGELOG_ENTRY"
                 echo ""
-                cat CHANGELOG.md
-              } > CHANGELOG.md.tmp
-              mv CHANGELOG.md.tmp CHANGELOG.md
+                cat "$CHANGELOG_PATH"
+              } > "$CHANGELOG_PATH.tmp"
+              mv "$CHANGELOG_PATH.tmp" "$CHANGELOG_PATH"
             fi
           else
-            # File doesn't exist - create it
+            # File doesn't exist - create it with Keep a Changelog format
             {
-              echo "## MuShee - Changelog"
+              echo "# Changelog"
+              echo ""
+              echo "All notable changes to this project will be documented in this file."
               echo ""
               echo "$CHANGELOG_ENTRY"
-            } > CHANGELOG.md
+            } > "$CHANGELOG_PATH"
           fi
 
-          # Check if there are changes
-          if git diff --quiet CHANGELOG.md; then
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "No changes detected in CHANGELOG.md"
-          else
+          # Check if there are changes (including untracked files)
+          # git status --porcelain shows both modified and untracked files
+          if git status --porcelain "$CHANGELOG_PATH" | grep -q .; then
             echo "has_changes=true" >> $GITHUB_OUTPUT
-            echo "Changes detected in CHANGELOG.md"
-            git diff CHANGELOG.md
+            echo "Changes detected in $CHANGELOG_PATH"
+            # Show diff if file is tracked, otherwise show file content
+            if git ls-files --error-unmatch "$CHANGELOG_PATH" >/dev/null 2>&1; then
+              git diff "$CHANGELOG_PATH"
+            else
+              echo "New file created:"
+              cat "$CHANGELOG_PATH"
+            fi
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No changes detected in $CHANGELOG_PATH"
           fi
 
       - name: Create Pull Request
