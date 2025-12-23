@@ -18,7 +18,6 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { OpenSheetMusicDisplay, IOSMDOptions } from 'opensheetmusicdisplay';
@@ -69,7 +68,6 @@ export class SheetMusicViewerComponent implements OnInit, OnDestroy, AfterViewIn
   private readonly feedbackService = inject(FeedbackService);
   private readonly authService = inject(AuthService);
   private readonly snackBar = inject(MatSnackBar);
-  private readonly dialog = inject(MatDialog);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly themeService = inject(ThemeService);
   private readonly document = inject(DOCUMENT);
