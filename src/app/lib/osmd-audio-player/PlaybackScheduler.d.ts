@@ -1,0 +1,46 @@
+import { Note, VoiceEntry } from 'opensheetmusicdisplay/build/dist/src';
+import { IAudioContext } from 'standardized-audio-context';
+interface NoteSchedulingMeta {
+  tick: number;
+  stepQueueIndex: number;
+}
+declare type NoteSchedulingCallback = (
+  delay: number,
+  notes: Note[],
+  meta: NoteSchedulingMeta
+) => void;
+export default class PlaybackScheduler {
+  wholeNoteLength: number;
+  private stepQueue;
+  private stepQueueIndex;
+  private scheduledTicks;
+  private currentTick;
+  private currentTickTimestamp;
+  private audioContext;
+  private audioContextStartTime;
+  private schedulerIntervalHandle;
+  private scheduleInterval;
+  private schedulePeriod;
+  private tickDenominator;
+  private lastTickOffset;
+  private playing;
+  private noteSchedulingCallback;
+  constructor(
+    wholeNoteLength: number,
+    audioContext: IAudioContext,
+    noteSchedulingCallback: NoteSchedulingCallback
+  );
+  get schedulePeriodTicks(): number;
+  get audioContextTime(): number;
+  get tickDuration(): number;
+  private get calculatedTick();
+  start(): void;
+  setIterationStep(step: number): void;
+  pause(): void;
+  resume(): void;
+  reset(): void;
+  loadNotes(currentVoiceEntries: VoiceEntry[], timeStampRealValue?: number | null): void;
+  private scheduleIterationStep;
+  private nextTickAvailableAndWithinSchedulePeriod;
+}
+export {};

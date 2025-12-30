@@ -21,7 +21,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { OpenSheetMusicDisplay, IOSMDOptions } from 'opensheetmusicdisplay';
-import PlaybackEngine from 'osmd-audio-player';
+import PlaybackEngine from '../../lib/osmd-audio-player';
 
 // PlaybackState and PlaybackEvent are not re-exported from index, define locally
 enum PlaybackState {
@@ -482,8 +482,12 @@ export class SheetMusicViewerComponent implements OnInit, OnDestroy, AfterViewIn
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await this.playbackEngine.loadScore(this.osmd as any);
 
-      // Set initial BPM
-      this.playbackEngine.setBpm(this.currentBpm());
+      // Sync UI BPM to the score's resolved BPM (from MusicXML/OSMD).
+      // Important: do NOT overwrite the score tempo with our UI default (120),
+      // otherwise any explicit tempo markings (e.g. <sound tempo="..."/>) get clobbered.
+      const resolvedBpm = Math.round(this.playbackEngine.playbackSettings.bpm);
+      const clampedBpm = Math.min(this.MAX_BPM, Math.max(this.MIN_BPM, resolvedBpm));
+      this.currentBpm.set(clampedBpm);
 
       this.playbackReady.set(true);
       console.log('Playback engine initialized successfully');
