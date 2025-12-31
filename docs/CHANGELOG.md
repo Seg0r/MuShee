@@ -1,5 +1,10 @@
 # Changelog
 
+### 23.11.2025 - 23.12.2025
+
+- Implemented an automated CHANGELOG update workflow using GitHub Actions and the
+
+
 All notable changes to this project will be documented in this file. See [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) for the standard format.
 
 ## [Unreleased] - 2025-11-18
