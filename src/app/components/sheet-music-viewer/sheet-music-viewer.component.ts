@@ -21,7 +21,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { OpenSheetMusicDisplay, IOSMDOptions } from 'opensheetmusicdisplay';
-import PlaybackEngine from '../../lib/osmd-audio-player';
+import PlaybackEngine from 'osmd-audio-player';
 
 // PlaybackState and PlaybackEvent are not re-exported from index, define locally
 enum PlaybackState {

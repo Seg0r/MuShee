@@ -42,7 +42,7 @@
     "dotenv": "^17.2.3",
     "jszip": "^3.10.1",
     "opensheetmusicdisplay": "^1.9.3",
-    "osmd-audio-player": "^0.7.0",
+    "osmd-audio-player": "git+https://github.com/Seg0r/osmd-audio-player.git#fix/tempo-increased-by-tuplets-and-subdivisions",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "xml2js": "^0.6.2",
